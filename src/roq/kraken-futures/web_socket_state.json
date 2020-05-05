@@ -1,0 +1,9 @@
+{
+"name": "WebSocketState",
+"type": "enum",
+"values": [
+	{ "name": "asset_pairs" },
+	{ "name": "subscribe" },
+	{ "name": "done" }
+]
+}
