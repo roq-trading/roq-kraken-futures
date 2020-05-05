@@ -17,8 +17,8 @@
 
 #include "roq/core/web/client.h"
 
-#include "roq/kraken-futures/config.h"
-#include "roq/kraken-futures/random.h"
+#include "roq/kraken_futures/config.h"
+#include "roq/kraken_futures/random.h"
 
 namespace roq {
 namespace kraken_futures {

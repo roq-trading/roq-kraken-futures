@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/kraken-futures/web_socket.h"
+#include "roq/kraken_futures/web_socket.h"
 
 #include <fmt/format.h>
 
@@ -8,10 +8,10 @@
 
 #include "roq/core/clock.h"
 
-#include "roq/kraken-futures/gateway.h"
-#include "roq/kraken-futures/options.h"
+#include "roq/kraken_futures/gateway.h"
+#include "roq/kraken_futures/options.h"
 
-#include "roq/kraken-futures/json/parser.h"
+#include "roq/kraken_futures/json/parser.h"
 
 namespace roq {
 namespace kraken_futures {

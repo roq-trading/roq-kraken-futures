@@ -14,8 +14,8 @@ AC_CONFIG_FILES([
  Makefile
  src/Makefile
  src/roq/Makefile
- src/roq/kraken-futures/Makefile
- src/roq/kraken-futures/json/Makefile
+ src/roq/kraken_futures/Makefile
+ src/roq/kraken_futures/json/Makefile
  test/Makefile
 ])
 AC_CONFIG_FILES([roq-kraken-futures.pc])

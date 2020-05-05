@@ -2,7 +2,7 @@
 {% set number = environ.get('GIT_DESCRIBE_NUMBER', 0) %}
 
 package:
-  name: roq-kraken
+  name: roq-kraken-futures
   version: {{ version }}
 
 source:
@@ -12,7 +12,7 @@ build:
   skip: True  # [win and osx]
   number: {{ number }}
   run_exports:
-    - {{ pin_subpackage('roq-kraken', max_pin='x.x') }}
+    - {{ pin_subpackage('roq-kraken-futures', max_pin='x.x') }}
 
 requirements:
   build:

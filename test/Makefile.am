@@ -7,24 +7,24 @@ libgtest_la_CPPFLAGS = \
         -I$(top_srcdir)/third_party/googletest/googletest
 libgtest_la_LDFLAGS = -pthread
 
-TESTS = roq-kraken-test
-check_PROGRAMS = roq-kraken-test
+TESTS = roq-kraken-futures-test
+check_PROGRAMS = roq-kraken-futures-test
 
-roq_kraken_test_LDADD = \
+roq_kraken_futures_test_LDADD = \
 	libgtest.la \
-	$(top_builddir)/src/roq/kraken/json/libroq-kraken-json.la \
+	$(top_builddir)/src/roq/kraken_futures/json/libroq-kraken-futures-json.la \
 	$(DATE_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \
 	$(FMT_LIBS) \
 	$(DATE_LIBS)
-roq_kraken_test_CPPFLAGS = \
+roq_kraken_futures_test_CPPFLAGS = \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/third_party/googletest/googletest/include \
 	$(ROQ_API_CFLAGS) \
 	$(ROQ_CORE_CFLAGS) \
 	$(FMT_CFLAGS) \
 	$(DATE_CFLAGS)
-nodist_roq_kraken_test_SOURCES = \
+nodist_roq_kraken_futures_test_SOURCES = \
 	json_book.cpp \
 	main.cpp

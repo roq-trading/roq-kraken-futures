@@ -7,14 +7,13 @@
 
 #include "roq/core/market/bad_state.h"
 
-#include "roq/kraken/json/parser.h"
+#include "roq/kraken_futures/json/parser.h"
 
 using namespace roq;  // NOLINT
-using namespace roq::kraken;  // NOLINT
+using namespace roq::kraken_futures;  // NOLINT
 
 namespace {
 struct Handler : public json::Parser::Handler {
-
  protected:
   void operator()(const json::Error&) override {
   }

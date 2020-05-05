@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/kraken-futures/json/parser.h"
+#include "roq/kraken_futures/json/parser.h"
 
 #include "roq/logging.h"
 
-#include "roq/kraken-futures/json/channel.h"
-#include "roq/kraken-futures/json/event.h"
-#include "roq/kraken-futures/json/result_field.h"
+#include "roq/kraken_futures/json/channel.h"
+#include "roq/kraken_futures/json/event.h"
+#include "roq/kraken_futures/json/result_field.h"
 
 namespace roq {
 namespace kraken_futures {

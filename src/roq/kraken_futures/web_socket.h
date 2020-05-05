@@ -19,10 +19,10 @@
 
 #include "roq/core/web/socket.h"
 
-#include "roq/kraken-futures/config.h"
-#include "roq/kraken-futures/random.h"
+#include "roq/kraken_futures/config.h"
+#include "roq/kraken_futures/random.h"
 
-#include "roq/kraken-futures/json/parser.h"
+#include "roq/kraken_futures/json/parser.h"
 
 namespace roq {
 namespace kraken_futures {

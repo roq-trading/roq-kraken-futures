@@ -58,13 +58,13 @@ class Config final
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::kraken::Config> {
+struct fmt::formatter<roq::kraken_futures::Config> {
   template <typename C>
   constexpr auto parse(C& ctx) {
     return ctx.begin();
   }
   template <typename C>
-  auto format(const roq::kraken::Config& value, C& ctx) {
+  auto format(const roq::kraken_futures::Config& value, C& ctx) {
     // FIXME(thraneh): proper
     return format_to(
         ctx.out(),

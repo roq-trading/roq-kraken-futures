@@ -3,7 +3,7 @@ SUBDIRS = json
 bin_PROGRAMS = roq-kraken-futures
 roq_kraken_futures_LDFLAGS = \
 	$(PTHREAD_CFLAGS) \
-	$(top_builddir)/src/roq/kraken/json/libroq-kraken-json.la \
+	$(top_builddir)/src/roq/kraken_futures/json/libroq-kraken-futures-json.la \
 	$(ROQ_SERVER_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \

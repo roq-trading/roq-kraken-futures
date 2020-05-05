@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/kraken-futures/config.h"
+#include "roq/kraken_futures/config.h"
 
 #include <utility>
 
 #include "roq/logging.h"
 
-#include "roq/kraken-futures/options.h"
+#include "roq/kraken_futures/options.h"
 
 namespace roq {
 namespace kraken_futures {

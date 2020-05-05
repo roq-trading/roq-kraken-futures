@@ -1,1 +1,1 @@
-SUBDIRS = kraken-futures
+SUBDIRS = kraken_futures

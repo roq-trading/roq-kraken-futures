@@ -4,9 +4,9 @@ MAINTAINER Hans Erik Thrane <info@roq-trading.com>
 
 COPY pkgs/ /pkgs/
 
-RUN conda install --quiet --yes --override-channels --channel file:///pkgs --channel defaults roq-kraken
+RUN conda install --quiet --yes --override-channels --channel file:///pkgs --channel defaults roq-kraken-futures
 RUN rm -rf /pkgs
 
-ENTRYPOINT [ "/opt/conda/bin/roq-kraken" ]
+ENTRYPOINT [ "/opt/conda/bin/roq-kraken-futures" ]
 
 CMD [ "--help" ]
