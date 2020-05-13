@@ -2,11 +2,6 @@
 
 #include "roq/kraken_futures/options.h"
 
-DEFINE_string(listen,
-    "",
-    "bind address (path)");
-// DEFINE_validator(listen, ...);
-
 DEFINE_string(config_file,
     "",
     "config file (path)");
