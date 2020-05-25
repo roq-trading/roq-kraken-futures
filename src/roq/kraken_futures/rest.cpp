@@ -116,6 +116,7 @@ void Rest::get_asset_pairs(
   _connection.request(
       core::http::Method::GET,
       "/public/AssetPairs",
+      std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
