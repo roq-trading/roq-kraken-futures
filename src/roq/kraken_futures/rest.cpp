@@ -101,14 +101,14 @@ void Rest::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
-void Rest::operator()(Metrics& metrics) {
-  metrics
+void Rest::operator()(metrics::Writer& writer) {
+  writer
     // counter
-    .write(_counter.disconnect)
+    .write(_counter.disconnect, metrics::COUNTER)
     // profile
-    .write(_profile.asset_pairs)
+    .write(_profile.asset_pairs, metrics::PROFILE)
     // latency
-    .write(_latency.ping);
+    .write(_latency.ping, metrics::LATENCY);
 }
 
 void Rest::get_asset_pairs(

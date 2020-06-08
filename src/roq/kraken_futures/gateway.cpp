@@ -134,9 +134,9 @@ void Gateway::operator()(
   // TODO(thraneh): implement
 }
 
-void Gateway::operator()(Metrics& metrics) {
-  _rest.connection(metrics);
-  _web_socket.connection(metrics);
+void Gateway::operator()(metrics::Writer& writer) {
+  _rest.connection(writer);
+  _web_socket.connection(writer);
 }
 
 // rest

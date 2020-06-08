@@ -49,7 +49,7 @@ class Rest final
   void operator()(const server::StopEvent&);
   void operator()(const server::TimerEvent&);
 
-  void operator()(Metrics& metrics);
+  void operator()(metrics::Writer& writer);
 
   void get_asset_pairs(
       std::function<void(const core::web::Response&)>&& callback);
