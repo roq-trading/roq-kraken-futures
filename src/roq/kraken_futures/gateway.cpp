@@ -173,6 +173,7 @@ void Gateway::download_asset_pairs() {
 
 void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   assert(_symbols.empty());
+  server::Trace trace;  // XXX
   _symbols.reserve(asset_pairs.result.size());
   for (auto& item : asset_pairs.result) {
     if (item.wsname.empty()) {
@@ -213,6 +214,7 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
         reference_data);
     enqueue(
         reference_data,
+        trace,
         true);
     MarketStatus market_status {
       .exchange = FLAGS_exchange,
@@ -224,6 +226,7 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
         market_status);
     enqueue(
         market_status,
+        trace,
         true);
   }
 }
@@ -278,6 +281,7 @@ void Gateway::subscribe() {
 void Gateway::operator()(
     const json::Trade& trade,
     const std::string_view& pair) {
+  server::Trace trace;  // XXX
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t trade_length = 0;
@@ -313,6 +317,7 @@ void Gateway::operator()(
         trade_summary);
     enqueue(
         trade_summary,
+        trace,
         true);
   }
 }
@@ -320,6 +325,7 @@ void Gateway::operator()(
 void Gateway::operator()(
     const json::Spread& spread,
     const std::string_view& pair) {
+  server::Trace trace;  // XXX
   TopOfBook top_of_book {
     .exchange = FLAGS_exchange,
     .symbol = pair,
@@ -337,12 +343,14 @@ void Gateway::operator()(
       top_of_book);
   enqueue(
       top_of_book,
+      trace,
       true);
 }
 
 void Gateway::operator()(
     const json::Book& book,
     const std::string_view& pair) {
+  server::Trace trace;  // XXX
   bool snapshot =
     book.bs.empty() == false &&
     book.as.empty() == false;
@@ -421,6 +429,7 @@ void Gateway::operator()(
         market_by_price);
     enqueue(
         market_by_price,
+        trace,
         true);
   }
 }
@@ -429,11 +438,13 @@ void Gateway::update(GatewayStatus gateway_status) {
   if (gateway_status == _gateway_status)
     return;
   _gateway_status = gateway_status;
+  server::Trace trace;
   MarketDataStatus market_data_status {
     .status = _gateway_status,
   };
   enqueue(
       market_data_status,
+      trace,
       false);
   OrderManagerStatus order_manager_status {
     .account = _account,
@@ -441,6 +452,7 @@ void Gateway::update(GatewayStatus gateway_status) {
   };
   enqueue(
       order_manager_status,
+      trace,
       true);
   LOG(INFO)(
       FMT_STRING(R"(Update: gateway_status={})"),
@@ -450,12 +462,11 @@ void Gateway::update(GatewayStatus gateway_status) {
 template <typename T>
 inline void Gateway::enqueue(
     const T& value,
+    const server::Trace& trace,
     bool is_last) {
-  auto now = core::get_system_clock();
   _dispatcher(
       value,
-      now,
-      now,
+      trace,
       is_last);
 }
 
@@ -463,13 +474,12 @@ template <typename T>
 inline void Gateway::enqueue(
     uint8_t user_id,
     const T& value,
+    const server::Trace& trace,
     bool is_last) {
-  auto now = core::get_system_clock();
   _dispatcher(
       user_id,
       value,
-      now,
-      now,
+      trace,
       is_last);
 }
 
