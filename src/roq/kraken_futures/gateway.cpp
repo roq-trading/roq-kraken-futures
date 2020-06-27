@@ -118,6 +118,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(gateway_order_id);
 }
 
 void Gateway::operator()(
@@ -125,6 +128,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(order);
 }
 
 void Gateway::operator()(
@@ -132,6 +138,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(order);
 }
 
 void Gateway::operator()(metrics::Writer& writer) {
@@ -410,7 +419,7 @@ void Gateway::operator()(
         ask_length, _ask.size());
   }
   if (bid_length > 0 || ask_length > 0) {
-    MarketByPrice market_by_price {
+    MarketByPriceUpdate market_by_price_update {
       .exchange = FLAGS_exchange,
       .symbol = pair,
       .bids = {
@@ -425,10 +434,10 @@ void Gateway::operator()(
       .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(
-        FMT_STRING(R"(market_by_price={})"),
-        market_by_price);
+        FMT_STRING(R"(market_by_price_update={})"),
+        market_by_price_update);
     enqueue(
-        market_by_price,
+        market_by_price_update,
         trace,
         true);
   }
