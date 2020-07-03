@@ -182,7 +182,7 @@ void Gateway::download_asset_pairs() {
 
 void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   assert(_symbols.empty());
-  server::Trace trace;  // XXX
+  server::TraceInfo trace_info;  // XXX
   _symbols.reserve(asset_pairs.result.size());
   for (auto& item : asset_pairs.result) {
     if (item.wsname.empty()) {
@@ -221,9 +221,10 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
     VLOG(1)(
         FMT_STRING(R"(reference_data={})"),
         reference_data);
-    enqueue(
+    server::create_trace_and_dispatch(
+        trace_info,
         reference_data,
-        trace,
+        _dispatcher,
         true);
     MarketStatus market_status {
       .exchange = FLAGS_exchange,
@@ -233,9 +234,10 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
     VLOG(2)(
         FMT_STRING(R"(market_status={})"),
         market_status);
-    enqueue(
+    server::create_trace_and_dispatch(
+        trace_info,
         market_status,
-        trace,
+        _dispatcher,
         true);
   }
 }
@@ -290,7 +292,7 @@ void Gateway::subscribe() {
 void Gateway::operator()(
     const json::Trade& trade,
     const std::string_view& pair) {
-  server::Trace trace;  // XXX
+  server::TraceInfo trace_info;  // XXX
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t trade_length = 0;
@@ -324,9 +326,10 @@ void Gateway::operator()(
     VLOG(3)(
         FMT_STRING(R"(trade_summary={})"),
         trade_summary);
-    enqueue(
+    server::create_trace_and_dispatch(
+        trace_info,
         trade_summary,
-        trace,
+        _dispatcher,
         true);
   }
 }
@@ -334,7 +337,7 @@ void Gateway::operator()(
 void Gateway::operator()(
     const json::Spread& spread,
     const std::string_view& pair) {
-  server::Trace trace;  // XXX
+  server::TraceInfo trace_info;  // XXX
   TopOfBook top_of_book {
     .exchange = FLAGS_exchange,
     .symbol = pair,
@@ -350,16 +353,17 @@ void Gateway::operator()(
   VLOG(3)(
       FMT_STRING(R"(top_of_book={})"),
       top_of_book);
-  enqueue(
+  server::create_trace_and_dispatch(
+      trace_info,
       top_of_book,
-      trace,
+      _dispatcher,
       true);
 }
 
 void Gateway::operator()(
     const json::Book& book,
     const std::string_view& pair) {
-  server::Trace trace;  // XXX
+  server::TraceInfo trace_info;  // XXX
   bool snapshot =
     book.bs.empty() == false &&
     book.as.empty() == false;
@@ -436,9 +440,10 @@ void Gateway::operator()(
     VLOG(3)(
         FMT_STRING(R"(market_by_price_update={})"),
         market_by_price_update);
-    enqueue(
+    server::create_trace_and_dispatch(
+        trace_info,
         market_by_price_update,
-        trace,
+        _dispatcher,
         true);
   }
 }
@@ -447,49 +452,27 @@ void Gateway::update(GatewayStatus gateway_status) {
   if (gateway_status == _gateway_status)
     return;
   _gateway_status = gateway_status;
-  server::Trace trace;
+  server::TraceInfo trace_info;
   MarketDataStatus market_data_status {
     .status = _gateway_status,
   };
-  enqueue(
+  server::create_trace_and_dispatch(
+      trace_info,
       market_data_status,
-      trace,
+      _dispatcher,
       false);
   OrderManagerStatus order_manager_status {
     .account = _account,
     .status = _gateway_status,
   };
-  enqueue(
+  server::create_trace_and_dispatch(
+      trace_info,
       order_manager_status,
-      trace,
+      _dispatcher,
       true);
   LOG(INFO)(
       FMT_STRING(R"(Update: gateway_status={})"),
       _gateway_status);
-}
-
-template <typename T>
-inline void Gateway::enqueue(
-    const T& value,
-    const server::Trace& trace,
-    bool is_last) {
-  _dispatcher(
-      value,
-      trace,
-      is_last);
-}
-
-template <typename T>
-inline void Gateway::enqueue(
-    uint8_t user_id,
-    const T& value,
-    const server::Trace& trace,
-    bool is_last) {
-  _dispatcher(
-      user_id,
-      value,
-      trace,
-      is_last);
 }
 
 }  // namespace kraken_futures
