@@ -112,41 +112,39 @@ void WebSocket::subscribe(
     const std::string_view& name,
     const roq::span<std::string>& pairs) {
   LOG(INFO)(
-      FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
+      R"(subscribe name="{}", len(pairs)={})",
       name,
       std::size(pairs));
   if (FLAGS_book_depth && name.compare("book") == 0) {
     auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}",)"
-          R"("depth":{})"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name,
-          FLAGS_book_depth);
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("pair":["{}"],)"
+        R"("subscription":{{)"
+        R"("name":"{}",)"
+        R"("depth":{})"
+        R"(}})"
+        R"(}})",
+        fmt::join(pairs, R"(",")"),
+        name,
+        FLAGS_book_depth);
     DLOG(INFO)(
-        FMT_STRING(R"(request="{}")"),
+        R"(request="{}")",
         message);
     _connection.send_text(message);
   } else {
     auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}")"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name);
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("pair":["{}"],)"
+        R"("subscription":{{)"
+        R"("name":"{}")"
+        R"(}})"
+        R"(}})",
+        fmt::join(pairs, R"(",")"),
+        name);
     DLOG(INFO)(
-        FMT_STRING(R"(request="{}")"),
+        R"(request="{}")",
         message);
     _connection.send_text(message);
   }
@@ -192,32 +190,32 @@ void WebSocket::parse(const std::string_view& message) {
 
 void WebSocket::operator()(const json::Error& error) {
   LOG(FATAL)(
-      FMT_STRING("error={}"),
+      "error={}",
       error);
 }
 
 void WebSocket::operator()(const json::SystemStatus& system_status) {
   LOG(INFO)(
-      FMT_STRING("system_status={}"),
+      "system_status={}",
       system_status);
 }
 
 void WebSocket::operator()(const json::Pong& pong) {
   VLOG(1)(
-      FMT_STRING("pong={}"),
+      "pong={}",
       pong);
 }
 
 void WebSocket::operator()(const json::Heartbeat& heartbeat) {
   VLOG(1)(
-      FMT_STRING("heartbeat={}"),
+      "heartbeat={}",
       heartbeat);
 }
 
 void WebSocket::operator()(
     const json::SubscriptionStatus& subscription_status) {
   VLOG(1)(
-      FMT_STRING("subscription_status={}"),
+      "subscription_status={}",
       subscription_status);
 }
 
@@ -225,7 +223,7 @@ void WebSocket::operator()(
     const json::Trade& trade,
     const std::string_view& pair) {
   VLOG(3)(
-      FMT_STRING(R"(trade={}, pair="{}")"),
+      R"(trade={}, pair="{}")",
       trade,
       pair);
   _gateway(trade, pair);
@@ -235,7 +233,7 @@ void WebSocket::operator()(
     const json::Spread& spread,
     const std::string_view& pair) {
   VLOG(3)(
-      FMT_STRING(R"(spread={}, pair="{}")"),
+      R"(spread={}, pair="{}")",
       spread,
       pair);
   _gateway(spread, pair);
@@ -245,7 +243,7 @@ void WebSocket::operator()(
     const json::Book& book,
     const std::string_view& pair) {
   VLOG(3)(
-      FMT_STRING(R"(book={}, pair="{}")"),
+      R"(book={}, pair="{}")",
       book,
       pair);
   _gateway(book, pair);

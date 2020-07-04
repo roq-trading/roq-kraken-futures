@@ -167,9 +167,8 @@ void Gateway::download_asset_pairs() {
               break;
             default:
               LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get products, )"
-                      R"(status={})"),
+                  R"(Unable to get products, )"
+                  R"(status={})",
                   status);
           }
         } catch (NotConnected&) {
@@ -187,7 +186,7 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   for (auto& item : asset_pairs.result) {
     if (item.wsname.empty()) {
       VLOG(1)(
-          FMT_STRING(R"(Skipping altname={}, reason: wsname is empty)"),
+          R"(Skipping altname={}, reason: wsname is empty)",
           item.altname);
       continue;
     }
@@ -219,7 +218,7 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
       .strike_price = std::numeric_limits<double>::quiet_NaN(),
     };
     VLOG(1)(
-        FMT_STRING(R"(reference_data={})"),
+        R"(reference_data={})",
         reference_data);
     server::create_trace_and_dispatch(
         trace_info,
@@ -232,7 +231,7 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
       .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
     VLOG(2)(
-        FMT_STRING(R"(market_status={})"),
+        R"(market_status={})",
         market_status);
     server::create_trace_and_dispatch(
         trace_info,
@@ -308,9 +307,8 @@ void Gateway::operator()(
   }
   if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
-        FMT_STRING(
-          R"(Insufficient trade array size: )"
-          R"(len(trade)={}/{})"),
+        R"(Insufficient trade array size: )"
+        R"(len(trade)={}/{})",
         trade_length, _trade.size());
   }
   if (trade_length > 0) {
@@ -324,7 +322,7 @@ void Gateway::operator()(
       .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(
-        FMT_STRING(R"(trade_summary={})"),
+        R"(trade_summary={})",
         trade_summary);
     server::create_trace_and_dispatch(
         trace_info,
@@ -351,7 +349,7 @@ void Gateway::operator()(
     .exchange_time_utc = spread.timestamp,
   };
   VLOG(3)(
-      FMT_STRING(R"(top_of_book={})"),
+      R"(top_of_book={})",
       top_of_book);
   server::create_trace_and_dispatch(
       trace_info,
@@ -416,9 +414,8 @@ void Gateway::operator()(
   }
   if (ROQ_PREDICT_FALSE(success == false)) {
     LOG(FATAL)(
-        FMT_STRING(
-          R"(Insufficient bid/ask array size(s): )"
-          R"(len(bid={}/{}, len(ask)={}/{})"),
+        R"(Insufficient bid/ask array size(s): )"
+        R"(len(bid={}/{}, len(ask)={}/{})",
         bid_length, _bid.size(),
         ask_length, _ask.size());
   }
@@ -438,7 +435,7 @@ void Gateway::operator()(
       .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(
-        FMT_STRING(R"(market_by_price_update={})"),
+        R"(market_by_price_update={})",
         market_by_price_update);
     server::create_trace_and_dispatch(
         trace_info,
@@ -471,7 +468,7 @@ void Gateway::update(GatewayStatus gateway_status) {
       _dispatcher,
       true);
   LOG(INFO)(
-      FMT_STRING(R"(Update: gateway_status={})"),
+      R"(Update: gateway_status={})",
       _gateway_status);
 }
 

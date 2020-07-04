@@ -66,7 +66,7 @@ bool Parser::dispatch(
             break;
           case Event::UNKNOWN:
             DLOG(FATAL)(
-                FMT_STRING("Unknown key=\"{}\""),
+                R"(Unknown key="{}")",
                 key);
             break;
           case Event::ERROR: {
@@ -128,7 +128,7 @@ static bool dispatch2(
     size_t data_count) {
   /*
   DLOG(INFO)(
-      FMT_STRING(R"(channel_id={} channel={} pair={}, len(data)={})"),
+      R"(channel_id={} channel={} pair={}, len(data)={})",
       channel_id,
       channel,
       pair,
@@ -240,7 +240,7 @@ bool Parser::dispatch(
               name.remove_suffix(name.size() - pos);
             channel = Channel(name);
             DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
-                FMT_STRING(R"(Unknown channel="{}")"),
+                R"(Unknown channel="{}")",
                 name);
             break;
           }
@@ -255,7 +255,7 @@ bool Parser::dispatch(
     }
   }
   LOG_IF(FATAL, offset != 3)(
-      FMT_STRING(R"(message={})"),
+      R"(message={})",
       message);
   return dispatch2(
       handler,

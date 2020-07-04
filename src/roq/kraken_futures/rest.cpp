@@ -131,7 +131,7 @@ void Rest::get_asset_pairs(
                         body,
                         buffer);
                   VLOG(1)(
-                      FMT_STRING(R"(asset_pairs={})"),
+                      R"(asset_pairs={})",
                       asset_pairs);
                   _gateway(asset_pairs);
                 });
