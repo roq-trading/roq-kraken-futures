@@ -42,3 +42,5 @@ roq-kraken-futures-benchmark
 roq-kraken-futures-test
 
 *.roq
+
+build/
