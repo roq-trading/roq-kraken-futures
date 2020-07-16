@@ -7,22 +7,48 @@ set(SOURCES
 
 include(RoqAutogen)
 
+set(AUTOGEN_SCHEMAS
+  asset_pairs.json
+  asset_pairs_item.json
+  book.json
+  book_item.json
+  channel.json
+  error.json
+  event.json
+  heartbeat.json
+  open_positions.json
+  order.json
+  order_type.json
+  own_trades_item.json
+  ping.json
+  pong.json
+  result_field.json
+  side.json
+  spread.json
+  subscription_status.json
+  system_status.json
+  time_.json
+  trade.json
+  trade_item.json
+  update_type.json
+)
+
 roq_autogen(
   OUTPUT AUTOGEN_HEADERS
-  PATTERN "*.json"
   NAMESPACE "roq/kraken_futures/json"
   OUTPUT_TYPE "json"
-  FILE_TYPE "h")
+  FILE_TYPE "h"
+  SOURCES ${AUTOGEN_SCHEMAS})
 
 add_custom_target(autogen-json-headers ALL
   DEPENDS ${AUTOGEN_HEADERS})
 
 roq_autogen(
   OUTPUT AUTOGEN_SOURCES
-  PATTERN "*.json"
   NAMESPACE "roq/kraken_futures/json"
   OUTPUT_TYPE "json"
-  FILE_TYPE "cpp")
+  FILE_TYPE "cpp"
+  SOURCES ${AUTOGEN_SCHEMAS})
 
 add_library("${TARGET_NAME}" STATIC
   ${SOURCES}
