@@ -57,6 +57,7 @@ build/
 
 # project specific
 
+roq-kraken-futures.pc
 roq-kraken-futures
 roq-kraken-futures-benchmark
 roq-kraken-futures-test
