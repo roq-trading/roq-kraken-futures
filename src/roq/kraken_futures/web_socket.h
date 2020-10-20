@@ -31,72 +31,66 @@ namespace kraken_futures {
 
 class Gateway;
 
-class WebSocket final
-    : public core::web::Socket::Handler,
-      public json::Parser::Handler {
+class WebSocket final : public core::web::Socket::Handler,
+                        public json::Parser::Handler {
  public:
   WebSocket(
-      Gateway& gateway,
-      const Config& config,
-      Random& random,
-      core::event::Base& base,
-      core::event::DNSBase& dns_base,
-      core::ssl::Context& ssl_context);
+      Gateway &gateway,
+      const Config &config,
+      Random &random,
+      core::event::Base &base,
+      core::event::DNSBase &dns_base,
+      core::ssl::Context &ssl_context);
 
-  WebSocket(WebSocket&&) = delete;
-  WebSocket(const WebSocket&) = delete;
+  WebSocket(WebSocket &&) = delete;
+  WebSocket(const WebSocket &) = delete;
 
   bool ready() const;
 
   void close();
 
-  void operator()(const Event<Start>&);
-  void operator()(const Event<Stop>&);
-  void operator()(const Event<Timer>&);
+  void operator()(const Event<Start> &);
+  void operator()(const Event<Stop> &);
+  void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer& writer);
+  void operator()(metrics::Writer &writer);
 
   template <typename T>
-  void subscribe(
-      const std::string_view& name,
-      const roq::span<T>& pairs);
+  void subscribe(const std::string_view &name, const roq::span<T> &pairs);
 
  protected:
-  void operator()(const core::web::Socket::Connected&) override;
-  void operator()(const core::web::Socket::Disconnected&) override;
-  void operator()(const core::web::Socket::Ready&) override;
-  void operator()(const core::web::Socket::Close&) override;
-  void operator()(const core::web::Socket::Latency&) override;
-  void operator()(const core::web::Socket::Text&) override;
+  void operator()(const core::web::Socket::Connected &) override;
+  void operator()(const core::web::Socket::Disconnected &) override;
+  void operator()(const core::web::Socket::Ready &) override;
+  void operator()(const core::web::Socket::Close &) override;
+  void operator()(const core::web::Socket::Latency &) override;
+  void operator()(const core::web::Socket::Text &) override;
 
-  void parse(const std::string_view& message);
+  void parse(const std::string_view &message);
 
  public:
-  void operator()(const json::Error&) override;
-  void operator()(const json::SystemStatus&) override;
-  void operator()(const json::Pong&) override;
-  void operator()(const json::Heartbeat&) override;
-  void operator()(const json::SubscriptionStatus&) override;
+  void operator()(const json::Error &) override;
+  void operator()(const json::SystemStatus &) override;
+  void operator()(const json::Pong &) override;
+  void operator()(const json::Heartbeat &) override;
+  void operator()(const json::SubscriptionStatus &) override;
 
   void operator()(
-      const json::Trade& trade,
-      const std::string_view& pair) override;
+      const json::Trade &trade, const std::string_view &pair) override;
   void operator()(
-      const json::Spread& spread,
-      const std::string_view& pair) override;
+      const json::Spread &spread, const std::string_view &pair) override;
   void operator()(
-      const json::Book& book,
-      const std::string_view& pair) override;
+      const json::Book &book, const std::string_view &pair) override;
 
  protected:
   void reset();
 
  private:
-  Gateway& _gateway;
+  Gateway &_gateway;
   // config
   const std::string _access_key;
   // authentication
-  Random& _random;
+  Random &_random;
   // web socket
   core::web::Socket _connection;
   // buffers
@@ -104,17 +98,13 @@ class WebSocket final
   core::stack::Buffer<char, 32> _stack_buffer;
   // metrics
   struct {
-    core::metrics::Counter
-      disconnect;
+    core::metrics::Counter disconnect;
   } _counter;
   struct {
-    core::metrics::Profile
-      parse;
+    core::metrics::Profile parse;
   } _profile;
   struct {
-    core::metrics::Latency
-      ping,
-      heartbeat;
+    core::metrics::Latency ping, heartbeat;
   } _latency;
 };
 

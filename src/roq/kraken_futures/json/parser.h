@@ -22,40 +22,36 @@ namespace json {
 
 struct Parser final {
   struct Handler {
-    virtual void operator()(const Error&) = 0;
-    virtual void operator()(const SystemStatus&) = 0;
-    virtual void operator()(const Pong&) = 0;
-    virtual void operator()(const Heartbeat&) = 0;
-    virtual void operator()(const SubscriptionStatus&) = 0;
+    virtual void operator()(const Error &) = 0;
+    virtual void operator()(const SystemStatus &) = 0;
+    virtual void operator()(const Pong &) = 0;
+    virtual void operator()(const Heartbeat &) = 0;
+    virtual void operator()(const SubscriptionStatus &) = 0;
 
     virtual void operator()(
-        const Trade& trade,
-        const std::string_view& pair) = 0;
+        const Trade &trade, const std::string_view &pair) = 0;
     virtual void operator()(
-        const Spread& spread,
-        const std::string_view& pair) = 0;
-    virtual void operator()(
-        const Book& book,
-        const std::string_view& pair) = 0;
+        const Spread &spread, const std::string_view &pair) = 0;
+    virtual void operator()(const Book &book, const std::string_view &pair) = 0;
   };
 
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer);
 
  protected:
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      core::json::object_t& root);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      core::json::object_t &root);
 
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      core::json::array_t& root);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      core::json::array_t &root);
 };
 
 }  // namespace json

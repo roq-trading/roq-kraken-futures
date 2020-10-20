@@ -13,44 +13,34 @@ namespace kraken_futures {
 namespace json {
 
 bool Parser::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
   return std::visit(
       overloaded {
-        [](const core::json::null_t&) -> bool {
-          throw std::bad_cast();
-        },
-        [](bool) -> bool {
-          throw std::bad_cast();
-        },
-        [](int64_t) -> bool {
-          throw std::bad_cast();
-        },
-        [](double) -> bool {
-          throw std::bad_cast();
-        },
-        [](const std::string_view&) -> bool {
-          throw std::bad_cast();
-        },
-        [&](core::json::object_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
-        },
-        [&](core::json::array_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
-        },
+          [](const core::json::null_t &) -> bool { throw std::bad_cast(); },
+          [](bool) -> bool { throw std::bad_cast(); },
+          [](int64_t) -> bool { throw std::bad_cast(); },
+          [](double) -> bool { throw std::bad_cast(); },
+          [](const std::string_view &) -> bool { throw std::bad_cast(); },
+          [&](core::json::object_t &value) -> bool {
+            return dispatch(handler, message, buffer, value);
+          },
+          [&](core::json::array_t &value) -> bool {
+            return dispatch(handler, message, buffer, value);
+          },
       },
       root);
 }
 
 bool Parser::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer&,
-    core::json::object_t& root) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &,
+    core::json::object_t &root) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -65,9 +55,7 @@ bool Parser::dispatch(
             LOG(FATAL)("Unexpected");
             break;
           case Event::UNKNOWN:
-            DLOG(FATAL)(
-                R"(Unknown key="{}")",
-                key);
+            DLOG(FATAL)(R"(Unknown key="{}")", key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -77,7 +65,7 @@ bool Parser::dispatch(
           }
           case Event::SYSTEM_STATUS: {
             auto system_status =
-              core::json::Parser::create<SystemStatus>(message);
+                core::json::Parser::create<SystemStatus>(message);
             handler(system_status);
             dispatched = true;
             break;
@@ -89,15 +77,14 @@ bool Parser::dispatch(
             break;
           }
           case Event::HEARTBEAT: {
-            auto heartbeat =
-              core::json::Parser::create<Heartbeat>(message);
+            auto heartbeat = core::json::Parser::create<Heartbeat>(message);
             handler(heartbeat);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status =
-              core::json::Parser::create<SubscriptionStatus>(message);
+                core::json::Parser::create<SubscriptionStatus>(message);
             handler(subscription_status);
             dispatched = true;
             break;
@@ -119,12 +106,12 @@ bool Parser::dispatch(
 
 namespace {
 static bool dispatch2(
-    Parser::Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
+    Parser::Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
     int64_t channel_id,
     Channel channel,
-    const std::string_view& pair,
+    const std::string_view &pair,
     size_t data_count) {
   /*
   DLOG(INFO)(
@@ -140,10 +127,8 @@ static bool dispatch2(
   size_t offset = 0;
   Book book_1, book_2;
   for (auto value : std::get<core::json::array_t>(root)) {
-    if (++offset == 1)
-      continue;
-    if (offset > (1 + data_count))
-      break;
+    if (++offset == 1) continue;
+    if (offset > (1 + data_count)) break;
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
@@ -159,9 +144,7 @@ static bool dispatch2(
       }
       case Channel::TRADE: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
-        Trade trade(
-            value,
-            buffer);
+        Trade trade(value, buffer);
         handler(trade, pair);
         dispatched = true;
         break;
@@ -217,10 +200,10 @@ static bool dispatch2(
 }  // namespace
 
 bool Parser::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    core::json::array_t& root) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    core::json::array_t &root) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;
@@ -228,20 +211,18 @@ bool Parser::dispatch(
   size_t data_count = 0;
   for (auto value : root) {
     if (offset == 0) {
-        channel_id = std::get<int64_t>(value);
-        ++offset;
+      channel_id = std::get<int64_t>(value);
+      ++offset;
     } else {
       if (core::json::is_pod(value)) {
         switch (offset) {
           case 1: {
             auto name = std::get<std::string_view>(value);
             auto pos = name.find_first_of('-');
-            if (pos != name.npos)
-              name.remove_suffix(name.size() - pos);
+            if (pos != name.npos) name.remove_suffix(name.size() - pos);
             channel = Channel(name);
-            DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
-                R"(Unknown channel="{}")",
-                name);
+            DLOG_IF(FATAL, channel == Channel::UNKNOWN)
+            (R"(Unknown channel="{}")", name);
             break;
           }
           case 2:
@@ -254,17 +235,9 @@ bool Parser::dispatch(
       }
     }
   }
-  LOG_IF(FATAL, offset != 3)(
-      R"(message={})",
-      message);
+  LOG_IF(FATAL, offset != 3)(R"(message={})", message);
   return dispatch2(
-      handler,
-      message,
-      buffer,
-      channel_id,
-      channel,
-      pair,
-      data_count);
+      handler, message, buffer, channel_id, channel, pair, data_count);
 }
 
 }  // namespace json
