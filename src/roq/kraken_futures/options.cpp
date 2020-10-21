@@ -9,6 +9,11 @@ DEFINE_string(rest_uri, "https://api.kraken.com/0", "REST end-point (URI)");
 DEFINE_string(
     ws_uri, "wss://beta-ws-auth.kraken.com", "WebSocket end-point (URI)");
 
+DEFINE_uint32(request_queue_depth, uint32_t { 5 }, "request: max queue depth");
+
+DEFINE_uint32(
+    request_timeout_secs, uint32_t { 30 }, "request: timeout (seconds)");
+
 DEFINE_uint32(
     rate_limit_interval_secs,
     uint32_t { 1 },
