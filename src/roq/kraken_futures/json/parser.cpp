@@ -91,11 +91,9 @@ bool Parser::dispatch(
           }
           case Event::ADD_ORDER_STATUS: {
             throw std::runtime_error("addOrderStatus not supported");
-            break;
           }
           case Event::CANCEL_ORDER_STATUS:
             throw std::runtime_error("cancelOrderStatus not supported");
-            break;
         }
         break;
       }
@@ -136,11 +134,9 @@ static bool dispatch2(
         break;
       case Channel::TICKER: {
         throw std::runtime_error("ticker not supported");
-        break;
       }
       case Channel::OHLC: {
         throw std::runtime_error("ohlc not supported");
-        break;
       }
       case Channel::TRADE: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
@@ -172,11 +168,9 @@ static bool dispatch2(
       }
       case Channel::OWN_TRADES: {
         throw std::runtime_error("ownTrades not supported");
-        break;
       }
       case Channel::OPEN_ORDERS: {
         throw std::runtime_error("openOrders not supported");
-        break;
       }
     }
   }
