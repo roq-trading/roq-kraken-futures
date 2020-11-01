@@ -20,6 +20,8 @@ namespace kraken_futures {
 namespace {
 constexpr std::string_view CONNECTION = "rest";
 
+static const std::string_view ACCEPT_JSON{"application/json"};
+
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(FLAGS_name, CONNECTION, function);
 }
@@ -105,6 +107,8 @@ void Rest::get_asset_pairs(
       core::http::Method::GET,
       "/public/AssetPairs",
       std::string_view(),  // query
+      ACCEPT_JSON,
+      std::string_view(),  // content_type
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto &response) {
