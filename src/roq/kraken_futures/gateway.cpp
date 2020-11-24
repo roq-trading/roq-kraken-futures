@@ -173,12 +173,10 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .exchange = FLAGS_exchange,
         .symbol = symbol,
         .security_type = SecurityType::UNDEFINED,
-        .currency = item.aclass_quote,                     // XXX check
-        .settlement_currency = item.aclass_base,           // XXX check
-        .commission_currency = item.aclass_base,           // XXX check
-        .tick_size = std::pow(10.0, -item.pair_decimals),  // XXX check
-        .limit_up = std::numeric_limits<double>::quiet_NaN(),
-        .limit_down = std::numeric_limits<double>::quiet_NaN(),
+        .currency = item.aclass_quote,                        // XXX check
+        .settlement_currency = item.aclass_base,              // XXX check
+        .commission_currency = item.aclass_base,              // XXX check
+        .tick_size = std::pow(10.0, -item.pair_decimals),     // XXX check
         .multiplier = item.lot_multiplier,                    // XXX check
         .min_trade_vol = std::pow(10.0, -item.lot_decimals),  // XXX check
         .option_type = OptionType::UNDEFINED,
