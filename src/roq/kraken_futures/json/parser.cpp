@@ -120,8 +120,10 @@ static bool dispatch2(
   size_t offset = 0;
   Book book_1, book_2;
   for (auto value : std::get<core::json::array_t>(root)) {
-    if (++offset == 1) continue;
-    if (offset > (1 + data_count)) break;
+    if (++offset == 1)
+      continue;
+    if (offset > (1 + data_count))
+      break;
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN: LOG(FATAL)("Unexpected"); break;
@@ -201,7 +203,8 @@ bool Parser::dispatch(
           case 1: {
             auto name = std::get<std::string_view>(value);
             auto pos = name.find_first_of('-');
-            if (pos != name.npos) name.remove_suffix(name.size() - pos);
+            if (pos != name.npos)
+              name.remove_suffix(name.size() - pos);
             channel = Channel(name);
             DLOG_IF(FATAL, channel == Channel::UNKNOWN)
             (R"(Unknown channel="{}")", name);

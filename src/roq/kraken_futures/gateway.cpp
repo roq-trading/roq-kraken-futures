@@ -131,7 +131,8 @@ void Gateway::operator()(metrics::Writer &writer) {
 // rest
 
 void Gateway::operator()(const Rest &) {
-  if (_rest.connection.ready()) _web_socket.download.bump();
+  if (_rest.connection.ready())
+    _web_socket.download.bump();
 }
 
 void Gateway::download_asset_pairs() {
@@ -167,7 +168,8 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     std::string symbol(item.wsname);
     // XXX remove escape
     symbol.erase(std::remove(symbol.begin(), symbol.end(), '\\'), symbol.end());
-    if (_dispatcher.discard_symbol(symbol)) continue;
+    if (_dispatcher.discard_symbol(symbol))
+      continue;
     _symbols.emplace_back(symbol);
     ReferenceData reference_data{
         .exchange = FLAGS_exchange,
@@ -207,7 +209,8 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
 // web socket
 
 int32_t Gateway::download(WebSocketDownload::State state) {
-  if (_web_socket.connection.ready() == false) return -1;
+  if (_web_socket.connection.ready() == false)
+    return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED: assert(false); break;
     case WebSocketDownload::State::ASSET_PAIRS:
@@ -243,9 +246,11 @@ void Gateway::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t trade_length = 0;
   for (auto &item : trade.data) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = trade_update(_trade, trade_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.time;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.time;
   }
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
@@ -300,24 +305,32 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t bid_length = 0, ask_length = 0;
   for (auto &item : book.b) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(_bid, bid_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.bs) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(_bid, bid_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.a) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(_ask, ask_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.as) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(_ask, ask_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
@@ -352,7 +365,8 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
 }
 
 void Gateway::update(GatewayStatus gateway_status) {
-  if (gateway_status == _gateway_status) return;
+  if (gateway_status == _gateway_status)
+    return;
   _gateway_status = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{
