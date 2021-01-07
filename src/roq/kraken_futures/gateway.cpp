@@ -141,7 +141,9 @@ void Gateway::download_asset_pairs() {
     try {
       auto status = response.status();
       switch (status) {
-        case core::http::Status::OK: _web_socket.download.check(state); break;
+        case core::http::Status::OK:
+          _web_socket.download.check(state);
+          break;
         default:
           LOG(FATAL)
           (R"(Unable to get products, )"
@@ -212,12 +214,18 @@ int32_t Gateway::download(WebSocketDownload::State state) {
   if (_web_socket.connection.ready() == false)
     return -1;
   switch (state) {
-    case WebSocketDownload::State::UNDEFINED: assert(false); break;
+    case WebSocketDownload::State::UNDEFINED:
+      assert(false);
+      break;
     case WebSocketDownload::State::ASSET_PAIRS:
       download_asset_pairs();
       return 1;
-    case WebSocketDownload::State::SUBSCRIBE: subscribe(); return 0;
-    case WebSocketDownload::State::DONE: update(GatewayStatus::READY); return 0;
+    case WebSocketDownload::State::SUBSCRIBE:
+      subscribe();
+      return 0;
+    case WebSocketDownload::State::DONE:
+      update(GatewayStatus::READY);
+      return 0;
   }
   assert(false);
   return 0;
