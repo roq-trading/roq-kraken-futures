@@ -2,14 +2,12 @@
 
 #include "roq/kraken_futures/web_socket.h"
 
-#include <absl/flags/flag.h>
-
 #include <fmt/format.h>
 
 #include "roq/core/clock.h"
 
+#include "roq/kraken_futures/flags.h"
 #include "roq/kraken_futures/gateway.h"
-#include "roq/kraken_futures/options.h"
 
 #include "roq/kraken_futures/json/parser.h"
 
@@ -20,18 +18,15 @@ namespace {
 constexpr std::string_view CONNECTION = "ws";
 
 static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Counter(Flags::name(), CONNECTION, function);
 }
 
 static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Profile(Flags::name(), CONNECTION, function);
 }
 
 static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(
-      absl::GetFlag(FLAGS_name), CONNECTION, function);
+  return core::metrics::Latency(Flags::name(), CONNECTION, function);
 }
 }  // namespace
 
@@ -48,13 +43,13 @@ WebSocket::WebSocket(
           base,
           dns_base,
           ssl_context,
-          core::URI(absl::GetFlag(FLAGS_ws_uri)),
+          core::URI(Flags::ws_uri()),
           std::string_view(),  // query
-          std::chrono::seconds{absl::GetFlag(FLAGS_ping_freq_secs)},
-          absl::GetFlag(FLAGS_decode_buffer_size),  // XXX need read buffer size
-          absl::GetFlag(FLAGS_encode_buffer_size),
+          std::chrono::seconds{Flags::ping_freq_secs()},
+          Flags::decode_buffer_size(),  // XXX need read buffer size
+          Flags::encode_buffer_size(),
           []() { return std::string(); }),
-      _decode_buffer(absl::GetFlag(FLAGS_decode_buffer_size)),
+      _decode_buffer(Flags::decode_buffer_size()),
       _counter{
           .disconnect = create_counter("disconnect"),
       },
@@ -102,7 +97,7 @@ template <>
 void WebSocket::subscribe(
     const std::string_view &name, const roq::span<std::string> &pairs) {
   LOG(INFO)(R"(subscribe name="{}", len(pairs)={})", name, std::size(pairs));
-  if (absl::GetFlag(FLAGS_book_depth) && name.compare("book") == 0) {
+  if (Flags::book_depth() && name.compare("book") == 0) {
     auto message = fmt::format(
         R"({{)"
         R"("event":"subscribe",)"
@@ -114,7 +109,7 @@ void WebSocket::subscribe(
         R"(}})",
         fmt::join(pairs, R"(",")"),
         name,
-        absl::GetFlag(FLAGS_book_depth));
+        Flags::book_depth());
     DLOG(INFO)(R"(request="{}")", message);
     _connection.send_text(message);
   } else {
