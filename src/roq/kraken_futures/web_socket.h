@@ -31,8 +31,7 @@ namespace kraken_futures {
 
 class Gateway;
 
-class WebSocket final : public core::web::Socket::Handler,
-                        public json::Parser::Handler {
+class WebSocket final : public core::web::Socket::Handler, public json::Parser::Handler {
  public:
   WebSocket(
       Gateway &gateway,
@@ -75,12 +74,9 @@ class WebSocket final : public core::web::Socket::Handler,
   void operator()(const json::Heartbeat &) override;
   void operator()(const json::SubscriptionStatus &) override;
 
-  void operator()(
-      const json::Trade &trade, const std::string_view &pair) override;
-  void operator()(
-      const json::Spread &spread, const std::string_view &pair) override;
-  void operator()(
-      const json::Book &book, const std::string_view &pair) override;
+  void operator()(const json::Trade &trade, const std::string_view &pair) override;
+  void operator()(const json::Spread &spread, const std::string_view &pair) override;
+  void operator()(const json::Book &book, const std::string_view &pair) override;
 
  protected:
   void reset();

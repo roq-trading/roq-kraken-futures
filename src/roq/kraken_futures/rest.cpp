@@ -101,8 +101,7 @@ void Rest::operator()(metrics::Writer &writer) {
       .write(_latency.ping, metrics::LATENCY);
 }
 
-void Rest::get_asset_pairs(
-    std::function<void(const core::web::Response &)> &&callback) {
+void Rest::get_asset_pairs(std::function<void(const core::web::Response &)> &&callback) {
   _connection.request(
       core::http::Method::GET,
       "/public/AssetPairs",
@@ -117,8 +116,7 @@ void Rest::get_asset_pairs(
           if (status == core::http::Status::OK) {
             _profile.asset_pairs([&]() {
               core::json::Buffer buffer(_decode_buffer);
-              auto asset_pairs =
-                  core::json::Parser::create<json::AssetPairs>(body, buffer);
+              auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
               VLOG(1)(R"(asset_pairs={})", asset_pairs);
               _gateway(asset_pairs);
             });
@@ -139,8 +137,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
   _latency.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 }  // namespace kraken_futures

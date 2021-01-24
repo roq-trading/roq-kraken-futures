@@ -94,8 +94,7 @@ void WebSocket::operator()(metrics::Writer &writer) {
 }
 
 template <>
-void WebSocket::subscribe(
-    const std::string_view &name, const roq::span<std::string> &pairs) {
+void WebSocket::subscribe(const std::string_view &name, const roq::span<std::string> &pairs) {
   LOG(INFO)(R"(subscribe name="{}", len(pairs)={})", name, std::size(pairs));
   if (Flags::book_depth() && name.compare("book") == 0) {
     auto message = fmt::format(
@@ -147,8 +146,7 @@ void WebSocket::operator()(const core::web::Socket::Close &) {
 
 void WebSocket::operator()(const core::web::Socket::Latency &latency) {
   _latency.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 void WebSocket::operator()(const core::web::Socket::Text &text) {
@@ -178,25 +176,21 @@ void WebSocket::operator()(const json::Heartbeat &heartbeat) {
   VLOG(1)("heartbeat={}", heartbeat);
 }
 
-void WebSocket::operator()(
-    const json::SubscriptionStatus &subscription_status) {
+void WebSocket::operator()(const json::SubscriptionStatus &subscription_status) {
   VLOG(1)("subscription_status={}", subscription_status);
 }
 
-void WebSocket::operator()(
-    const json::Trade &trade, const std::string_view &pair) {
+void WebSocket::operator()(const json::Trade &trade, const std::string_view &pair) {
   VLOG(3)(R"(trade={}, pair="{}")", trade, pair);
   _gateway(trade, pair);
 }
 
-void WebSocket::operator()(
-    const json::Spread &spread, const std::string_view &pair) {
+void WebSocket::operator()(const json::Spread &spread, const std::string_view &pair) {
   VLOG(3)(R"(spread={}, pair="{}")", spread, pair);
   _gateway(spread, pair);
 }
 
-void WebSocket::operator()(
-    const json::Book &book, const std::string_view &pair) {
+void WebSocket::operator()(const json::Book &book, const std::string_view &pair) {
   VLOG(3)(R"(book={}, pair="{}")", book, pair);
   _gateway(book, pair);
 }

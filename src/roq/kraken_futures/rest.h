@@ -50,8 +50,7 @@ class Rest final : public core::web::Client::Handler {
 
   void operator()(metrics::Writer &writer);
 
-  void get_asset_pairs(
-      std::function<void(const core::web::Response &)> &&callback);
+  void get_asset_pairs(std::function<void(const core::web::Response &)> &&callback);
 
  protected:
   void operator()(const core::web::Client::Connected &) override;

@@ -13,9 +13,7 @@ namespace kraken_futures {
 namespace json {
 
 bool Parser::dispatch(
-    Handler &handler,
-    const std::string_view &message,
-    core::json::Buffer &buffer) {
+    Handler &handler, const std::string_view &message, core::json::Buffer &buffer) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -64,8 +62,7 @@ bool Parser::dispatch(
             break;
           }
           case Event::SYSTEM_STATUS: {
-            auto system_status =
-                core::json::Parser::create<SystemStatus>(message);
+            auto system_status = core::json::Parser::create<SystemStatus>(message);
             handler(system_status);
             dispatched = true;
             break;
@@ -83,8 +80,7 @@ bool Parser::dispatch(
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
-            auto subscription_status =
-                core::json::Parser::create<SubscriptionStatus>(message);
+            auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
             handler(subscription_status);
             dispatched = true;
             break;
@@ -233,8 +229,7 @@ bool Parser::dispatch(
     }
   }
   LOG_IF(FATAL, offset != 3)(R"(message={})", message);
-  return dispatch2(
-      handler, message, buffer, channel_id, channel, pair, data_count);
+  return dispatch2(handler, message, buffer, channel_id, channel, pair, data_count);
 }
 
 }  // namespace json

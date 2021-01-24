@@ -28,17 +28,13 @@ struct Parser final {
     virtual void operator()(const Heartbeat &) = 0;
     virtual void operator()(const SubscriptionStatus &) = 0;
 
-    virtual void operator()(
-        const Trade &trade, const std::string_view &pair) = 0;
-    virtual void operator()(
-        const Spread &spread, const std::string_view &pair) = 0;
+    virtual void operator()(const Trade &trade, const std::string_view &pair) = 0;
+    virtual void operator()(const Spread &spread, const std::string_view &pair) = 0;
     virtual void operator()(const Book &book, const std::string_view &pair) = 0;
   };
 
   static bool dispatch(
-      Handler &handler,
-      const std::string_view &message,
-      core::json::Buffer &buffer);
+      Handler &handler, const std::string_view &message, core::json::Buffer &buffer);
 
  protected:
   static bool dispatch(

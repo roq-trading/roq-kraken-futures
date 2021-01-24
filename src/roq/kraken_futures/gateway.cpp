@@ -39,9 +39,8 @@ static bool trade_update(C &data, size_t &offset, const T &item) {
 }
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : _dispatcher(dispatcher), _account(config.get_account()),
-      _access_key(config.get_access_key()), _random(config.get_access_secret()),
-      _dns_base(_base, true),
+    : _dispatcher(dispatcher), _account(config.get_account()), _access_key(config.get_access_key()),
+      _random(config.get_access_secret()), _dns_base(_base, true),
       _web_socket{
           .connection =
               {
@@ -195,16 +194,14 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .expiry_datetime_utc = {},
     };
     VLOG(1)(R"(reference_data={})", reference_data);
-    server::create_trace_and_dispatch(
-        trace_info, reference_data, _dispatcher, true);
+    server::create_trace_and_dispatch(trace_info, reference_data, _dispatcher, true);
     MarketStatus market_status{
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
     VLOG(2)(R"(market_status={})", market_status);
-    server::create_trace_and_dispatch(
-        trace_info, market_status, _dispatcher, true);
+    server::create_trace_and_dispatch(trace_info, market_status, _dispatcher, true);
   }
 }
 
@@ -247,8 +244,7 @@ void Gateway::subscribe() {
   _web_socket.connection.subscribe("book", pairs);
 }
 
-void Gateway::operator()(
-    const json::Trade &trade, const std::string_view &pair) {
+void Gateway::operator()(const json::Trade &trade, const std::string_view &pair) {
   server::TraceInfo trace_info;  // XXX
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
@@ -279,13 +275,11 @@ void Gateway::operator()(
         .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(R"(trade_summary={})", trade_summary);
-    server::create_trace_and_dispatch(
-        trace_info, trade_summary, _dispatcher, true);
+    server::create_trace_and_dispatch(trace_info, trade_summary, _dispatcher, true);
   }
 }
 
-void Gateway::operator()(
-    const json::Spread &spread, const std::string_view &pair) {
+void Gateway::operator()(const json::Spread &spread, const std::string_view &pair) {
   server::TraceInfo trace_info;  // XXX
   TopOfBook top_of_book{
       .exchange = Flags::exchange(),
@@ -367,8 +361,7 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
         .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(R"(market_by_price_update={})", market_by_price_update);
-    server::create_trace_and_dispatch(
-        trace_info, market_by_price_update, _dispatcher, true);
+    server::create_trace_and_dispatch(trace_info, market_by_price_update, _dispatcher, true);
   }
 }
 
@@ -380,14 +373,12 @@ void Gateway::update(GatewayStatus gateway_status) {
   MarketDataStatus market_data_status{
       .status = _gateway_status,
   };
-  server::create_trace_and_dispatch(
-      trace_info, market_data_status, _dispatcher, false);
+  server::create_trace_and_dispatch(trace_info, market_data_status, _dispatcher, false);
   OrderManagerStatus order_manager_status{
       .account = _account,
       .status = _gateway_status,
   };
-  server::create_trace_and_dispatch(
-      trace_info, order_manager_status, _dispatcher, true);
+  server::create_trace_and_dispatch(trace_info, order_manager_status, _dispatcher, true);
   LOG(INFO)(R"(Update: gateway_status={})", _gateway_status);
 }
 
