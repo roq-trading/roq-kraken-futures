@@ -267,11 +267,7 @@ void Gateway::operator()(const json::Trade &trade, const std::string_view &pair)
     TradeSummary trade_summary{
         .exchange = Flags::exchange(),
         .symbol = pair,
-        .trades =
-            {
-                .items = _trade.data(),
-                .length = trade_length,
-            },
+        .trades = {_trade.data(), trade_length},
         .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(R"(trade_summary={})", trade_summary);
@@ -347,16 +343,8 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
     MarketByPriceUpdate market_by_price_update{
         .exchange = Flags::exchange(),
         .symbol = pair,
-        .bids =
-            {
-                .items = _bid.data(),
-                .length = bid_length,
-            },
-        .asks =
-            {
-                .items = _ask.data(),
-                .length = ask_length,
-            },
+        .bids = {_bid.data(), bid_length},
+        .asks = {_ask.data(), ask_length},
         .snapshot = snapshot,
         .exchange_time_utc = exchange_time_utc,
     };
