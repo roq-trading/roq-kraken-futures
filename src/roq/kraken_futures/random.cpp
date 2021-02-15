@@ -2,6 +2,7 @@
 
 #include "roq/kraken_futures/random.h"
 
+#include <algorithm>
 #include <array>
 #include <random>
 
