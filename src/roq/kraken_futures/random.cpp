@@ -2,8 +2,6 @@
 
 #include "roq/kraken_futures/random.h"
 
-#include <fmt/format.h>
-
 #include <array>
 #include <random>
 

@@ -3,7 +3,6 @@
 #include "roq/kraken_futures/rest.h"
 
 #include <fmt/chrono.h>
-#include <fmt/format.h>
 
 #include "roq/core/json/parser.h"
 
