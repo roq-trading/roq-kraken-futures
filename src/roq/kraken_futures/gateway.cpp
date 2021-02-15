@@ -146,7 +146,7 @@ void Gateway::download_asset_pairs() {
         default:
           LOG(FATAL)
           (R"(Unable to get products, )"
-           R"(status={})",
+           R"(status={})"_fmt,
            status);
       }
     } catch (NotConnected &) {
@@ -163,7 +163,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
   _symbols.reserve(asset_pairs.result.size());
   for (auto &item : asset_pairs.result) {
     if (item.wsname.empty()) {
-      VLOG(1)(R"(Skipping altname={}, reason: wsname is empty)", item.altname);
+      VLOG(1)(R"(Skipping altname={}, reason: wsname is empty)"_fmt, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
@@ -193,14 +193,14 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    VLOG(1)(R"(reference_data={})", reference_data);
+    VLOG(1)(R"(reference_data={})"_fmt, reference_data);
     server::create_trace_and_dispatch(trace_info, reference_data, _dispatcher, true);
     MarketStatus market_status{
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
-    VLOG(2)(R"(market_status={})", market_status);
+    VLOG(2)(R"(market_status={})"_fmt, market_status);
     server::create_trace_and_dispatch(trace_info, market_status, _dispatcher, true);
   }
 }
@@ -259,7 +259,7 @@ void Gateway::operator()(const json::Trade &trade, const std::string_view &pair)
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
     (R"(Insufficient trade array size: )"
-     R"(len(trade)={}/{})",
+     R"(len(trade)={}/{})"_fmt,
      trade_length,
      _trade.size());
   }
@@ -270,7 +270,7 @@ void Gateway::operator()(const json::Trade &trade, const std::string_view &pair)
         .trades = {_trade.data(), trade_length},
         .exchange_time_utc = exchange_time_utc,
     };
-    VLOG(3)(R"(trade_summary={})", trade_summary);
+    VLOG(3)(R"(trade_summary={})"_fmt, trade_summary);
     server::create_trace_and_dispatch(trace_info, trade_summary, _dispatcher, true);
   }
 }
@@ -290,7 +290,7 @@ void Gateway::operator()(const json::Spread &spread, const std::string_view &pai
       .snapshot = false,  // note! we don't know... false is probably ok
       .exchange_time_utc = spread.timestamp,
   };
-  VLOG(3)(R"(top_of_book={})", top_of_book);
+  VLOG(3)(R"(top_of_book={})"_fmt, top_of_book);
   server::create_trace_and_dispatch(trace_info, top_of_book, _dispatcher, true);
 }
 
@@ -333,7 +333,7 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
     (R"(Insufficient bid/ask array size(s): )"
-     R"(len(bid={}/{}, len(ask)={}/{})",
+     R"(len(bid={}/{}, len(ask)={}/{})"_fmt,
      bid_length,
      _bid.size(),
      ask_length,
@@ -348,7 +348,7 @@ void Gateway::operator()(const json::Book &book, const std::string_view &pair) {
         .snapshot = snapshot,
         .exchange_time_utc = exchange_time_utc,
     };
-    VLOG(3)(R"(market_by_price_update={})", market_by_price_update);
+    VLOG(3)(R"(market_by_price_update={})"_fmt, market_by_price_update);
     server::create_trace_and_dispatch(trace_info, market_by_price_update, _dispatcher, true);
   }
 }
@@ -367,7 +367,7 @@ void Gateway::update(GatewayStatus gateway_status) {
       .status = _gateway_status,
   };
   server::create_trace_and_dispatch(trace_info, order_manager_status, _dispatcher, true);
-  LOG(INFO)(R"(Update: gateway_status={})", _gateway_status);
+  LOG(INFO)(R"(Update: gateway_status={})"_fmt, _gateway_status);
 }
 
 }  // namespace kraken_futures

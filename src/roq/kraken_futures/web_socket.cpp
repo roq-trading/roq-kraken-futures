@@ -93,7 +93,7 @@ void WebSocket::operator()(metrics::Writer &writer) {
 
 template <>
 void WebSocket::subscribe(const std::string_view &name, const roq::span<std::string> &pairs) {
-  LOG(INFO)(R"(subscribe name="{}", len(pairs)={})", name, std::size(pairs));
+  LOG(INFO)(R"(subscribe name="{}", len(pairs)={})"_fmt, name, std::size(pairs));
   if (Flags::book_depth() && name.compare("book") == 0) {
     auto message = roq::format(
         R"({{)"
@@ -107,7 +107,7 @@ void WebSocket::subscribe(const std::string_view &name, const roq::span<std::str
         roq::join(pairs, R"(",")"_sv),
         name,
         Flags::book_depth());
-    DLOG(INFO)(R"(request="{}")", message);
+    DLOG(INFO)(R"(request="{}")"_fmt, message);
     _connection.send_text(message);
   } else {
     auto message = roq::format(
@@ -120,7 +120,7 @@ void WebSocket::subscribe(const std::string_view &name, const roq::span<std::str
         R"(}})"_fmt,
         roq::join(pairs, R"(",")"_sv),
         name);
-    DLOG(INFO)(R"(request="{}")", message);
+    DLOG(INFO)(R"(request="{}")"_fmt, message);
     _connection.send_text(message);
   }
 }
@@ -158,37 +158,37 @@ void WebSocket::parse(const std::string_view &message) {
 }
 
 void WebSocket::operator()(const json::Error &error) {
-  LOG(FATAL)("error={}", error);
+  LOG(FATAL)("error={}"_fmt, error);
 }
 
 void WebSocket::operator()(const json::SystemStatus &system_status) {
-  LOG(INFO)("system_status={}", system_status);
+  LOG(INFO)("system_status={}"_fmt, system_status);
 }
 
 void WebSocket::operator()(const json::Pong &pong) {
-  VLOG(1)("pong={}", pong);
+  VLOG(1)("pong={}"_fmt, pong);
 }
 
 void WebSocket::operator()(const json::Heartbeat &heartbeat) {
-  VLOG(1)("heartbeat={}", heartbeat);
+  VLOG(1)("heartbeat={}"_fmt, heartbeat);
 }
 
 void WebSocket::operator()(const json::SubscriptionStatus &subscription_status) {
-  VLOG(1)("subscription_status={}", subscription_status);
+  VLOG(1)("subscription_status={}"_fmt, subscription_status);
 }
 
 void WebSocket::operator()(const json::Trade &trade, const std::string_view &pair) {
-  VLOG(3)(R"(trade={}, pair="{}")", trade, pair);
+  VLOG(3)(R"(trade={}, pair="{}")"_fmt, trade, pair);
   _gateway(trade, pair);
 }
 
 void WebSocket::operator()(const json::Spread &spread, const std::string_view &pair) {
-  VLOG(3)(R"(spread={}, pair="{}")", spread, pair);
+  VLOG(3)(R"(spread={}, pair="{}")"_fmt, spread, pair);
   _gateway(spread, pair);
 }
 
 void WebSocket::operator()(const json::Book &book, const std::string_view &pair) {
-  VLOG(3)(R"(book={}, pair="{}")", book, pair);
+  VLOG(3)(R"(book={}, pair="{}")"_fmt, book, pair);
   _gateway(book, pair);
 }
 

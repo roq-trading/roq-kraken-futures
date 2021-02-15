@@ -116,7 +116,7 @@ void Rest::get_asset_pairs(std::function<void(const core::web::Response &)> &&ca
             _profile.asset_pairs([&]() {
               core::json::Buffer buffer(_decode_buffer);
               auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
-              VLOG(1)(R"(asset_pairs={})", asset_pairs);
+              VLOG(1)(R"(asset_pairs={})"_fmt, asset_pairs);
               _gateway(asset_pairs);
             });
           }
