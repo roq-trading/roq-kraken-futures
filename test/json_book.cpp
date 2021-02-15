@@ -9,8 +9,8 @@
 
 #include "roq/kraken_futures/json/parser.h"
 
-using namespace roq;                  // NOLINT
-using namespace roq::kraken_futures;  // NOLINT
+using namespace roq;
+using namespace roq::kraken_futures;
 
 namespace {
 struct Handler : public json::Parser::Handler {
