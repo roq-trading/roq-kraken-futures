@@ -2,104 +2,88 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "roq/download.h"
 #include "roq/server.h"
 
-#include "roq/core/ssl/ssl.h"
-
-#include "roq/core/event/base.h"
-#include "roq/core/event/dns_base.h"
+#include "roq/core/io/context.h"
 
 #include "roq/kraken_futures/config.h"
-#include "roq/kraken_futures/random.h"
-#include "roq/kraken_futures/rest.h"
-#include "roq/kraken_futures/web_socket.h"
-
-#include "roq/kraken_futures/web_socket_state.h"
-
-#include "roq/kraken_futures/json/asset_pairs.h"
+#include "roq/kraken_futures/drop_copy.h"
+#include "roq/kraken_futures/market_data.h"
+#include "roq/kraken_futures/order_entry.h"
+#include "roq/kraken_futures/security.h"
+#include "roq/kraken_futures/shared.h"
 
 namespace roq {
 namespace kraken_futures {
 
-class Gateway final : public server::Handler {
+class Gateway final : public server::Handler,
+                      public OrderEntry::Handler,
+                      public MarketData::Handler,
+                      public DropCopy::Handler {
  public:
-  Gateway(server::Dispatcher &dispatcher, const Config &config);
+  Gateway(server::Dispatcher &, const Config &);
+
+ protected:
+  // server::Handler
 
   void operator()(const Event<Start> &) override;
   void operator()(const Event<Stop> &) override;
   void operator()(const Event<Timer> &) override;
-  void operator()(const Event<Connection> &) override;
+  void operator()(const Event<Connected> &) override;
+  void operator()(const Event<Disconnected> &) override;
 
   void operator()(
-      const Event<CreateOrder> &event,
+      const Event<CreateOrder> &,
       const std::string_view &request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const Event<ModifyOrder> &event,
+      const Event<ModifyOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
   void operator()(
-      const Event<CancelOrder> &event,
+      const Event<CancelOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
 
-  void operator()(metrics::Writer &writer) override;
+  void operator()(metrics::Writer &) override;
 
-  // rest
-  void operator()(const Rest &);
+  void operator()(const server::Trace<StreamStatus> &) override;
+  void operator()(const server::Trace<ExternalLatency> &) override;
+  void operator()(const server::Trace<ReferenceData> &, bool is_last) override;
+  void operator()(const server::Trace<MarketStatus> &, bool is_last) override;
+  void operator()(const server::Trace<TopOfBook> &, bool is_last) override;
+  void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) override;
+  void operator()(const server::Trace<TradeSummary> &, bool is_last) override;
 
-  void operator()(const json::AssetPairs &);
+  void operator()(OrderEntry::TokenUpdate &) override;
+  void operator()(OrderEntry::SymbolsUpdate &) override;
 
-  // web socket
-  void operator()(const WebSocket &);
+  // utilities
 
-  void operator()(const json::Trade &trade, const std::string_view &pair);
-  void operator()(const json::Spread &spread, const std::string_view &pair);
-  void operator()(const json::Book &book, const std::string_view &pair);
-
- private:
-  using WebSocketDownload = server::Download<WebSocketState>;
-
-  int32_t download(WebSocketDownload::State state);
+  OrderEntry &get_order_entry(const std::string_view &account);
 
  private:
-  void update(GatewayStatus gateway_status);
-
-  void download_asset_pairs();
-
-  void subscribe();
-
- private:
-  server::Dispatcher &_dispatcher;
+  server::Dispatcher &dispatcher_;
   // config
-  const std::string _account;
-  const std::string _access_key;
-  // authentication
-  Random _random;
-  // async
-  core::event::Base _base;
-  core::event::DNSBase _dns_base;
-  // crypto
-  core::ssl::Context _ssl_context;
-  // connections
-  struct {
-    WebSocket connection;
-    WebSocketDownload download;
-  } _web_socket;
-  struct {
-    Rest connection;
-  } _rest;
-  // download (web socket)
-  std::vector<std::string> _symbols;
-  // market data + order manager
-  GatewayStatus _gateway_status = GatewayStatus::DISCONNECTED;
-  // market data
-  core::page_aligned_vector<MBPUpdate> _bid, _ask;
-  core::page_aligned_vector<Trade> _trade;
+  const std::string master_account_;
+  // security
+  absl::flat_hash_map<std::string, std::unique_ptr<Security>> security_;
+  // io
+  core::io::Context context_;
+  // shared
+  Shared shared_;
+  // seed
+  uint16_t stream_id_ = {};
+  // streams
+  absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
+  std::vector<std::unique_ptr<MarketData>> market_data_;
 };
 
 }  // namespace kraken_futures

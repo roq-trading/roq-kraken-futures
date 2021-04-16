@@ -1,13 +1,9 @@
 /* Copyright (c) 2017-2021, Hans Erik Thrane */
 
-#pragma once
-
-#include "roq/kraken_futures/flags/flags.h"
+#include "roq/kraken_futures/json/result.h"
 
 namespace roq {
 namespace kraken_futures {
-
-using flags::Flags;
-
+namespace json {}  // namespace json
 }  // namespace kraken_futures
 }  // namespace roq

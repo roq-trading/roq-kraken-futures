@@ -2,8 +2,12 @@
 
 #include "roq/kraken_futures/application.h"
 
+#include "roq/literals.h"
+
+using namespace roq::literals;
+
 namespace {
-constexpr std::string_view DESCRIPTION = "Roq HitBTC Gateway";
+static const auto DESCRIPTION = "Roq HitBTC Gateway"_sv;
 }  // namespace
 
 int main(int argc, char **argv) {

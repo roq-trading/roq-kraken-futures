@@ -1,6 +1,6 @@
 {
-"name": "Order",
-"type": "item",
+"name": "OpenOrdersItem",
+"type": "item2",
 "values": [
 	{ "name": "refid", "type": "std::string_view" },
 	{ "name": "userref", "type": "int64_t" },

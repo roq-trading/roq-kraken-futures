@@ -8,6 +8,8 @@
 
 #include "roq/kraken_futures/flags.h"
 
+using namespace roq::literals;
+
 namespace roq {
 namespace kraken_futures {
 
@@ -15,10 +17,32 @@ Config::Config(const std::string_view &path) {
   server::ConfigReader::parse(*this, path);
 }
 
-std::string Config::get_account() const {
-  if (accounts.size() != 1)
-    throw std::runtime_error("Only supporting 1 account");
-  return (*accounts.begin()).first;
+std::string Config::get_master_account() const {
+  return master_account_;
+}
+
+std::string Config::get_access_key(const std::string_view &account) const {
+  auto iter = accounts.find(account);
+  if (iter == accounts.end()) {
+    log::fatal(R"(Unknown account="{}")"_fmt, account);
+  }
+  return (*iter).second.login;
+}
+
+std::string Config::get_access_secret(const std::string_view &account) const {
+  auto iter = accounts.find(account);
+  if (iter == accounts.end()) {
+    log::fatal(R"(Unknown account="{}")"_fmt, account);
+  }
+  return (*iter).second.secret;
+}
+
+std::string Config::get_access_password(const std::string_view &account) const {
+  auto iter = accounts.find(account);
+  if (iter == accounts.end()) {
+    log::fatal(R"(Unknown account="{}")"_fmt, account);
+  }
+  return (*iter).second.password;
 }
 
 void Config::dispatch(server::Config::Handler &handler) const {
@@ -28,7 +52,9 @@ void Config::dispatch(server::Config::Handler &handler) const {
     handler(iter.second);
   for (auto &user : users)
     handler(user);
-  server::Settings settings{};
+  server::Settings settings{
+      .mbp_max_depth = Flags::ws_public_subscribe_book_depth(),
+  };
   handler(settings);
 }
 
@@ -37,7 +63,9 @@ void Config::operator()(server::Symbols &&symbols) {
 }
 
 void Config::operator()(server::Account &&account) {
-  accounts.emplace(account.name, std::move(account));
+  auto res = accounts.emplace(account.name, std::move(account));
+  if (master_account_.empty())
+    master_account_ = (*res.first).first;
 }
 
 void Config::operator()(server::User &&user) {
@@ -45,7 +73,7 @@ void Config::operator()(server::User &&user) {
 }
 
 void Config::operator()(const std::string_view &key, cpptoml::base &) {
-  LOG(WARNING)(R"(UNKNOWN KEY="{}")"_fmt, key);
+  log::warn(R"(UNKNOWN KEY="{}")"_fmt, key);
 }
 
 }  // namespace kraken_futures

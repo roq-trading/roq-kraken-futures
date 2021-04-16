@@ -1,8 +1,7 @@
 {
-"name": "WebSocketState",
+"name": "DropCopyState",
 "type": "enum",
 "values": [
-	{ "name": "asset_pairs" },
 	{ "name": "subscribe" },
 	{ "name": "done" }
 ]

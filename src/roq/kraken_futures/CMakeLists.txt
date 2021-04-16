@@ -1,20 +1,24 @@
 set(TARGET_NAME "${PROJECT_NAME}")
 
+add_subdirectory(flags)
+
 set(SOURCES
     application.cpp
     config.cpp
+    drop_copy.cpp
     flags.cpp
     gateway.cpp
-    random.cpp
-    rest.cpp
-    web_socket.cpp
+    market_data.cpp
+    order_entry.cpp
+    security.cpp
+    shared.cpp
     main.cpp)
 
 add_subdirectory("json")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS web_socket_state.json)
+set(AUTOGEN_SCHEMAS order_entry_state.json drop_copy_state.json market_data_state.json)
 
 roq_autogen(
   OUTPUT
@@ -49,6 +53,7 @@ add_dependencies("${TARGET_NAME}" autogen-headers autogen-json-headers)
 target_link_libraries(
   "${TARGET_NAME}"
   "${PROJECT_NAME}-json"
+  "${PROJECT_NAME}-flags"
   roq-server::roq-server
   roq-core::roq-core
   roq-api::roq-api
@@ -58,6 +63,8 @@ target_link_libraries(
   absl::flat_hash_set
   ${UUID_LIBRARIES}
   ${RT_LIBRARIES})
+
+target_compile_features("${TARGET_NAME}" PUBLIC cxx_std_17)
 
 set_target_properties("${TARGET_NAME}" PROPERTIES LINK_FLAGS_RELEASE -s)
 
