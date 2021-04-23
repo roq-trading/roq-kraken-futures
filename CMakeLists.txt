@@ -29,17 +29,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # c++
 
-option(TEST_CPP20 "Enable c++20" OFF)
-
-if(TEST_CPP20)
-  set(CMAKE_CXX_STANDARD 20)
-else(TEST_CPP20)
-  set(CMAKE_CXX_STANDARD 17)
-endif(TEST_CPP20)
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 # filesystem
@@ -105,7 +94,11 @@ install(FILES "${CMAKE_SOURCE_DIR}/CHANGELOG.md"
 
 # debian
 
-set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "thraneh@gmail.com")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "roq-api, roq-logging, roq-server")
-include(CPack)
+option(BUILD_DEB "Enable debian packaging?" OFF)
+
+if(BUILD_DEB)
+  set(CPACK_GENERATOR "DEB")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "thraneh@gmail.com")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "roq-api, roq-logging, roq-server")
+  include(CPack)
+endif(BUILD_DEB)
