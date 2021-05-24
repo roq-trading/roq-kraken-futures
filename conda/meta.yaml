@@ -24,6 +24,7 @@ requirements:
     - benchmark
     - roq-api =={{ version }}
     - roq-core =={{ version }}
+    - roq-oss-abseil-cpp
     - roq-oss-date
     - roq-oss-http-parser
     - roq-server =={{ version }}
