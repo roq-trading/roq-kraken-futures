@@ -22,12 +22,13 @@ requirements:
     - make
   host:
     - benchmark
-    - roq-api =={{ version }}
-    - roq-core =={{ version }}
+    - roq-api
+    - roq-core
     - roq-oss-abseil-cpp
+    - roq-oss-brotli
     - roq-oss-date
     - roq-oss-http-parser
-    - roq-server =={{ version }}
+    - roq-server
 
 about:
   home: https://roq-trading.com
