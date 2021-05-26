@@ -132,9 +132,8 @@ uint16_t OrderEntry::operator()(
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
-uint16_t OrderEntry::operator()(
-    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
+  log::fatal("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"_sv);
 }
 
 void OrderEntry::operator()(ConnectionStatus status) {

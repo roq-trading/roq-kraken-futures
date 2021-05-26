@@ -122,10 +122,9 @@ uint16_t Gateway::operator()(
   return get_order_entry(event.value.account)(event, request_id, order);
 }
 
-uint16_t Gateway::operator()(
-    const Event<CancelAllOrders> &event, const std::string_view &request_id) {
+uint16_t Gateway::operator()(const Event<CancelAllOrders> &event) {
   assert(!event.value.account.empty());
-  return get_order_entry(event.value.account)(event, request_id);
+  return get_order_entry(event.value.account)(event);
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
