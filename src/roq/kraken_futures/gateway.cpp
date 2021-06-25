@@ -172,7 +172,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   assert(!account.empty());
   auto iter = drop_copy_.find(account);
   if (ROQ_UNLIKELY(iter == drop_copy_.end()))
-    log::fatal(R"(Unexpected: account="{}")"_fmt, account);
+    log::fatal(R"(Unexpected: account="{}")"_sv, account);
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"_sv);
     auto drop_copy = std::make_unique<DropCopy>(
@@ -208,7 +208,7 @@ OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
     return *(*iter).second;
-  throw RuntimeErrorException(R"(Unknown account="{}")"_fmt, account);
+  throw RuntimeErrorException(R"(Unknown account="{}")"_sv, account);
 }
 
 }  // namespace kraken_futures
