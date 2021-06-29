@@ -19,7 +19,7 @@
       "name": "rest_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
-      "default": "https://api.kraken.com",
+      "default": "https://demo-futures.kraken.com",
       "description": "REST end-point (URI)"
     },
     {
@@ -64,7 +64,7 @@
       "name": "ws_public_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
-      "default": "wss://beta-ws.kraken.com",
+      "default": "wss://demo-futures.kraken.com/ws/v1",
       "description": "WebSocket end-point (URI)"
     },
     {
