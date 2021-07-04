@@ -62,6 +62,8 @@ class OrderEntry final : public core::web::Client::Handler {
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(const OrderEntry &) = delete;
 
+  bool ready() const { return status_ == ConnectionStatus::READY; }
+
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
@@ -131,7 +133,6 @@ class OrderEntry final : public core::web::Client::Handler {
   Shared &shared_;
   absl::flat_hash_set<std::string> all_symbols_;  // only used by master
   // state
-  bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   server::Download<OrderEntryState> download_;

@@ -370,7 +370,6 @@ void OrderEntry::operator()(const core::web::Client::Connected &) {
 
 void OrderEntry::operator()(const core::web::Client::Disconnected &) {
   ++counter_.disconnect;
-  ready_ = false;
   (*this)(ConnectionStatus::DISCONNECTED);
   if (!download_.downloading())
     download_.reset();
@@ -417,8 +416,6 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       return 1;
     case OrderEntryState::DONE:
       (*this)(ConnectionStatus::READY);
-      assert(!ready_);
-      ready_ = true;
       return {};
   }
   assert(false);
