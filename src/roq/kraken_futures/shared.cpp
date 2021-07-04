@@ -2,8 +2,6 @@
 
 #include "roq/kraken_futures/shared.h"
 
-#include <magic_enum.hpp>
-
 #include "roq/kraken_futures/flags.h"
 
 namespace roq {
