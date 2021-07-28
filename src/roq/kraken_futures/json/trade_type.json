@@ -2,6 +2,7 @@
 "name": "TradeType",
 "type": "enum",
 "values": [
-	{ "name": "fill" }
+	{ "name": "fill" },
+	{ "name": "liquidation" }
 ]
 }
