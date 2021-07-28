@@ -2,6 +2,7 @@
 
 #include "roq/kraken_futures/rest.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "roq/utils/mask.h"
@@ -204,9 +205,9 @@ void Rest::operator()(const json::Instruments &instruments) {
   symbols.reserve(instruments.instruments.size());
   size_t counter = {};
   for (auto &item : instruments.instruments) {
-    log::info("DEBUG: instrument={}"_sv, item);
     log::info<1>("item={}"_sv, item);
-    auto &symbol = item.symbol;
+    std::string symbol(item.symbol);  // note! we need the upper-case version
+    std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
     if (shared_.discard_symbol(symbol))
       continue;
     if (all_symbols_.emplace(symbol).second)  // only include new
@@ -235,13 +236,6 @@ void Rest::operator()(const json::Instruments &instruments) {
         .expiry_datetime_utc = {},
     };
     server::create_trace_and_dispatch(trace_info, reference_data, handler_, true);
-    MarketStatus market_status{
-        .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
-        .symbol = symbol,
-        .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
-    };
-    server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
   }
   log::info("Instruments {} / {}"_sv, counter, instruments.instruments.size());
   if (!symbols.empty()) {

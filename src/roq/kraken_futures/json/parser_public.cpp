@@ -33,10 +33,13 @@ static void dispatch_alert(
 
 template <typename H>
 static void dispatch_subscribed(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Subscribed subscribed(root);
+  Subscribed subscribed(root, buffer);
   handler(subscribed, trace_info);
 }
 
@@ -51,7 +54,10 @@ static void dispatch_ticker(
 }  // namespace
 
 bool ParserPublic::dispatch(
-    Handler &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
@@ -67,7 +73,7 @@ bool ParserPublic::dispatch(
         return true;
       }
       if (event.compare("subscribed") == 0) {
-        dispatch_subscribed(handler, message, trace_info);
+        dispatch_subscribed(handler, message, buffer, trace_info);
         return true;
       }
     }

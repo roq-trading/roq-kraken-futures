@@ -1,9 +1,9 @@
 {
 "name": "Subscribed",
-"type": "item",
+"type": "comp",
 "values": [
 	{ "name": "event", "type": "std::string_view" },
 	{ "name": "feed", "type": "std::string_view" },
-	{ "name": "product_ids" }
+	{ "name": "product_ids", "type": "roq::span<ProductID>" }
 ]
 }

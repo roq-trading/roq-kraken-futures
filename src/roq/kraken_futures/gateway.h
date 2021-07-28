@@ -63,6 +63,7 @@ class Gateway final : public server::Handler,
   void operator()(const server::Trace<TopOfBook> &, bool is_last) override;
   void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) override;
   void operator()(const server::Trace<TradeSummary> &, bool is_last) override;
+  void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) override;
 
   void operator()(Rest::SymbolsUpdate &) override;
 

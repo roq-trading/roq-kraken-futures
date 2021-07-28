@@ -8,6 +8,8 @@ instruments.h
 instruments.cpp
 instruments_item.h
 instruments_item.cpp
+product_id.h
+product_id.cpp
 result.h
 result.cpp
 subscribed.h

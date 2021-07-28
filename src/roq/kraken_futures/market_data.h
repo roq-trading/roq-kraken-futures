@@ -30,9 +30,11 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
     virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
     virtual void operator()(const server::Trace<TopOfBook> &, bool is_last) = 0;
     virtual void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) = 0;
     virtual void operator()(const server::Trace<TradeSummary> &, bool is_last) = 0;
+    virtual void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) = 0;
   };
 
   MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
@@ -91,7 +93,7 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse;
+    core::metrics::Profile parse, ticker;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

@@ -1,0 +1,7 @@
+{
+"name": "ProductID",
+"type": "single",
+"values": [
+	{ "name": "text", "type": "std::string_view" }
+]
+}

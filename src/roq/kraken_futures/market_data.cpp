@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "roq/utils/mask.h"
+#include "roq/utils/safe_cast.h"
 #include "roq/utils/update.h"
 
 #include "roq/core/back_emplacer.h"
@@ -74,6 +75,7 @@ MarketData::MarketData(
       },
       profile_{
           .parse = create_metrics(name_, "parse"_sv),
+          .ticker = create_metrics(name_, "ticker"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -101,6 +103,7 @@ void MarketData::operator()(metrics::Writer &writer) {
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
       .write(profile_.parse, metrics::PROFILE)
+      .write(profile_.ticker, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
@@ -216,8 +219,8 @@ void MarketData::subscribe(
 void MarketData::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
-    // core::json::Buffer buffer(decode_buffer_);
-    auto result = json::ParserPublic::dispatch(*this, message, trace_info);
+    core::json::Buffer buffer(decode_buffer_);
+    auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
       log::warn(R"(Unexpected: message="{}")"_sv, message);
   });
@@ -237,26 +240,53 @@ void MarketData::operator()(
 }
 
 void MarketData::operator()(const json::Ticker &ticker, const server::TraceInfo &trace_info) {
-  log::info("DEBUG: ticker={}"_sv, ticker);
-  /*
-  log::info<3>(R"(trade={}, pair="{}")"_sv, trade, pair);
-  core::back_emplacer trades(shared_.trades);
-  std::chrono::nanoseconds exchange_time_utc = {};
-  for (auto &item : trade.data) {
-    trades.emplace_back([&item](auto &result) { emplace(result, item); });
-    utils::update_first(exchange_time_utc, item.time);
-  }
-  if (!trades.empty()) {
-    TradeSummary trade_summary{
+  profile_.ticker([&]() {
+    log::info<3>("ticker={}"_sv, ticker);
+    TopOfBook top_of_book{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
-        .symbol = pair,
-        .trades = trades,
-        .exchange_time_utc = exchange_time_utc,
+        .symbol = ticker.product_id,
+        .layer{
+            .bid_price = ticker.bid,
+            .bid_quantity = ticker.bid_size,
+            .ask_price = ticker.ask,
+            .ask_quantity = ticker.ask_size,
+        },
+        .snapshot = false,
+        .exchange_time_utc = utils::safe_cast(ticker.time),
     };
-    server::create_trace_and_dispatch(trace_info, trade_summary, handler_, true);
-  }
-  */
+    server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
+    Statistics statistics[] = {
+        {
+            .type = StatisticsType::INDEX_VALUE,
+            .value = ticker.index,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::FUNDING_RATE,
+            .value = ticker.funding_rate_prediction,
+            .begin_time_utc = utils::safe_cast(ticker.next_funding_rate_time),
+            .end_time_utc = {},
+        },
+    };
+    StatisticsUpdate statistics_update{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = ticker.product_id,
+        .statistics = statistics,
+        .snapshot = false,
+        .exchange_time_utc = utils::safe_cast(ticker.time),
+    };
+    server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
+    MarketStatus market_status{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = ticker.product_id,
+        .trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN,
+    };
+    server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
+  });
 }
 
 }  // namespace kraken_futures

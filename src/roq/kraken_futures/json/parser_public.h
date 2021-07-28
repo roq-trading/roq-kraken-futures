@@ -28,7 +28,10 @@ struct ParserPublic final {
   };
 
   static bool dispatch(
-      Handler &handler, const std::string_view &message, const server::TraceInfo &trace_info);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      const server::TraceInfo &trace_info);
 };
 
 }  // namespace json

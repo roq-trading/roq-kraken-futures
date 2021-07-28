@@ -171,6 +171,10 @@ void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last)
   dispatcher_(event, is_last);
 }
 
+void Gateway::operator()(const server::Trace<StatisticsUpdate> &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto &symbols = symbols_update.symbols;
   for (auto &iter : market_data_) {

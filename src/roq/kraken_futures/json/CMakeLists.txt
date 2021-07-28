@@ -10,6 +10,7 @@ set(AUTOGEN_SCHEMAS
     info.json
     instruments.json
     instruments_item.json
+    product_id.json
     result.json
     subscribed.json
     ticker.json
