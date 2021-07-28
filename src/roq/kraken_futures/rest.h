@@ -23,14 +23,15 @@
 #include "roq/download.h"
 #include "roq/server.h"
 
-#include "roq/kraken_futures/order_entry_state.h"
-#include "roq/kraken_futures/security.h"
+#include "roq/kraken_futures/rest_state.h"
 #include "roq/kraken_futures/shared.h"
+
+#include "roq/kraken_futures/json/instruments.h"
 
 namespace roq {
 namespace kraken_futures {
 
-class OrderEntry final : public core::web::Client::Handler {
+class Rest final : public core::web::Client::Handler {
  public:
   struct TokenUpdate final {
     std::string_view account;
@@ -44,13 +45,16 @@ class OrderEntry final : public core::web::Client::Handler {
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
     virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const server::Trace<ReferenceData> &, bool is_last) = 0;
+    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
+    // cross-communication
+    virtual void operator()(SymbolsUpdate &) = 0;
   };
 
-  OrderEntry(
-      Handler &, core::io::Context &context, uint16_t stream_id, Security &, Shared &, bool master);
+  Rest(Handler &, core::io::Context &context, uint16_t stream_id, Shared &);
 
-  OrderEntry(OrderEntry &&) = delete;
-  OrderEntry(const OrderEntry &) = delete;
+  Rest(Rest &&) = delete;
+  Rest(const Rest &) = delete;
 
   bool ready() const { return status_ == ConnectionStatus::READY; }
 
@@ -59,20 +63,6 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(const Event<Timer> &);
 
   void operator()(metrics::Writer &);
-
-  uint16_t operator()(const Event<CreateOrder> &, const std::string_view &request_id);
-  uint16_t operator()(
-      const Event<ModifyOrder> &,
-      const server::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-  uint16_t operator()(
-      const Event<CancelOrder> &,
-      const server::Order &,
-      const std::string_view &request_id,
-      const std::string_view &previous_request_id);
-
-  uint16_t operator()(const Event<CancelAllOrders> &);
 
  protected:
   void operator()(const core::web::Client::Connected &) override;
@@ -84,14 +74,17 @@ class OrderEntry final : public core::web::Client::Handler {
   template <typename T>
   void get(std::function<void(const core::Promise<T> &)> &&callback);
 
-  uint32_t download(OrderEntryState);
+  uint32_t download(RestState);
+
+  void download_instruments();
+
+  void operator()(const json::Instruments &);
 
  private:
   Handler &handler_;
   // config
   const uint16_t stream_id_;
   const std::string name_;
-  const bool master_;
   // connection
   core::web::Client connection_;
   // buffers
@@ -101,20 +94,18 @@ class OrderEntry final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile assets, asset_pairs, balance, open_positions, get_web_sockets_token;
+    core::metrics::Profile instruments;
   } profile_;
   struct {
     core::metrics::Latency ping;
   } latency_;
-  // security
-  Security &security_;
   // cache
   Shared &shared_;
-  absl::flat_hash_set<std::string> all_symbols_;  // only used by master
+  absl::flat_hash_set<std::string> all_symbols_;
   // state
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  server::Download<OrderEntryState> download_;
+  server::Download<RestState> download_;
 };
 
 }  // namespace kraken_futures

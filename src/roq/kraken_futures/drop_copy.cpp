@@ -36,9 +36,9 @@ DropCopy::DropCopy(
       connection_(
           *this,
           context,
-          core::URI(Flags::ws_private_uri()),
+          core::URI(Flags::ws_uri()),
           {},  // query
-          Flags::ws_private_ping_freq(),
+          Flags::ws_ping_freq(),
           Flags::decode_buffer_size(),  // XXX need read buffer size
           Flags::encode_buffer_size(),
           []() { return std::string(); }),
@@ -54,8 +54,7 @@ DropCopy::DropCopy(
           .heartbeat = create_metrics(name_, "heartbeat"_sv),
       },
       security_(security), shared_(shared),
-      download_(
-          Flags::ws_private_request_timeout(), [this](auto state) { return download(state); }) {
+      download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
 void DropCopy::operator()(const Event<Start> &) {

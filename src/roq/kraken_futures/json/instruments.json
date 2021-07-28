@@ -1,0 +1,10 @@
+{
+"name": "Instruments",
+"type": "comp",
+"values": [
+	{ "name": "result", "type": "Result" },
+	{ "name": "error", "type": "std::string_view", "required": false },
+	{ "name": "instruments", "type": "roq::span<InstrumentsItem>", "required": false },
+	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
+]
+}

@@ -63,7 +63,7 @@ void Config::dispatch(server::Config::Handler &handler) const {
           SupportType::CANCEL_ORDER,
           SupportType::ORDER_ACK,
       },
-      .mbp_max_depth = Flags::ws_public_subscribe_book_depth(),
+      .mbp_max_depth = Flags::ws_subscribe_book_depth(),
       .mbp_allow_price_inversion = {},
       .mbp_allow_fractional_tick_size = {},
       .mbp_allow_remove_non_existing = {},

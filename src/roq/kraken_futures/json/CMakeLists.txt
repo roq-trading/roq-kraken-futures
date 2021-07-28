@@ -17,6 +17,8 @@ set(AUTOGEN_SCHEMAS
     error.json
     event.json
     heartbeat.json
+    instruments.json
+    instruments_item.json
     open_orders.json
     open_orders_item.json
     open_positions.json
@@ -28,6 +30,7 @@ set(AUTOGEN_SCHEMAS
     pong.json
     positions.json
     positions_item.json
+    result.json
     result_field.json
     side.json
     spread.json

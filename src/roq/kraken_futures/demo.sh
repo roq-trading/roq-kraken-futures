@@ -12,7 +12,7 @@ NAME="kraken-futures"
 
 CONFIG_FILE="$CWD/config/$NAME.toml"
 
-ENV=""
+ENV="demo-"
 
 URI="futures.kraken.com"
 

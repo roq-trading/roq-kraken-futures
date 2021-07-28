@@ -2,47 +2,53 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string_view>
 
-#include "roq/core/json/array.h"
-#include "roq/core/json/buffer.h"
+#include "roq/format.h"
+#include "roq/literals.h"
+
 #include "roq/core/json/parser.h"
+
+#ifdef VERSION
+#undef VERSION
+#endif
 
 namespace roq {
 namespace kraken_futures {
 namespace json {
 
 struct Result final {
-  template <typename T, typename E, typename H>
-  static void dispatch(
-      const std::string_view &message,
-      core::json::Buffer &buffer,
-      E error_handler,
-      H result_handler) {
-    using namespace roq::literals;
-    core::json::Parser parser(message);
-    auto root = parser.root();
-    for (auto [key, value] : std::get<core::json::object_t>(root)) {
-      if (key.compare("error"_sv) == 0) {
-        auto error = core::json::Array<roq::span<std::string_view>, core::json::array_t>::parse(
-            buffer, std::get<core::json::array_t>(value));
-        if (std::size(error) > 0) {
-          error_handler(error);
-          return;
-        }
-      } else if (key.compare("result"_sv) == 0) {
-        T obj(value);  // note! no buffer
-        result_handler(obj);
-        return;
-      } else {
-        throw RuntimeErrorException(R"(Unexpected key="{}")"_sv, key);
-      }
-    }
-    throw RuntimeErrorException(R"(Didn't find key in {"error", "result"})"_sv);
-  }
+  enum type_t { UNDEFINED, UNKNOWN, SUCCESS, ERROR };
+
+  constexpr Result() = default;
+
+  // cppcheck-suppress noExplicitConstructor
+  constexpr Result(type_t type) : type_(type) {}  // NOLINT (allow implicit)
+
+  explicit Result(const core::json::value_t &);
+
+  explicit Result(const std::string_view &name);
+
+  Result &operator=(const std::string_view &name);
+
+  constexpr operator type_t() const { return type_; }
+
+  std::string_view as_text() const;
+  std::string_view as_raw_text() const;
+
+ private:
+  type_t type_ = {};
 };
 
 }  // namespace json
 }  // namespace kraken_futures
 }  // namespace roq
+
+template <>
+struct fmt::formatter<roq::kraken_futures::json::Result> : public roq::formatter {
+  template <typename Context>
+  auto format(const roq::kraken_futures::json::Result &value, Context &context) {
+    using namespace roq::literals;
+    return roq::format_to(context.out(), R"({})"_sv, value.as_text());
+  }
+};

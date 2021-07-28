@@ -1,6 +1,6 @@
 set(TARGET_NAME "${PROJECT_NAME}-test")
 
-set(SOURCES main.cpp)
+set(SOURCES json_instruments_item.cpp json_instruments.cpp main.cpp)
 
 add_executable("${TARGET_NAME}" ${SOURCES})
 

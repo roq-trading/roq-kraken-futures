@@ -19,7 +19,7 @@
       "name": "rest_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
-      "default": "https://demo-futures.kraken.com",
+      "default": "https://demo-futures.kraken.com/derivatives",
       "description": "REST end-point (URI)"
     },
     {
@@ -33,7 +33,7 @@
       "name": "rest_ping_path",
       "type": "std::string",
       "validator": "roq::core::flags::Path<std::string>",
-      "default": "/0/public/Time",
+      "default": "/api/v3/instruments",
       "description": "URI path used for REST connection keep-alive messages"
     },
     {
@@ -58,60 +58,39 @@
       "description": "rate limit: max requests (per interval)"
     },
     {
-      "name": "ws_public_uri",
+      "name": "ws_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
       "default": "wss://demo-futures.kraken.com/ws/v1",
       "description": "WebSocket end-point (URI)"
     },
     {
-      "name": "ws_public_ping_freq",
+      "name": "ws_ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",
       "default": "5s",
       "description": "ping frequency"
     },
     {
-      "name": "ws_public_request_timeout",
+      "name": "ws_request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",
       "default": "15s",
       "description": "request timeout"
     },
     {
-      "name": "ws_public_subscribe_book_depth",
+      "name": "ws_subscribe_book_depth",
       "type": "uint32_t",
       "validator": "roq::core::flags::Positive<uint32_t>",
       "default": 10,
       "description": "book depth (size)"
     },
     {
-      "name": "ws_public_max_subscriptions_per_stream",
+      "name": "ws_max_subscriptions_per_stream",
       "type": "uint32_t",
       "validator": "roq::core::flags::Positive<uint32_t>",
       "default": 128,
-      "description": "Cmax subscriptions per connection (count)"
-    },
-    {
-      "name": "ws_private_uri",
-      "type": "roq::core::URI",
-      "validator": "roq::core::flags::URI<std::string>",
-      "default": "wss://beta-ws-auth.kraken.com",
-      "description": "WebSocket end-point (URI)"
-    },
-    {
-      "name": "ws_private_ping_freq",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "5s",
-      "description": "ping frequency"
-    },
-    {
-      "name": "ws_private_request_timeout",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "15s",
-      "description": "request timeout (seconds)"
+      "description": "max subscriptions per connection (count)"
     },
     {
       "name": "encode_buffer_size",

@@ -1,7 +1,8 @@
 {
-"name": "OrderEntryState",
+"name": "RestState",
 "type": "enum",
 "values": [
+	{ "name": "instruments" },
 	{ "name": "done" }
 ]
 }

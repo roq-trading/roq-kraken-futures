@@ -61,9 +61,9 @@ MarketData::MarketData(
       connection_(
           *this,
           context,
-          core::URI(Flags::ws_public_uri()),
+          core::URI(Flags::ws_uri()),
           {},  // query
-          Flags::ws_public_ping_freq(),
+          Flags::ws_ping_freq(),
           Flags::decode_buffer_size(),  // XXX need read buffer size
           Flags::encode_buffer_size(),
           []() { return std::string(); }),
@@ -78,9 +78,8 @@ MarketData::MarketData(
           .ping = create_metrics(name_, "ping"_sv),
           .heartbeat = create_metrics(name_, "heartbeat"_sv),
       },
-      shared_(shared), download_(Flags::ws_public_request_timeout(), [this](auto state) {
-        return download(state);
-      }) {
+      shared_(shared),
+      download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
 void MarketData::operator()(const Event<Start> &) {
@@ -108,7 +107,7 @@ void MarketData::operator()(metrics::Writer &writer) {
 
 void MarketData::update_subscriptions(std::vector<std::string> &symbols) {
   assert(&symbols != &symbols_);
-  auto max_size = Flags::ws_public_max_subscriptions_per_stream();
+  auto max_size = Flags::ws_max_subscriptions_per_stream();
   auto offset = symbols_.size();
   if (max_size <= offset)
     return;
@@ -202,7 +201,7 @@ void MarketData::subscribe(const roq::span<std::string> &symbols) {
 
 void MarketData::subscribe(const std::string_view &name, const roq::span<std::string> &symbols) {
   log::info(R"(subscribe name="{}", len(symbols)={})"_sv, name, std::size(symbols));
-  if (Flags::ws_public_subscribe_book_depth() && name.compare("book"_sv) == 0) {
+  if (Flags::ws_subscribe_book_depth() && name.compare("book"_sv) == 0) {
     auto message = roq::format(
         R"({{)"
         R"("event":"subscribe",)"
@@ -214,7 +213,7 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"(}})"_sv,
         roq::join(symbols, R"(",")"_sv),
         name,
-        Flags::ws_public_subscribe_book_depth());
+        Flags::ws_subscribe_book_depth());
     log::info<3>(R"(request="{}")"_sv, message);
     connection_.send_text(message);
   } else {

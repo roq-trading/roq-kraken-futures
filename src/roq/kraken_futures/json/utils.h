@@ -11,6 +11,7 @@
 #include "roq/core/charconv/datetime.h"
 
 #include "roq/kraken_futures/json/order_type.h"
+#include "roq/kraken_futures/json/result.h"
 #include "roq/kraken_futures/json/side.h"
 #include "roq/kraken_futures/json/update_type.h"
 
@@ -52,6 +53,12 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
 
 template <>
 inline void update(OrderType &result, const core::json::value_t &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
+  result = result_type(core::json::get<std::string_view>(value));
+}
+
+template <>
+inline void update(Result &result, const core::json::value_t &value) {
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }

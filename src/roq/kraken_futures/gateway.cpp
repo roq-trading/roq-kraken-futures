@@ -51,6 +51,7 @@ static auto create_drop_copy(T &security) {
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
       security_(create_security(config)), shared_(dispatcher),
+      rest_(*this, context_, ++stream_id_, shared_),
       order_entry_(
           create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),
       drop_copy_(create_drop_copy(security_)) {
@@ -58,6 +59,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
 
 void Gateway::operator()(const Event<Start> &event) {
   log::info("Starting the gateway..."_sv);
+  rest_(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -76,9 +78,11 @@ void Gateway::operator()(const Event<Stop> &event) {
       (*drop_copy)(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
+  rest_(event);
 }
 
 void Gateway::operator()(const Event<Timer> &event) {
+  rest_(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -167,24 +171,8 @@ void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last)
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
-  auto &account = token_update.account;
-  assert(!account.empty());
-  auto iter = drop_copy_.find(account);
-  if (ROQ_UNLIKELY(iter == drop_copy_.end()))
-    log::fatal(R"(Unexpected: account="{}")"_sv, account);
-  if (!static_cast<bool>((*iter).second)) {
-    log::info("Create drop-copy (ws-private)"_sv);
-    auto drop_copy = std::make_unique<DropCopy>(
-        *this, context_, ++stream_id_, *security_[account], shared_, token_update.token);
-    MessageInfo message_info;  // XXX something sensible
-    Start start;
-    create_event_and_dispatch(*drop_copy, message_info, start);
-    (*iter).second = std::move(drop_copy);
-  }
-}
-
-void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
+void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
+  /*
   auto &symbols = symbols_update.symbols;
   for (auto &iter : market_data_) {
     if (symbols.empty())
@@ -202,6 +190,7 @@ void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
     create_event_and_dispatch(*market_data, message_info, start);
     market_data_.emplace_back(std::move(market_data));
   }
+  */
 }
 
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {

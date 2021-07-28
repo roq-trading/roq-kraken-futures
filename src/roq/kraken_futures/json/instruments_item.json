@@ -1,0 +1,17 @@
+{
+"name": "InstrumentsItem",
+"type": "item",
+"values": [
+	{ "name": "symbol", "type": "std::string_view" },
+	{ "name": "type", "type": "std::string_view" },
+	{ "name": "underlying", "type": "std::string_view" },
+	{ "name": "lastTradingTime", "type": "std::string_view" },
+	{ "name": "tickSize", "type": "double" },
+	{ "name": "contractSize", "type": "double" },
+	{ "name": "tradeable", "type": "bool" },
+	{ "name": "marginLevels" },
+	{ "name": "fundingRateCoefficient", "type": "double" },
+	{ "name": "maxRelativeFundingRate", "type": "double" },
+	{ "name": "retailMarginLevels" }
+]
+}
