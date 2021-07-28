@@ -55,6 +55,7 @@ bool ParserPublic::dispatch(
   core::json::Parser parser(message);
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
+    // event
     if (key.compare("event"_sv) == 0) {
       auto event = core::json::get<std::string_view>(value);
       if (event.compare("info") == 0) {
@@ -69,7 +70,11 @@ bool ParserPublic::dispatch(
         dispatch_subscribed(handler, message, trace_info);
         return true;
       }
-      if (event.compare("ticker") == 0) {
+    }
+    // feed
+    if (key.compare("feed"_sv) == 0) {
+      auto feed = core::json::get<std::string_view>(value);
+      if (feed.compare("ticker") == 0) {
         dispatch_ticker(handler, message, trace_info);
         return true;
       }
