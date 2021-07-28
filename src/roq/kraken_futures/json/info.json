@@ -1,8 +1,8 @@
 {
-"name": "Ping",
+"name": "Info",
 "type": "item",
 "values": [
 	{ "name": "event", "type": "std::string_view" },
-	{ "name": "reqid", "type": "int64_t" }
+	{ "name": "version", "type": "int32_t" }
 ]
 }

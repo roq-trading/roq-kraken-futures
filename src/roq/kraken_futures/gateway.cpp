@@ -172,7 +172,6 @@ void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last)
 }
 
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
-  /*
   auto &symbols = symbols_update.symbols;
   for (auto &iter : market_data_) {
     if (symbols.empty())
@@ -190,7 +189,6 @@ void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
     create_event_and_dispatch(*market_data, message_info, start);
     market_data_.emplace_back(std::move(market_data));
   }
-  */
 }
 
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {

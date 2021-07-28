@@ -1,8 +1,0 @@
-{
-"name": "Error",
-"type": "item",
-"values": [
-	{ "name": "event", "type": "std::string_view" },
-	{ "name": "errorMessage", "type": "std::string_view" }
-]
-}

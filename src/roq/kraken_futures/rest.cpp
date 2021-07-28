@@ -198,40 +198,32 @@ void Rest::download_instruments() {
 }
 
 void Rest::operator()(const json::Instruments &instruments) {
-  /*
-  assert(asset_pairs.error.empty());
+  assert(instruments.error.empty());
   server::TraceInfo trace_info;  // XXX not correct (*parsing* already done)
   std::vector<std::string> symbols;
-  symbols.reserve(asset_pairs.result.size());
+  symbols.reserve(instruments.instruments.size());
   size_t counter = {};
-  for (auto &item : asset_pairs.result) {
+  for (auto &item : instruments.instruments) {
+    log::info("DEBUG: instrument={}"_sv, item);
     log::info<1>("item={}"_sv, item);
-    if (item.wsname.empty()) {
-      log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"_sv, item.altname);
-      continue;
-    }
-    std::string symbol(item.wsname);
-    // remove escape
-    symbol.erase(std::remove(symbol.begin(), symbol.end(), '\\'), symbol.end());
+    auto &symbol = item.symbol;
     if (shared_.discard_symbol(symbol))
       continue;
     if (all_symbols_.emplace(symbol).second)  // only include new
       symbols.emplace_back(symbol);
     ++counter;
-    auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
-    auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
     ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
-        .description = item.altname,
+        .description = {},
         .security_type = {},
-        .currency = item.aclass_quote,
-        .settlement_currency = item.aclass_base,
-        .commission_currency = item.aclass_base,
-        .tick_size = tick_size,
-        .multiplier = item.lot_multiplier,  // XXX check
-        .min_trade_vol = min_trade_vol,
+        .currency = {},
+        .settlement_currency = {},
+        .commission_currency = {},
+        .tick_size = item.tick_size,
+        .multiplier = item.contract_size,
+        .min_trade_vol = 1.0,  // XXX check
         .option_type = {},
         .strike_currency = {},
         .strike_price = NaN,
@@ -251,14 +243,13 @@ void Rest::operator()(const json::Instruments &instruments) {
     };
     server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
   }
-  log::info("AssetPairs {} / {}"_sv, counter, asset_pairs.result.size());
+  log::info("Instruments {} / {}"_sv, counter, instruments.instruments.size());
   if (!symbols.empty()) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,
     };
     handler_(symbols_update);
   }
-  */
 }
 
 }  // namespace kraken_futures

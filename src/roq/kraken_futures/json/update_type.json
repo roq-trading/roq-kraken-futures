@@ -1,7 +1,0 @@
-{
-"name": "UpdateType",
-"type": "enum",
-"values": [
-	{ "name": "r" }
-]
-}

@@ -32,7 +32,7 @@ struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
-
+/*
 template <typename T>
 void emplace(MBPUpdate &result, const T &value) {
   new (&result) MBPUpdate{
@@ -53,6 +53,7 @@ void emplace(Trade &result, const T &value) {
       .trade_id = {},
   };
 }
+*/
 }  // namespace
 
 MarketData::MarketData(
@@ -194,77 +195,50 @@ uint32_t MarketData::download(MarketDataState state) {
 }
 
 void MarketData::subscribe(const roq::span<std::string> &symbols) {
-  subscribe("trade"_sv, symbols);
-  subscribe("spread"_sv, symbols);
-  subscribe("book"_sv, symbols);
+  subscribe("ticker"_sv, symbols);
 }
 
-void MarketData::subscribe(const std::string_view &name, const roq::span<std::string> &symbols) {
-  log::info(R"(subscribe name="{}", len(symbols)={})"_sv, name, std::size(symbols));
-  if (Flags::ws_subscribe_book_depth() && name.compare("book"_sv) == 0) {
-    auto message = roq::format(
-        R"({{)"
-        R"("event":"subscribe",)"
-        R"("pair":["{}"],)"
-        R"("subscription":{{)"
-        R"("name":"{}",)"
-        R"("depth":{})"
-        R"(}})"
-        R"(}})"_sv,
-        roq::join(symbols, R"(",")"_sv),
-        name,
-        Flags::ws_subscribe_book_depth());
-    log::info<3>(R"(request="{}")"_sv, message);
-    connection_.send_text(message);
-  } else {
-    auto message = roq::format(
-        R"({{)"
-        R"("event":"subscribe",)"
-        R"("pair":["{}"],)"
-        R"("subscription":{{)"
-        R"("name":"{}")"
-        R"(}})"
-        R"(}})"_sv,
-        roq::join(symbols, R"(",")"_sv),
-        name);
-    log::info<3>(R"(request="{}")"_sv, message);
-    connection_.send_text(message);
-  }
+void MarketData::subscribe(
+    const std::string_view &feed, const roq::span<std::string> &product_ids) {
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
+  auto message = roq::format(
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("feed":"{}",)"
+      R"("product_ids":["{}"])"
+      R"(}})"_sv,
+      feed,
+      roq::join(product_ids, R"(",")"_sv));
+  log::info<3>(R"(request="{}")"_sv, message);
+  connection_.send_text(message);
 }
 
 void MarketData::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
-    core::json::Buffer buffer(decode_buffer_);
-    auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
+    // core::json::Buffer buffer(decode_buffer_);
+    auto result = json::ParserPublic::dispatch(*this, message, trace_info);
     if (ROQ_UNLIKELY(!result))
       log::warn(R"(Unexpected: message="{}")"_sv, message);
   });
 }
 
-void MarketData::operator()(const json::Error &error, const server::TraceInfo &) {
-  log::fatal("error={}"_sv, error);
+void MarketData::operator()(const json::Info &info, const server::TraceInfo &trace_info) {
+  log::info("DEBUG: info={}"_sv, info);
 }
 
-void MarketData::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  log::info("system_status={}"_sv, system_status);
-}
-
-void MarketData::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  log::info<1>("pong={}"_sv, pong);
-}
-
-void MarketData::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  log::info<1>("heartbeat={}"_sv, heartbeat);
+void MarketData::operator()(const json::Alert &alert, const server::TraceInfo &trace_info) {
+  log::info("DEBUG: alert={}"_sv, alert);
 }
 
 void MarketData::operator()(
-    const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  log::info<1>("subscription_status={}"_sv, subscription_status);
+    const json::Subscribed &subscribed, const server::TraceInfo &trace_info) {
+  log::info("DEBUG: subscribed={}"_sv, subscribed);
 }
 
-void MarketData::operator()(
-    const json::Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) {
+void MarketData::operator()(const json::Ticker &ticker, const server::TraceInfo &trace_info) {
+  log::info("DEBUG: ticker={}"_sv, ticker);
+  /*
   log::info<3>(R"(trade={}, pair="{}")"_sv, trade, pair);
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
@@ -282,64 +256,7 @@ void MarketData::operator()(
     };
     server::create_trace_and_dispatch(trace_info, trade_summary, handler_, true);
   }
-}
-
-void MarketData::operator()(
-    const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  log::info<3>(R"(spread={}, pair="{}")"_sv, spread, pair);
-  TopOfBook top_of_book{
-      .stream_id = stream_id_,
-      .exchange = Flags::exchange(),
-      .symbol = pair,
-      .layer{
-          .bid_price = spread.bid,
-          .bid_quantity = spread.bid_volume,
-          .ask_price = spread.ask,
-          .ask_quantity = spread.ask_volume,
-      },
-      .snapshot = false,  // note! we don't know... false is probably ok
-      .exchange_time_utc = spread.timestamp,
-  };
-  server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
-}
-
-void MarketData::operator()(
-    const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  log::info<3>(R"(book={}, pair="{}")"_sv, book, pair);
-  bool snapshot = !book.bs.empty() && !book.as.empty();
-  bool live = !book.b.empty() && !book.a.empty();
-  if (ROQ_UNLIKELY(snapshot && live))
-    log::fatal("Unexpected"_sv);
-  core::back_emplacer bids(shared_.bids), asks(shared_.asks);
-  std::chrono::nanoseconds exchange_time_utc = {};
-  for (auto &item : book.b) {
-    bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    utils::update_first(exchange_time_utc, item.timestamp);
-  }
-  for (auto &item : book.bs) {
-    bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    utils::update_first(exchange_time_utc, item.timestamp);
-  }
-  for (auto &item : book.a) {
-    asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    utils::update_first(exchange_time_utc, item.timestamp);
-  }
-  for (auto &item : book.as) {
-    asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    utils::update_first(exchange_time_utc, item.timestamp);
-  }
-  if (!(bids.empty() && asks.empty())) {
-    MarketByPriceUpdate market_by_price_update{
-        .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
-        .symbol = pair,
-        .bids = bids,
-        .asks = asks,
-        .snapshot = snapshot,
-        .exchange_time_utc = exchange_time_utc,
-    };
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
-  }
+  */
 }
 
 }  // namespace kraken_futures

@@ -1,0 +1,9 @@
+{
+"name": "Ticker",
+"type": "item",
+"values": [
+	{ "name": "time", "type": "std::chrono::milliseconds" },
+	{ "name": "feed", "type": "std::string_view" },
+	{ "name": "product_id", "type": "std::string_view" }
+]
+}

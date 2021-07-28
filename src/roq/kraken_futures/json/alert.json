@@ -1,8 +1,8 @@
 {
-"name": "Pong",
+"name": "Alert",
 "type": "item",
 "values": [
 	{ "name": "event", "type": "std::string_view" },
-	{ "name": "reqid", "type": "int64_t" }
+	{ "name": "message", "type": "std::string_view" }
 ]
 }

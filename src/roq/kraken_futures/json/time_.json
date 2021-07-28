@@ -1,8 +1,0 @@
-{
-"name": "Time_",
-"type": "item",
-"values": [
-	{ "name": "unixtime", "type": "std::chrono::milliseconds" },
-	{ "name": "rfc1123", "type": "std::string_view" }
-]
-}

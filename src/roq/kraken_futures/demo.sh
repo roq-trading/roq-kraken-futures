@@ -17,7 +17,7 @@ ENV="demo-"
 URI="futures.kraken.com"
 
 REST_URI="https://${ENV}$URI/derivatives"
-WS_URI="wss://${ENV}$URI/ws/v1"
+WS_URI="wss://${ENV}$URI/ws/v3"
 
 $PREFIX ./roq-kraken-futures \
 	--name "$NAME" \

@@ -1,5 +1,4 @@
 symbols = ".*"
-# symbols = "XBT/USD"
 
 [accounts]
 

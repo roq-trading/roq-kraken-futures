@@ -69,18 +69,6 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
 
   void parse(const std::string_view &message);
 
-  void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
-  void operator()(const json::Pong &, const server::TraceInfo &) override;
-  void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
-
-  void operator()(const json::AddOrderStatus &, const server::TraceInfo &) override;
-  void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) override;
-
-  void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
-  void operator()(const json::OwnTrades &, const server::TraceInfo &) override;
-
   void reset();
 
  private:

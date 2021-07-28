@@ -173,53 +173,11 @@ uint32_t DropCopy::download(DropCopyState state) {
 void DropCopy::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
-    core::json::Buffer buffer(decode_buffer_);
-    auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
+    // core::json::Buffer buffer(decode_buffer_);
+    auto result = json::ParserPrivate::dispatch(*this, message, trace_info);
     if (ROQ_UNLIKELY(!result))
       log::warn(R"(Unexpected: message="{}")"_sv, message);
   });
-}
-
-void DropCopy::operator()(const json::Error &error, const server::TraceInfo &) {
-  log::fatal("error={}"_sv, error);
-}
-
-void DropCopy::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  log::info("system_status={}"_sv, system_status);
-}
-
-void DropCopy::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  log::info<1>("pong={}"_sv, pong);
-}
-
-void DropCopy::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  log::info<1>("heartbeat={}"_sv, heartbeat);
-}
-
-void DropCopy::operator()(
-    const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  log::info("subscription_status={}"_sv, subscription_status);
-}
-
-void DropCopy::operator()(const json::AddOrderStatus &add_order_status, const server::TraceInfo &) {
-  log::info("add_order_status={}"_sv, add_order_status);
-  log::fatal("NOT IMPLEMENTED"_sv);
-}
-
-void DropCopy::operator()(
-    const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &) {
-  log::info("cancel_order_status={}"_sv, cancel_order_status);
-  log::fatal("NOT IMPLEMENTED"_sv);
-}
-
-void DropCopy::operator()(const json::OpenOrders &open_orders, const server::TraceInfo &) {
-  log::info("open_orders={}"_sv, open_orders);
-  log::fatal("NOT IMPLEMENTED"_sv);
-}
-
-void DropCopy::operator()(const json::OwnTrades &own_trades, const server::TraceInfo &) {
-  log::info("own_trades={}"_sv, own_trades);
-  log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 }  // namespace kraken_futures

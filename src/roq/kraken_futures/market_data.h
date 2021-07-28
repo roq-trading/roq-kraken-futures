@@ -62,22 +62,15 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
 
   void subscribe(const roq::span<std::string> &symbols);
 
-  void subscribe(const std::string_view &name, const roq::span<std::string> &symbols);
+  void subscribe(const std::string_view &feed, const roq::span<std::string> &product_ids);
 
   // json::ParserPublic::Handler
 
-  void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
-  void operator()(const json::Pong &, const server::TraceInfo &) override;
-  void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
+  void operator()(const json::Info &, const server::TraceInfo &) override;
+  void operator()(const json::Alert &, const server::TraceInfo &) override;
+  void operator()(const json::Subscribed &, const server::TraceInfo &) override;
 
-  void operator()(
-      const json::Trade &, const std::string_view &pair, const server::TraceInfo &) override;
-  void operator()(
-      const json::Spread &, const std::string_view &pair, const server::TraceInfo &) override;
-  void operator()(
-      const json::Book &, const std::string_view &pair, const server::TraceInfo &) override;
+  void operator()(const json::Ticker &, const server::TraceInfo &) override;
 
  private:
   void parse(const std::string_view &message);

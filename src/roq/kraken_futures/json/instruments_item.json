@@ -5,7 +5,7 @@
 	{ "name": "symbol", "type": "std::string_view" },
 	{ "name": "type", "type": "std::string_view" },
 	{ "name": "underlying", "type": "std::string_view" },
-	{ "name": "lastTradingTime", "type": "std::string_view" },
+	{ "name": "lastTradingTime", "type": "std::chrono::milliseconds" },
 	{ "name": "tickSize", "type": "double" },
 	{ "name": "contractSize", "type": "double" },
 	{ "name": "tradeable", "type": "bool" },

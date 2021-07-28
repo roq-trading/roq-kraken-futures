@@ -1,0 +1,9 @@
+{
+"name": "Subscribed",
+"type": "item",
+"values": [
+	{ "name": "event", "type": "std::string_view" },
+	{ "name": "feed", "type": "std::string_view" },
+	{ "name": "product_ids" }
+]
+}
