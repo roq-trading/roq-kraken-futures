@@ -1,0 +1,9 @@
+{
+"name": "Tag",
+"type": "enum",
+"values": [
+	{ "name": "month" },
+	{ "name": "quarter" },
+	{ "name": "perpetual" }
+]
+}

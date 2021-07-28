@@ -1,0 +1,7 @@
+{
+"name": "TradeType",
+"type": "enum",
+"values": [
+	{ "name": "fill" }
+]
+}

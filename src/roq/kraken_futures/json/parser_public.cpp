@@ -4,7 +4,9 @@
 
 #include "roq/logging.h"
 
-// #include "roq/kraken_futures/json/event.h"
+#include "roq/kraken_futures/json/event.h"
+#include "roq/kraken_futures/json/feed.h"
+#include "roq/kraken_futures/json/utils.h"
 
 using namespace roq::literals;
 
@@ -51,6 +53,27 @@ static void dispatch_ticker(
   Ticker ticker(root);
   handler(ticker, trace_info);
 }
+
+template <typename H>
+static void dispatch_trades(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  Trades trades(root, buffer);
+  handler(trades, trace_info);
+}
+
+template <typename H>
+static void dispatch_trade(
+    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  Trade trade(root);
+  handler(trade, trace_info);
+}
 }  // namespace
 
 bool ParserPublic::dispatch(
@@ -63,26 +86,50 @@ bool ParserPublic::dispatch(
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     // event
     if (key.compare("event"_sv) == 0) {
-      auto event = core::json::get<std::string_view>(value);
-      if (event.compare("info") == 0) {
-        dispatch_info(handler, message, trace_info);
-        return true;
-      }
-      if (event.compare("alert") == 0) {
-        dispatch_alert(handler, message, trace_info);
-        return true;
-      }
-      if (event.compare("subscribed") == 0) {
-        dispatch_subscribed(handler, message, buffer, trace_info);
-        return true;
+      Event event = {};
+      update(event, value);
+      switch (event) {
+        case Event::UNDEFINED:
+          assert(false);
+          [[fallthrough]];
+        case Event::UNKNOWN:
+          log::warn(R"(Unknown event="{}")"_sv, event);
+          return false;
+        case Event::INFO:
+          dispatch_info(handler, message, trace_info);
+          return true;
+        case Event::ALERT:
+          dispatch_alert(handler, message, trace_info);
+          return true;
+        case Event::SUBSCRIBED:
+          dispatch_subscribed(handler, message, buffer, trace_info);
+          return true;
+        default:
+          assert(false);
       }
     }
     // feed
     if (key.compare("feed"_sv) == 0) {
-      auto feed = core::json::get<std::string_view>(value);
-      if (feed.compare("ticker") == 0) {
-        dispatch_ticker(handler, message, trace_info);
-        return true;
+      Feed feed = {};
+      update(feed, value);
+      switch (feed) {
+        case Feed::UNDEFINED:
+          assert(false);
+          [[fallthrough]];
+        case Feed::UNKNOWN:
+          log::warn(R"(Unknown feed="{}")"_sv, feed);
+          return false;
+        case Feed::TICKER:
+          dispatch_ticker(handler, message, trace_info);
+          return true;
+        case Feed::TRADE_SNAPSHOT:
+          dispatch_trades(handler, message, buffer, trace_info);
+          return true;
+        case Feed::TRADE:
+          dispatch_trade(handler, message, trace_info);
+          return true;
+        default:
+          assert(false);
       }
     }
   }

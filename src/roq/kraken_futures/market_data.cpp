@@ -44,17 +44,16 @@ void emplace(MBPUpdate &result, const T &value) {
       .number_of_orders = {},
   };
 }
-
+*/
 template <typename T>
 void emplace(Trade &result, const T &value) {
   new (&result) Trade{
       .side = json::map(value.side),
       .price = value.price,
-      .quantity = value.volume,
+      .quantity = value.qty,
       .trade_id = {},
   };
 }
-*/
 }  // namespace
 
 MarketData::MarketData(
@@ -76,6 +75,8 @@ MarketData::MarketData(
       profile_{
           .parse = create_metrics(name_, "parse"_sv),
           .ticker = create_metrics(name_, "ticker"_sv),
+          .trades = create_metrics(name_, "trades"_sv),
+          .trade = create_metrics(name_, "trade"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -104,6 +105,8 @@ void MarketData::operator()(metrics::Writer &writer) {
       // profile
       .write(profile_.parse, metrics::PROFILE)
       .write(profile_.ticker, metrics::PROFILE)
+      .write(profile_.trades, metrics::PROFILE)
+      .write(profile_.trade, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
@@ -199,6 +202,7 @@ uint32_t MarketData::download(MarketDataState state) {
 
 void MarketData::subscribe(const roq::span<std::string> &symbols) {
   subscribe("ticker"_sv, symbols);
+  subscribe("trade"_sv, symbols);
 }
 
 void MarketData::subscribe(
@@ -286,6 +290,26 @@ void MarketData::operator()(const json::Ticker &ticker, const server::TraceInfo 
         .trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN,
     };
     server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
+  });
+}
+
+void MarketData::operator()(const json::Trades &trades, const server::TraceInfo &trace_info) {
+  profile_.trades([&]() { log::info<3>("trades={}"_sv, trades); });
+}
+
+void MarketData::operator()(const json::Trade &trade, const server::TraceInfo &trace_info) {
+  profile_.trade([&]() {
+    log::info<3>("trade={}"_sv, trade);
+    core::back_emplacer trades(shared_.trades);
+    trades.emplace_back([&](auto &result) { emplace(result, trade); });
+    TradeSummary trade_summary{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = trade.product_id,
+        .trades = trades,
+        .exchange_time_utc = trade.time,
+    };
+    server::create_trace_and_dispatch(trace_info, trade_summary, handler_, true);
   });
 }
 

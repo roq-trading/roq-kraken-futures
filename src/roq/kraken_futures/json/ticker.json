@@ -3,7 +3,7 @@
 "type": "item",
 "values": [
 	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "feed", "type": "std::string_view" },
+	{ "name": "feed", "type": "Feed" },
 	{ "name": "product_id", "type": "std::string_view" },
 	{ "name": "bid", "type": "double" },
 	{ "name": "ask", "type": "double" },
@@ -19,7 +19,7 @@
 	{ "name": "funding_rate", "type": "double" },
 	{ "name": "funding_rate_prediction", "type": "double" },
 	{ "name": "suspended", "type": "bool" },
-	{ "name": "tag", "type": "std::string_view" },
+	{ "name": "tag", "type": "Tag" },
 	{ "name": "pair", "type": "std::string_view" },
 	{ "name": "openInterest", "type": "double" },
 	{ "name": "markPrice", "type": "double" },

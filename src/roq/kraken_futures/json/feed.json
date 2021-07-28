@@ -1,0 +1,9 @@
+{
+"name": "Feed",
+"type": "enum",
+"values": [
+	{ "name": "ticker" },
+	{ "name": "trade" },
+	{ "name": "trade_snapshot" }
+]
+}

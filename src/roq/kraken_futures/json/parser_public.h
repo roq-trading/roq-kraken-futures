@@ -13,6 +13,8 @@
 #include "roq/kraken_futures/json/subscribed.h"
 
 #include "roq/kraken_futures/json/ticker.h"
+#include "roq/kraken_futures/json/trade.h"
+#include "roq/kraken_futures/json/trades.h"
 
 namespace roq {
 namespace kraken_futures {
@@ -25,6 +27,8 @@ struct ParserPublic final {
     virtual void operator()(const Subscribed &, const server::TraceInfo &) = 0;
 
     virtual void operator()(const Ticker &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Trades &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Trade &, const server::TraceInfo &) = 0;
   };
 
   static bool dispatch(

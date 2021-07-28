@@ -3,7 +3,7 @@
 "type": "item",
 "values": [
 	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "type", "type": "std::string_view" },
+	{ "name": "type", "type": "std::string_view", "comment": "XXX can't use enum due to space" },
 	{ "name": "underlying", "type": "std::string_view" },
 	{ "name": "lastTradingTime", "type": "std::chrono::milliseconds" },
 	{ "name": "tickSize", "type": "double" },

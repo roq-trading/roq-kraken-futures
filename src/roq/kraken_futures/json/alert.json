@@ -2,7 +2,7 @@
 "name": "Alert",
 "type": "item",
 "values": [
-	{ "name": "event", "type": "std::string_view" },
+	{ "name": "event", "type": "Event" },
 	{ "name": "message", "type": "std::string_view" }
 ]
 }

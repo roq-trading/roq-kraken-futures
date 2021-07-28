@@ -36,7 +36,7 @@ TEST(json_ticker, simple) {
                  R"(})";
   auto obj = core::json::Parser::create<json::Ticker>(message);
   EXPECT_EQ(obj.time, 1627460663568ms);
-  EXPECT_EQ(obj.feed, "ticker"_sv);
+  EXPECT_EQ(obj.feed, json::Feed::TICKER);
   EXPECT_EQ(obj.product_id, "FI_ETHUSD_210730"_sv);
   EXPECT_DOUBLE_EQ(obj.bid, 2312.15);
   EXPECT_DOUBLE_EQ(obj.ask, 2313.3);
@@ -50,7 +50,7 @@ TEST(json_ticker, simple) {
   EXPECT_DOUBLE_EQ(obj.last, 2313.05);
   EXPECT_DOUBLE_EQ(obj.change, 4.008723413822568);
   EXPECT_EQ(obj.suspended, false);
-  EXPECT_EQ(obj.tag, "month"_sv);
+  EXPECT_EQ(obj.tag, json::Tag::MONTH);
   EXPECT_EQ(obj.pair, "ETH:USD"_sv);
   EXPECT_DOUBLE_EQ(obj.open_interest, 38089.0);
   EXPECT_DOUBLE_EQ(obj.mark_price, 2312.725);
@@ -87,7 +87,7 @@ TEST(json_ticker, funding_rates) {
                  R"(})";
   auto obj = core::json::Parser::create<json::Ticker>(message);
   EXPECT_EQ(obj.time, 1627462526224ms);
-  EXPECT_EQ(obj.feed, "ticker"_sv);
+  EXPECT_EQ(obj.feed, json::Feed::TICKER);
   EXPECT_EQ(obj.product_id, "PI_XBTUSD"_sv);
   EXPECT_DOUBLE_EQ(obj.bid, 39780.5);
   EXPECT_DOUBLE_EQ(obj.ask, 39800.5);
@@ -103,7 +103,7 @@ TEST(json_ticker, funding_rates) {
   EXPECT_DOUBLE_EQ(obj.funding_rate, 2.1914353639e-8);
   EXPECT_DOUBLE_EQ(obj.funding_rate_prediction, 2.2099858377e-8);
   EXPECT_EQ(obj.suspended, false);
-  EXPECT_EQ(obj.tag, "perpetual"_sv);
+  EXPECT_EQ(obj.tag, json::Tag::PERPETUAL);
   EXPECT_EQ(obj.pair, "XBT:USD"_sv);
   EXPECT_DOUBLE_EQ(obj.open_interest, 32093438.0);
   EXPECT_DOUBLE_EQ(obj.mark_price, 39790.5);

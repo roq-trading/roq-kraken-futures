@@ -1,0 +1,9 @@
+{
+"name": "Trades",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "product_id", "type": "std::string_view" },
+	{ "name": "trades", "type": "roq::span<Trade>" }
+]
+}

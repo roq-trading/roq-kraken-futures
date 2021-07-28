@@ -2,7 +2,7 @@
 "name": "Info",
 "type": "item",
 "values": [
-	{ "name": "event", "type": "std::string_view" },
+	{ "name": "event", "type": "Event" },
 	{ "name": "version", "type": "int32_t" }
 ]
 }

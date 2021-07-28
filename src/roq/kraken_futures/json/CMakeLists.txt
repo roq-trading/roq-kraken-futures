@@ -7,13 +7,19 @@ include(RoqAutogen)
 set(AUTOGEN_SCHEMAS
     alert.json
     event.json
+    feed.json
     info.json
     instruments.json
     instruments_item.json
     product_id.json
     result.json
+    side.json
     subscribed.json
+    tag.json
     ticker.json
+    trade.json
+    trade_type.json
+    trades.json
     type.json)
 
 roq_autogen(

@@ -50,4 +50,5 @@ TEST(json_instruments, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::Instruments>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
+  EXPECT_EQ(std::size(obj.instruments), 25);
 }
