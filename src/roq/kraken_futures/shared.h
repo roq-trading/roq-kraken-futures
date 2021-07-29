@@ -27,6 +27,11 @@ struct Shared final {
     return dispatcher_.find_order(std::forward<Args>(args)...);
   }
 
+  template <typename... Args>
+  auto operator()(Args &&...args) {
+    return dispatcher_(std::forward<Args>(args)...);
+  }
+
  public:
   core::page_aligned_vector<MBPUpdate> bids, asks;
   core::page_aligned_vector<Trade> trades;

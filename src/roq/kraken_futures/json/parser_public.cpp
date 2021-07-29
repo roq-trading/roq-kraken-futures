@@ -179,6 +179,14 @@ bool ParserPublic::dispatch(
         case Feed::TRADE:
           dispatch_trade(handler, message, trace_info);
           return true;
+        case Feed::ACCOUNT_BALANCES_AND_MARGINS:
+        case Feed::OPEN_POSITIONS:
+        case Feed::OPEN_ORDERS_SNAPSHOT:
+        case Feed::OPEN_ORDERS:
+        case Feed::OPEN_ORDERS_VERBOSE:
+        case Feed::FILLS:
+          log::fatal("Unexpected: feed={}"_sv, feed);
+          break;
         default:
           assert(false);
       }

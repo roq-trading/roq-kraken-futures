@@ -7,6 +7,8 @@
 
 #include "roq/logging.h"
 
+#include "roq/utils/safe_cast.h"
+
 #include "roq/core/clock.h"
 
 #include "roq/core/binascii/base64.h"
@@ -31,38 +33,18 @@ static auto create_hmac(const std::string_view &secret) {
 Security::Security(const Config &config, const std::string_view &account)
     : account_(account), key_(config.get_access_key(account)),
       password_(config.get_access_password(account)),
-      hmac_(create_hmac(config.get_access_secret(account))) {
+      hmac_(create_hmac(config.get_access_secret(account))),
+      nonce_(std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock())) {
 }
 
-std::string Security::create_body() {
-  auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
-  auto diff = now - nonce_;
-  if (ROQ_UNLIKELY(diff < THRESHOLD))
-    log::fatal("Probably something wrong... diff={})"_sv, diff);
-  if (diff.count() < 0)  // XXX shouldn't this be <= ?
-    ++nonce_;
-  else
-    nonce_ = now;
-  if (password_.empty()) {
-    return roq::format(R"(nonce={})"_sv, nonce_.count());
-  } else {
-    // XXX something weird with the quotes here... review
-    return roq::format(
-        R"("nonce={}&)"
-        R"("opt={}")"_sv,
-        nonce_.count(),
-        password_);
-  }
-}
-
-std::string Security::create_headers(
-    const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
-  assert(method == core::http::Method::POST);
-  assert(!body.empty());
-  auto nonce = roq::format("{}"_sv, nonce_.count());
+std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
+  assert(!path.empty());
+  assert(!query.empty());
+  auto nonce = roq::format("{}"_sv, (++nonce_).count());
   sha_.clear();
+  sha_.update(query);
   sha_.update(nonce);
-  sha_.update(body);
+  sha_.update(path);
   std::array<char, 32> buffer_1;
   auto length_1 = sha_.digest(buffer_1);
   assert(length_1 == buffer_1.size());
@@ -72,12 +54,14 @@ std::string Security::create_headers(
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
-  auto sign_2 = core::binascii::Base64::encode(buffer_2);
+  auto authent = core::binascii::Base64::encode(buffer_2);
   return roq::format(
-      "API-Key: {}\r\n"
-      "API-Sign: {}\r\n"_sv,
+      "APIKey: {}\r\n"
+      "Nonce: {}\r\n"
+      "Authent: {}\r\n"_sv,
       key_,
-      sign_2);
+      nonce,
+      authent);
 }
 
 }  // namespace kraken_futures

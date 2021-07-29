@@ -14,9 +14,10 @@
 
 #include "roq/kraken_futures/json/subscribed.h"
 
+#include "roq/kraken_futures/json/heartbeat.h"
+
 #include "roq/kraken_futures/json/book.h"
 #include "roq/kraken_futures/json/book_snapshot.h"
-#include "roq/kraken_futures/json/heartbeat.h"
 #include "roq/kraken_futures/json/ticker.h"
 #include "roq/kraken_futures/json/trade.h"
 #include "roq/kraken_futures/json/trade_snapshot.h"

@@ -22,7 +22,7 @@ namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "om"_sv;
+static const auto NAME = "rest"_sv;
 
 static const auto SUPPORTS = utils::Mask{
     SupportType::REFERENCE_DATA,

@@ -7,6 +7,12 @@
 	{ "name": "book_snapshot" },
 	{ "name": "book" },
 	{ "name": "trade_snapshot" },
-	{ "name": "trade" }
+	{ "name": "trade" },
+	{ "name": "account_balances_and_margins" },
+	{ "name": "open_positions" },
+	{ "name": "open_orders_snapshot" },
+	{ "name": "open_orders" },
+	{ "name": "open_orders_verbose" },
+	{ "name": "fills" }
 ]
 }

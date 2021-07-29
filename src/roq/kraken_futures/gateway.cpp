@@ -39,10 +39,17 @@ static auto create_order_entry(
 }
 
 template <typename T>
-static auto create_drop_copy(T &security) {
+static auto create_drop_copy(
+    Gateway &gateway,
+    core::io::Context &context,
+    uint16_t &stream_id,
+    T &security,
+    Shared &shared) {
   absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> result;
   for (auto &iter : security) {
-    result.try_emplace(iter.first, nullptr);
+    result.try_emplace(
+        iter.first,
+        std::make_unique<DropCopy>(gateway, context, ++stream_id, *iter.second, shared));
   }
   return result;
 }
@@ -54,7 +61,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
       rest_(*this, context_, ++stream_id_, shared_),
       order_entry_(
           create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),
-      drop_copy_(create_drop_copy(security_)) {
+      drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)) {
 }
 
 void Gateway::operator()(const Event<Start> &event) {
@@ -134,6 +141,7 @@ uint16_t Gateway::operator()(const Event<CancelAllOrders> &event) {
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
+  rest_(writer);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(writer);
   for (auto &[_, drop_copy] : drop_copy_)

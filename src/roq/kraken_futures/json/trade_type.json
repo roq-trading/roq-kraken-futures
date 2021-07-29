@@ -3,6 +3,7 @@
 "type": "enum",
 "values": [
 	{ "name": "fill" },
-	{ "name": "liquidation" }
+	{ "name": "liquidation" },
+	{ "name": "assignment" }
 ]
 }

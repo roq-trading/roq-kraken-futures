@@ -5,6 +5,7 @@ set(SOURCES parser_public.cpp parser_private.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
+    account_balances_and_margins.json
     alert.json
     book.json
     book_item.json
@@ -12,10 +13,19 @@ set(AUTOGEN_SCHEMAS
     error.json
     event.json
     feed.json
+    fill.json
+    fill_type.json
     heartbeat.json
     info.json
     instruments.json
     instruments_item.json
+    margin_account.json
+    open_orders.json
+    open_orders_snapshot.json
+    open_positions.json
+    order.json
+    order_type.json
+    position.json
     product_id.json
     result.json
     side.json

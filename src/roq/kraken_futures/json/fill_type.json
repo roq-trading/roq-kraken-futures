@@ -1,0 +1,8 @@
+{
+"name": "FillType",
+"type": "enum",
+"values": [
+	{ "name": "maker" },
+	{ "name": "taker" }
+]
+}

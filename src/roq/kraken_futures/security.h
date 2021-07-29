@@ -23,11 +23,9 @@ class Security final {
   Security(const Security &) = delete;
 
   std::string_view get_account() const { return account_; }
+  std::string_view get_key() const { return key_; }
 
-  std::string create_body();
-
-  std::string create_headers(
-      const core::http::Method &method, const std::string_view &path, const std::string_view &body);
+  std::string create_headers(const std::string_view &path, const std::string_view &body);
 
  private:
   const std::string account_;

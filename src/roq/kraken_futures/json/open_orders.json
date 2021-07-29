@@ -1,0 +1,10 @@
+{
+"name": "OpenOrders",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "orders", "comment": "XXX Order" },
+	{ "name": "is_cancel", "type": "bool" },
+	{ "name": "reason", "type": "std::string_view" }
+]
+}

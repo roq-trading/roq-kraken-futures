@@ -29,10 +29,9 @@ DropCopy::DropCopy(
     core::io::Context &context,
     uint16_t stream_id,
     Security &security,
-    Shared &shared,
-    const std::string_view &token)
+    Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), token_(token),
+      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -48,6 +47,7 @@ DropCopy::DropCopy(
       },
       profile_{
           .parse = create_metrics(name_, "parse"_sv),
+          .heartbeat = create_metrics(name_, "heartbeat"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -75,29 +75,33 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
       .write(profile_.parse, metrics::PROFILE)
+      .write(profile_.heartbeat, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
 void DropCopy::subscribe() {
-  subscribe("ownTrades"_sv);
-  subscribe("openOrders"_sv);
+  subscribe("account_balances_and_margins"_sv);
+  subscribe("open_positions"_sv);
+  subscribe("open_orders"_sv);
+  subscribe("fills"_sv);
 }
 
-void DropCopy::subscribe(const std::string_view &name) {
-  log::info(R"(subscribe name="{}", token="{}")"_sv, name, token_);
-  assert(!token_.empty());
+void DropCopy::subscribe(const std::string_view &feed) {
   auto message = roq::format(
       R"({{)"
       R"("event":"subscribe",)"
-      R"("subscription":{{)"
-      R"("name":"{}",)"
-      R"("token":"{}")"
-      R"(}})"
+      R"("feed":"{}",)"
+      R"("api_key":"{}",)"
+      R"("original_challenge":"{}",)"
+      R"("signed_challenge":"{}")"
       R"(}})"_sv,
-      name,
-      token_);
+      feed,
+      security_.get_key(),
+      "original_challenge"_sv,
+      "signed_challenge"_sv);
+  log::debug(R"(request="{}")"_sv, message);
   log::info<3>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
 }
@@ -170,11 +174,43 @@ uint32_t DropCopy::download(DropCopyState state) {
   return {};
 }
 
+void DropCopy::operator()(const server::Trace<json::Info> &event) {
+  auto &[trace_info, info] = event;
+  log::debug("info={}"_sv, info);
+  log::info<1>("info={}"_sv, info);
+}
+
+void DropCopy::operator()(const server::Trace<json::Alert> &event) {
+  auto &[trace_info, alert] = event;
+  log::debug("alert={}"_sv, alert);
+  log::warn<1>("alert={}"_sv, alert);
+}
+
+void DropCopy::operator()(const server::Trace<json::Error> &event) {
+  auto &[trace_info, error] = event;
+  log::debug("error={}"_sv, error);
+  log::warn("error={}"_sv, error);
+}
+
+void DropCopy::operator()(const server::Trace<json::Subscribed> &event) {
+  auto &[trace_info, subscribed] = event;
+  log::debug("subscribed={}"_sv, subscribed);
+  log::info<1>("subscribed={}"_sv, subscribed);
+}
+
+void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
+  profile_.heartbeat([&]() {
+    auto &[trace_info, heartbeat] = event;
+    log::debug("heartbeat={}"_sv, heartbeat);
+    log::info<3>("heartbeat={}"_sv, heartbeat);
+  });
+}
+
 void DropCopy::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
-    // core::json::Buffer buffer(decode_buffer_);
-    auto result = json::ParserPrivate::dispatch(*this, message, trace_info);
+    core::json::Buffer buffer(decode_buffer_);
+    auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
       log::warn(R"(Unexpected: message="{}")"_sv, message);
   });

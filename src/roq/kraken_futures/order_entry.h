@@ -32,15 +32,6 @@ namespace kraken_futures {
 
 class OrderEntry final : public core::web::Client::Handler {
  public:
-  struct TokenUpdate final {
-    std::string_view account;
-    std::string_view token;
-  };
-
-  struct SymbolsUpdate final {
-    std::vector<std::string> &symbols;
-  };
-
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
     virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
@@ -81,6 +72,23 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void operator()(ConnectionStatus);
 
+  void create_order_ack(
+      const core::web::Response &, const uint8_t user_id, const uint32_t order_id);
+
+  void modify_order_ack(
+      const core::web::Response &,
+      const uint8_t user_id,
+      const uint32_t order_id,
+      const uint32_t version);
+
+  void cancel_order_ack(
+      const core::web::Response &,
+      const uint8_t user_id,
+      const uint32_t order_id,
+      const uint32_t version);
+
+  void cancel_all_orders_ack(const core::web::Response &);
+
   template <typename T>
   void get(std::function<void(const core::Promise<T> &)> &&callback);
 
@@ -101,7 +109,8 @@ class OrderEntry final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile assets, asset_pairs, balance, open_positions, get_web_sockets_token;
+    core::metrics::Profile create_order, create_order_ack, modify_order, modify_order_ack,
+        cancel_order, cancel_order_ack, cancel_all_orders, cancel_all_orders_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;
@@ -110,7 +119,6 @@ class OrderEntry final : public core::web::Client::Handler {
   Security &security_;
   // cache
   Shared &shared_;
-  absl::flat_hash_set<std::string> all_symbols_;  // only used by master
   // state
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};

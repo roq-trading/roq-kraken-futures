@@ -1,3 +1,5 @@
+account_balances_and_margins.h
+account_balances_and_margins.cpp
 alert.h
 alert.cpp
 book.h
@@ -12,6 +14,10 @@ event.h
 event.cpp
 feed.h
 feed.cpp
+fill.h
+fill.cpp
+fill_type.h
+fill_type.cpp
 heartbeat.h
 heartbeat.cpp
 info.h
@@ -20,6 +26,20 @@ instruments.h
 instruments.cpp
 instruments_item.h
 instruments_item.cpp
+margin_account.h
+margin_account.cpp
+open_orders.h
+open_orders.cpp
+open_orders_snapshot.h
+open_orders_snapshot.cpp
+open_positions.h
+open_positions.cpp
+order.h
+order.cpp
+order_type.h
+order_type.cpp
+position.h
+position.cpp
 product_id.h
 product_id.cpp
 result.h

@@ -1,0 +1,9 @@
+{
+"name": "OpenOrdersSnapshot",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "account", "type": "std::string_view" },
+	{ "name": "orders", "type": "roq::span<Order>" }
+]
+}

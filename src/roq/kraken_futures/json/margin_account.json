@@ -1,0 +1,14 @@
+{
+"name": "MarginAccount",
+"type": "item",
+"values": [
+	{ "name": "name", "type": "std::string_view" },
+	{ "name": "balance", "type": "double" },
+	{ "name": "pnl", "type": "double" },
+	{ "name": "funding", "type": "double" },
+	{ "name": "pv", "type": "double" },
+	{ "name": "am", "type": "double" },
+	{ "name": "im", "type": "double" },
+	{ "name": "mm", "type": "double" }
+]
+}

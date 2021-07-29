@@ -25,6 +25,7 @@ static const auto NAME = "om"_sv;
 
 static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
+    SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
@@ -35,6 +36,11 @@ struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
+
+static auto get_quality_of_service() {
+  return Flags::rest_allow_order_request_pipeline() ? core::web::QualityOfService::IMMEDIATE
+                                                    : core::web::QualityOfService::CRITICAL;
+}
 }  // namespace
 
 OrderEntry::OrderEntry(
@@ -65,11 +71,14 @@ OrderEntry::OrderEntry(
           .disconnect = create_metrics(name_, "disconnect"_sv),
       },
       profile_{
-          .assets = create_metrics(name_, "assets"_sv),
-          .asset_pairs = create_metrics(name_, "asset_pairs"_sv),
-          .balance = create_metrics(name_, "balance"_sv),
-          .open_positions = create_metrics(name_, "open_positions"_sv),
-          .get_web_sockets_token = create_metrics(name_, "get_web_sockets_token"_sv),
+          .create_order = create_metrics(name_, "create_order"_sv),
+          .create_order_ack = create_metrics(name_, "create_order_ack"_sv),
+          .modify_order = create_metrics(name_, "modify_order"_sv),
+          .modify_order_ack = create_metrics(name_, "modify_order_ack"_sv),
+          .cancel_order = create_metrics(name_, "cancel_order"_sv),
+          .cancel_order_ack = create_metrics(name_, "cancel_order_ack"_sv),
+          .cancel_all_orders = create_metrics(name_, "cancel_all_orders"_sv),
+          .cancel_all_orders_ack = create_metrics(name_, "cancel_all_orders_ack"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -95,38 +104,176 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       // counter
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(profile_.assets, metrics::PROFILE)
-      .write(profile_.asset_pairs, metrics::PROFILE)
-      .write(profile_.balance, metrics::PROFILE)
-      .write(profile_.open_positions, metrics::PROFILE)
-      .write(profile_.get_web_sockets_token, metrics::PROFILE)
+      .write(profile_.create_order, metrics::PROFILE)
+      .write(profile_.create_order_ack, metrics::PROFILE)
+      .write(profile_.modify_order, metrics::PROFILE)
+      .write(profile_.modify_order_ack, metrics::PROFILE)
+      .write(profile_.cancel_order, metrics::PROFILE)
+      .write(profile_.cancel_order_ack, metrics::PROFILE)
+      .write(profile_.cancel_all_orders, metrics::PROFILE)
+      .write(profile_.cancel_all_orders_ack, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY);
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CreateOrder> &, [[maybe_unused]] const std::string_view &request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+    const Event<CreateOrder> &event, const std::string_view &request_id) {
+  profile_.create_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
+    auto &[message_info, create_order] = event;
+    auto method = core::http::Method::POST;
+    auto path = "/api/v3/sendorder"_sv;
+    auto order_type = "lmt"_sv;
+    auto side = "buy"_sv;
+    auto reduce_only = false;
+    auto query = roq::format(
+        "orderType={}&"
+        "symbol={}&"
+        "side={}&"
+        "size={}&"
+        "limitPrice={}&"
+        "stopPrice={}&"
+        "cliOrdId={}&"
+        "reduceOnly={}"_sv,
+        order_type,
+        create_order.symbol,
+        side,
+        create_order.quantity,
+        create_order.price,
+        create_order.stop_price,
+        request_id,
+        reduce_only);
+    log::debug(R"(query="{}")"_sv, query);
+    auto headers = security_.create_headers(path, query);
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = query,
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::JSON,
+        .headers = headers,
+        .body = {},
+        .quality_of_service = get_quality_of_service(),
+        .rate_limit_weight = 1,
+    };
+    connection_(
+        request,
+        [this, user_id = message_info.source, order_id = create_order.order_id](auto &response) {
+          profile_.create_order_ack([&]() { create_order_ack(response, user_id, order_id); });
+        });
+  });
+  return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<ModifyOrder> &,
-    const server::Order &,
+    const Event<ModifyOrder> &event,
+    const server::Order &order,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+  profile_.modify_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
+    auto &[message_info, modify_order] = event;
+    auto method = core::http::Method::POST;
+    auto path = "/api/v3/editorder"_sv;
+    // XXX HANS price has max 2 decimals, size is integer
+    auto query = roq::format(
+        "orderId={}&"
+        "size={}&"
+        "limitPrice={}&"
+        "symbol={}"_sv,
+        order.external_order_id,
+        modify_order.quantity,
+        modify_order.price);
+    log::debug(R"(query="{}")"_sv, query);
+    auto headers = security_.create_headers(path, query);
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = query,
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::JSON,
+        .headers = headers,
+        .body = {},
+        .quality_of_service = get_quality_of_service(),
+        .rate_limit_weight = 1,
+    };
+    connection_(
+        request,
+        [this,
+         user_id = message_info.source,
+         order_id = modify_order.order_id,
+         version = modify_order.version](auto &response) {
+          profile_.modify_order_ack(
+              [&]() { modify_order_ack(response, user_id, order_id, version); });
+        });
+  });
+  return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CancelOrder> &,
-    const server::Order &,
+    const Event<CancelOrder> &event,
+    const server::Order &order,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+  profile_.cancel_order([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
+    auto &[message_info, cancel_order] = event;
+    auto method = core::http::Method::POST;
+    auto path = "/api/v3/cancelorder"_sv;
+    auto query = roq::format("order_id={}"_sv, order.external_order_id);
+    log::debug(R"(query="{}")"_sv, query);
+    auto headers = security_.create_headers(path, query);
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = query,
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::JSON,
+        .headers = headers,
+        .body = {},
+        .quality_of_service = get_quality_of_service(),
+        .rate_limit_weight = 1,
+    };
+    connection_(
+        request,
+        [this,
+         user_id = message_info.source,
+         order_id = cancel_order.order_id,
+         version = cancel_order.version](auto &response) {
+          profile_.cancel_order_ack(
+              [&]() { cancel_order_ack(response, user_id, order_id, version); });
+        });
+  });
+  return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
-  log::fatal("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"_sv);
+uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
+  profile_.cancel_all_orders([&]() {
+    if (!ready())
+      throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
+    auto &[message_info, cancel_all_orders] = event;
+    auto method = core::http::Method::POST;
+    auto path = "/api/v3/cancelallorders"_sv;
+    auto headers = security_.create_headers(path, {});
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::JSON,
+        .headers = headers,
+        .body = {},
+        .quality_of_service = get_quality_of_service(),
+        .rate_limit_weight = 1,
+    };
+    connection_(request, [this](auto &response) {
+      profile_.cancel_all_orders_ack([&]() { cancel_all_orders_ack(response); });
+    });
+  });
+  return stream_id_;
 }
 
 void OrderEntry::operator()(ConnectionStatus status) {
@@ -169,6 +316,234 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
   };
   server::create_trace_and_dispatch(trace_info, external_latency, handler_);
   latency_.ping.update(latency.sample);
+}
+
+void OrderEntry::create_order_ack(
+    const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
+  server::TraceInfo trace_info;
+  /*
+  try {
+    switch (response.raw_status()) {
+      case core::http::Status::OK: {  // 200
+        auto body = response.body();
+        auto order_item = core::json::Parser::create<json::OrderItem>(body);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
+        break;
+      }
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+        std::string_view text;
+        auto body = response.body();
+        if (json::ErrorParser::dispatch(body, [&](auto &error) {
+              log::warn("error={}"_sv, error);
+              text = error.message;
+            })) {
+        } else {
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
+          text = "Unknown"_sv;
+        }
+        server::Ack ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::CREATE_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = {},
+            .request_id = {},
+        };
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
+    }
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CREATE_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = 1,  // XXX HANS allow 0
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  }
+  */
+}
+
+void OrderEntry::modify_order_ack(
+    const core::web::Response &response,
+    const uint8_t user_id,
+    const uint32_t order_id,
+    const uint32_t version) {
+  server::TraceInfo trace_info;
+  try {
+    switch (response.raw_status()) {
+      case core::http::Status::OK: {  // 200
+        // auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
+        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
+        break;
+      }
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+        /*
+        std::string_view text;
+        auto body = response.body();
+        if (json::ErrorParser::dispatch(body, [&](auto &error) {
+              log::warn("error={}"_sv, error);
+              text = error.message;
+            })) {
+        } else {
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
+          text = "Unknown"_sv;
+        }
+        server::Ack ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::MODIFY_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = version,
+            .request_id = {},
+        };
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        */
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
+    }
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::MODIFY_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  }
+}
+
+void OrderEntry::cancel_order_ack(
+    const core::web::Response &response,
+    const uint8_t user_id,
+    const uint32_t order_id,
+    const uint32_t version) {
+  server::TraceInfo trace_info;
+  try {
+    switch (response.raw_status()) {
+      case core::http::Status::OK: {  // 200
+        // core::json::Buffer buffer(decode_buffer_);
+        // auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
+        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
+        break;
+      }
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+        /*
+        std::string_view text;
+        auto body = response.body();
+        if (json::ErrorParser::dispatch(body, [&](auto &error) {
+              log::warn("error={}"_sv, error);
+              text = error.message;
+            })) {
+        } else {
+          log::warn(R"(Unable to parse response="{}")"_sv, body);
+          text = "Unknown"_sv;
+        }
+        server::Ack ack{
+            .stream_id = stream_id_,
+            .account = security_.get_account(),
+            .order_id = order_id,
+            .type = RequestType::CANCEL_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = version,
+            .request_id = {},
+        };
+        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+        */
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
+    }
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CANCEL_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  }
+}
+
+void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
+  server::TraceInfo trace_info;
+  try {
+    switch (response.raw_status()) {
+      case core::http::Status::OK: {  // 200
+        // core::json::Buffer buffer(decode_buffer_);
+        // auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
+        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
+        break;
+      }
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+                                              /*
+          auto body = response.body();
+          if (json::ErrorParser::dispatch(
+                  body, [&](auto &error) { log::warn("error={}"_sv, error); })) {
+          } else {
+            log::warn(R"(Unable to parse response="{}")"_sv, body);
+          }
+          */
+        // note! this event does not require an ack
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
+    }
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    // note! this event does not require an ack
+  }
 }
 
 uint32_t OrderEntry::download(OrderEntryState state) {

@@ -1,0 +1,10 @@
+{
+"name": "AccountBalancesAndMargins",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "account", "type": "std::string_view" },
+	{ "name": "margin_accounts", "type": "roq::span<MarginAccount>" },
+	{ "name": "seq", "type": "int64_t" }
+]
+}

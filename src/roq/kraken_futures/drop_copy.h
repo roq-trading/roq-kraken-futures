@@ -33,13 +33,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
     virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
   };
 
-  DropCopy(
-      Handler &,
-      core::io::Context &,
-      uint16_t stream_id,
-      Security &,
-      Shared &,
-      const std::string_view &token);
+  DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
   DropCopy(DropCopy &&) = delete;
   DropCopy(const DropCopy &) = delete;
@@ -49,8 +43,6 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   void operator()(const Event<Timer> &);
 
   void operator()(metrics::Writer &);
-
-  void subscribe(const std::string_view &name, const std::string_view &token);
 
  protected:
   void operator()(const core::web::Socket::Connected &) override;
@@ -65,8 +57,19 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   uint32_t download(DropCopyState);
 
   void subscribe();
-  void subscribe(const std::string_view &name);
+  void subscribe(const std::string_view &feed);
 
+  // json::ParserPrivate::Handler
+
+  void operator()(const server::Trace<json::Info> &) override;
+  void operator()(const server::Trace<json::Alert> &) override;
+  void operator()(const server::Trace<json::Error> &) override;
+
+  void operator()(const server::Trace<json::Subscribed> &) override;
+
+  void operator()(const server::Trace<json::Heartbeat> &) override;
+
+ private:
   void parse(const std::string_view &message);
 
   void reset();
@@ -76,7 +79,6 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   // config
   const uint16_t stream_id_;
   const std::string name_;
-  const std::string token_;
   // web socket
   core::web::Socket connection_;
   // buffers
@@ -87,7 +89,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse;
+    core::metrics::Profile parse, heartbeat;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

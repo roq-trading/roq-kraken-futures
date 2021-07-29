@@ -1,0 +1,9 @@
+{
+"name": "OpenPositions",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "account", "type": "std::string_view" },
+	{ "name": "positions", "type": "roq::span<Position>" }
+]
+}

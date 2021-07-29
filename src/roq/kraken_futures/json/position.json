@@ -1,0 +1,12 @@
+{
+"name": "Position",
+"type": "item",
+"values": [
+	{ "name": "instrument", "type": "std::string_view" },
+	{ "name": "balance", "type": "double" },
+	{ "name": "entry_price", "type": "double" },
+	{ "name": "mark_price", "type": "double" },
+	{ "name": "index_price", "type": "double" },
+	{ "name": "pnl", "type": "double" }
+]
+}
