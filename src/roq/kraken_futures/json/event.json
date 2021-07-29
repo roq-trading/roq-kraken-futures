@@ -4,6 +4,7 @@
 "values": [
 	{ "name": "info" },
 	{ "name": "alert" },
+	{ "name": "error" },
 	{ "name": "subscribed" }
 ]
 }

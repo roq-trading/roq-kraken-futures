@@ -6,6 +6,7 @@ include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
     alert.json
+    error.json
     event.json
     feed.json
     info.json

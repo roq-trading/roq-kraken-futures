@@ -4,6 +4,7 @@
 "values": [
 	{ "name": "month" },
 	{ "name": "quarter" },
+	{ "name": "semiannual" },
 	{ "name": "perpetual" }
 ]
 }

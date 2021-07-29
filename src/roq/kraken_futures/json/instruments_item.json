@@ -12,6 +12,7 @@
 	{ "name": "marginLevels" },
 	{ "name": "fundingRateCoefficient", "type": "double" },
 	{ "name": "maxRelativeFundingRate", "type": "double" },
-	{ "name": "retailMarginLevels" }
+	{ "name": "retailMarginLevels" },
+	{ "name": "isin", "type": "std::string_view", "comment": "undoc" }
 ]
 }

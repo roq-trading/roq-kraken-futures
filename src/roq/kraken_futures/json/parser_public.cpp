@@ -34,6 +34,15 @@ static void dispatch_alert(
 }
 
 template <typename H>
+static void dispatch_error(
+    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  Error error(root);
+  handler(error, trace_info);
+}
+
+template <typename H>
 static void dispatch_subscribed(
     H &handler,
     const std::string_view &message,
@@ -100,6 +109,9 @@ bool ParserPublic::dispatch(
           return true;
         case Event::ALERT:
           dispatch_alert(handler, message, trace_info);
+          return true;
+        case Event::ERROR:
+          dispatch_error(handler, message, trace_info);
           return true;
         case Event::SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);

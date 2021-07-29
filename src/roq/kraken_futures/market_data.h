@@ -70,6 +70,8 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
 
   void operator()(const json::Info &, const server::TraceInfo &) override;
   void operator()(const json::Alert &, const server::TraceInfo &) override;
+  void operator()(const json::Error &, const server::TraceInfo &) override;
+
   void operator()(const json::Subscribed &, const server::TraceInfo &) override;
 
   void operator()(const json::Ticker &, const server::TraceInfo &) override;

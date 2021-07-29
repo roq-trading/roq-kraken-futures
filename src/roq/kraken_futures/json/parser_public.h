@@ -9,7 +9,9 @@
 #include "roq/server.h"
 
 #include "roq/kraken_futures/json/alert.h"
+#include "roq/kraken_futures/json/error.h"
 #include "roq/kraken_futures/json/info.h"
+
 #include "roq/kraken_futures/json/subscribed.h"
 
 #include "roq/kraken_futures/json/ticker.h"
@@ -24,6 +26,8 @@ struct ParserPublic final {
   struct Handler {
     virtual void operator()(const Info &, const server::TraceInfo &) = 0;
     virtual void operator()(const Alert &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Error &, const server::TraceInfo &) = 0;
+
     virtual void operator()(const Subscribed &, const server::TraceInfo &) = 0;
 
     virtual void operator()(const Ticker &, const server::TraceInfo &) = 0;

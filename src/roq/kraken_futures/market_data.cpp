@@ -238,6 +238,10 @@ void MarketData::operator()(const json::Alert &alert, const server::TraceInfo &t
   log::info("DEBUG: alert={}"_sv, alert);
 }
 
+void MarketData::operator()(const json::Error &error, const server::TraceInfo &trace_info) {
+  log::warn("error={}"_sv, error);
+}
+
 void MarketData::operator()(
     const json::Subscribed &subscribed, const server::TraceInfo &trace_info) {
   log::info("DEBUG: subscribed={}"_sv, subscribed);

@@ -1,5 +1,7 @@
 alert.h
 alert.cpp
+error.h
+error.cpp
 event.h
 event.cpp
 feed.h
