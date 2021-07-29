@@ -1,0 +1,13 @@
+{
+"name": "Book",
+"type": "item",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "product_id", "type": "std::string_view" },
+	{ "name": "side", "type": "Side" },
+	{ "name": "seq", "type": "int64_t" },
+	{ "name": "qty", "type": "double" },
+	{ "name": "price", "type": "double" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" }
+]
+}

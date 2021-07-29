@@ -2,8 +2,11 @@
 "name": "Feed",
 "type": "enum",
 "values": [
+	{ "name": "heartbeat" },
 	{ "name": "ticker" },
-	{ "name": "trade" },
-	{ "name": "trade_snapshot" }
+	{ "name": "book_snapshot" },
+	{ "name": "book" },
+	{ "name": "trade_snapshot" },
+	{ "name": "trade" }
 ]
 }

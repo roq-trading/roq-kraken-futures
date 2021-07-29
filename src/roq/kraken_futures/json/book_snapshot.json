@@ -1,0 +1,13 @@
+{
+"name": "BookSnapshot",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "product_id", "type": "std::string_view" },
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
+	{ "name": "seq", "type": "int64_t" },
+	{ "name": "tickSize", "type": "double" },
+	{ "name": "bids", "type": "roq::span<BookItem>" },
+	{ "name": "asks", "type": "roq::span<BookItem>" }
+]
+}

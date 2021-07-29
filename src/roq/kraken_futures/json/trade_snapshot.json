@@ -1,5 +1,5 @@
 {
-"name": "Trades",
+"name": "TradeSnapshot",
 "type": "comp",
 "values": [
 	{ "name": "feed", "type": "Feed" },

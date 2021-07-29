@@ -64,19 +64,23 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
 
   void subscribe(const roq::span<std::string> &symbols);
 
+  void subscribe(const std::string_view &feed);
   void subscribe(const std::string_view &feed, const roq::span<std::string> &product_ids);
 
   // json::ParserPublic::Handler
 
-  void operator()(const json::Info &, const server::TraceInfo &) override;
-  void operator()(const json::Alert &, const server::TraceInfo &) override;
-  void operator()(const json::Error &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Info> &) override;
+  void operator()(const server::Trace<json::Alert> &) override;
+  void operator()(const server::Trace<json::Error> &) override;
 
-  void operator()(const json::Subscribed &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Subscribed> &) override;
 
-  void operator()(const json::Ticker &, const server::TraceInfo &) override;
-  void operator()(const json::Trades &, const server::TraceInfo &) override;
-  void operator()(const json::Trade &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Heartbeat> &) override;
+  void operator()(const server::Trace<json::Ticker> &) override;
+  void operator()(const server::Trace<json::BookSnapshot> &) override;
+  void operator()(const server::Trace<json::Book> &) override;
+  void operator()(const server::Trace<json::TradeSnapshot> &) override;
+  void operator()(const server::Trace<json::Trade> &) override;
 
  private:
   void parse(const std::string_view &message);
@@ -97,7 +101,7 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, ticker, trades, trade;
+    core::metrics::Profile parse, heartbeat, ticker, book_snapshot, book, trade_snapshot, trade;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

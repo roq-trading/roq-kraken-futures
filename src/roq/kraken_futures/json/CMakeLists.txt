@@ -6,9 +6,13 @@ include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
     alert.json
+    book.json
+    book_item.json
+    book_snapshot.json
     error.json
     event.json
     feed.json
+    heartbeat.json
     info.json
     instruments.json
     instruments_item.json
@@ -19,8 +23,8 @@ set(AUTOGEN_SCHEMAS
     tag.json
     ticker.json
     trade.json
+    trade_snapshot.json
     trade_type.json
-    trades.json
     type.json)
 
 roq_autogen(

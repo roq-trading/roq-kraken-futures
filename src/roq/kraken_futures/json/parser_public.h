@@ -14,9 +14,12 @@
 
 #include "roq/kraken_futures/json/subscribed.h"
 
+#include "roq/kraken_futures/json/book.h"
+#include "roq/kraken_futures/json/book_snapshot.h"
+#include "roq/kraken_futures/json/heartbeat.h"
 #include "roq/kraken_futures/json/ticker.h"
 #include "roq/kraken_futures/json/trade.h"
-#include "roq/kraken_futures/json/trades.h"
+#include "roq/kraken_futures/json/trade_snapshot.h"
 
 namespace roq {
 namespace kraken_futures {
@@ -24,15 +27,19 @@ namespace json {
 
 struct ParserPublic final {
   struct Handler {
-    virtual void operator()(const Info &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Alert &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Error &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<Info> &) = 0;
+    virtual void operator()(const server::Trace<Alert> &) = 0;
+    virtual void operator()(const server::Trace<Error> &) = 0;
 
-    virtual void operator()(const Subscribed &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<Subscribed> &) = 0;
 
-    virtual void operator()(const Ticker &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Trades &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Trade &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<Heartbeat> &) = 0;
+
+    virtual void operator()(const server::Trace<Ticker> &) = 0;
+    virtual void operator()(const server::Trace<BookSnapshot> &) = 0;
+    virtual void operator()(const server::Trace<Book> &) = 0;
+    virtual void operator()(const server::Trace<TradeSnapshot> &) = 0;
+    virtual void operator()(const server::Trace<Trade> &) = 0;
   };
 
   static bool dispatch(
