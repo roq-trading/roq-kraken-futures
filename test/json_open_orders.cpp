@@ -1,0 +1,61 @@
+/* Copyright (c) 2017-2021, Hans Erik Thrane */
+
+#include <gtest/gtest.h>
+
+#include "roq/core/buffer.h"
+
+#include "roq/core/json/buffer.h"
+#include "roq/core/json/parser.h"
+
+#include "roq/kraken_futures/json/open_orders.h"
+
+using namespace roq;
+using namespace roq::kraken_futures;
+
+using namespace std::chrono_literals;
+
+/*
+TEST(json_open_orders, new_placed_order_by_user) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order":{)"
+                 R"("instrument":"PI_XBTUSD",)"
+                 R"("time":1627578394576,)"
+                 R"("last_update_time":1627578394576,)"
+                 R"("qty":1.0,)"
+                 R"("filled":0.0,)"
+                 R"("limit_price":39547.0,)"
+                 R"("stop_price":0.0,)"
+                 R"("type":"limit",)"
+                 R"("order_id":"85d803ca-da36-4231-846a-fd3979770d67",)"
+                 R"("direction":0,)"
+                 R"("reduce_only":false)"
+                 R"(},)"
+                 R"("is_cancel":false,)"
+                 R"("reason":"new_placed_order_by_user")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  // XXX
+  EXPECT_EQ(obj.is_cancel, false);
+  EXPECT_EQ(obj.reason, "new_placed_order_by_user");
+}
+*/
+
+TEST(json_open_orders, cancelled_by_user) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order_id":"494f7cb0-6936-495f-a0c5-663ad9b9fbdd",)"
+                 R"("is_cancel":true,)"
+                 R"("reason":"cancelled_by_user")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  EXPECT_EQ(obj.order_id, "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"_sv);
+  EXPECT_EQ(obj.is_cancel, true);
+  EXPECT_EQ(obj.reason, "cancelled_by_user");
+}

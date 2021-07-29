@@ -1,0 +1,9 @@
+{
+"name": "Fills",
+"type": "comp",
+"values": [
+	{ "name": "feed", "type": "Feed" },
+	{ "name": "username", "type": "std::string_view" },
+	{ "name": "fills", "type": "roq::span<Fill>" }
+]
+}

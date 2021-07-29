@@ -10,7 +10,7 @@ fi
 
 NAME="kraken-futures"
 
-CONFIG_FILE="$CWD/config/$NAME.toml"
+CONFIG_FILE="$CWD/config/$NAME-demo.toml"
 
 ENV="demo-"
 

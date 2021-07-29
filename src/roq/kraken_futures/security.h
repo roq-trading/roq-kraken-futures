@@ -19,6 +19,12 @@ class Security final {
  public:
   Security(const Config &, const std::string_view &account);
 
+  Security(
+      const std::string_view &account,
+      const std::string_view &key,
+      const std::string_view &password,
+      const std::string_view &secret);
+
   Security(Security &&) = delete;
   Security(const Security &) = delete;
 

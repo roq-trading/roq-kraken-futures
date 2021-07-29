@@ -72,6 +72,77 @@ static void dispatch_heartbeat(
   server::create_trace_and_dispatch(trace_info, heartbeat, handler);
 }
 
+template <typename H>
+static void dispatch_account_balances_and_margins(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  AccountBalancesAndMargins account_balances_and_margins(root, buffer);
+  server::create_trace_and_dispatch(trace_info, account_balances_and_margins, handler);
+}
+
+template <typename H>
+static void dispatch_open_positions(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  OpenPositions open_positions(root, buffer);
+  server::create_trace_and_dispatch(trace_info, open_positions, handler);
+}
+
+template <typename H>
+static void dispatch_open_orders_snapshot(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  OpenOrdersSnapshot open_orders_snapshot(root, buffer);
+  server::create_trace_and_dispatch(trace_info, open_orders_snapshot, handler);
+}
+
+template <typename H>
+static void dispatch_open_orders(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  OpenOrders open_orders(root, buffer);
+  server::create_trace_and_dispatch(trace_info, open_orders, handler);
+}
+
+template <typename H>
+static void dispatch_fills_snapshot(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  FillsSnapshot fills_snapshot(root, buffer);
+  server::create_trace_and_dispatch(trace_info, fills_snapshot, handler);
+}
+
+template <typename H>
+static void dispatch_fills(
+    H &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  Fills fills(root, buffer);
+  server::create_trace_and_dispatch(trace_info, fills, handler);
+}
 }  // namespace
 
 bool ParserPrivate::dispatch(
@@ -137,11 +208,26 @@ bool ParserPrivate::dispatch(
           dispatch_challenge(handler, message, trace_info);
           return true;
         case Feed::ACCOUNT_BALANCES_AND_MARGINS:
+          dispatch_account_balances_and_margins(handler, message, buffer, trace_info);
+          return true;
         case Feed::OPEN_POSITIONS:
+          dispatch_open_positions(handler, message, buffer, trace_info);
+          return true;
         case Feed::OPEN_ORDERS_SNAPSHOT:
+          dispatch_open_orders_snapshot(handler, message, buffer, trace_info);
+          return true;
         case Feed::OPEN_ORDERS:
+          dispatch_open_orders(handler, message, buffer, trace_info);
+          return true;
         case Feed::OPEN_ORDERS_VERBOSE:
+          // XXX
+          break;
+        case Feed::FILLS_SNAPSHOT:
+          dispatch_fills_snapshot(handler, message, buffer, trace_info);
+          return true;
         case Feed::FILLS:
+          dispatch_fills(handler, message, buffer, trace_info);
+          return true;
           break;
         default:
           assert(false);

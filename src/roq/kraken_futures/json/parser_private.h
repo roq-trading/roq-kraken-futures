@@ -18,6 +18,15 @@
 
 #include "roq/kraken_futures/json/heartbeat.h"
 
+#include "roq/kraken_futures/json/account_balances_and_margins.h"
+#include "roq/kraken_futures/json/open_positions.h"
+
+#include "roq/kraken_futures/json/open_orders.h"
+#include "roq/kraken_futures/json/open_orders_snapshot.h"
+
+#include "roq/kraken_futures/json/fills.h"
+#include "roq/kraken_futures/json/fills_snapshot.h"
+
 namespace roq {
 namespace kraken_futures {
 namespace json {
@@ -33,6 +42,15 @@ struct ParserPrivate final {
     virtual void operator()(const server::Trace<Subscribed> &) = 0;
 
     virtual void operator()(const server::Trace<Heartbeat> &) = 0;
+
+    virtual void operator()(const server::Trace<AccountBalancesAndMargins> &) = 0;
+    virtual void operator()(const server::Trace<OpenPositions> &) = 0;
+
+    virtual void operator()(const server::Trace<OpenOrdersSnapshot> &) = 0;
+    virtual void operator()(const server::Trace<OpenOrders> &) = 0;
+
+    virtual void operator()(const server::Trace<FillsSnapshot> &) = 0;
+    virtual void operator()(const server::Trace<Fills> &) = 0;
   };
 
   static bool dispatch(

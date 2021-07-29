@@ -16,6 +16,8 @@ set(AUTOGEN_SCHEMAS
     feed.json
     fill.json
     fill_type.json
+    fills.json
+    fills_snapshot.json
     heartbeat.json
     info.json
     instruments.json

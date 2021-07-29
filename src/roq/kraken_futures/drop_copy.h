@@ -73,6 +73,15 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
 
   void operator()(const server::Trace<json::Heartbeat> &) override;
 
+  void operator()(const server::Trace<json::AccountBalancesAndMargins> &) override;
+  void operator()(const server::Trace<json::OpenPositions> &) override;
+
+  void operator()(const server::Trace<json::OpenOrdersSnapshot> &) override;
+  void operator()(const server::Trace<json::OpenOrders> &) override;
+
+  void operator()(const server::Trace<json::FillsSnapshot> &) override;
+  void operator()(const server::Trace<json::Fills> &) override;
+
  private:
   void parse(const std::string_view &message);
 
@@ -93,7 +102,8 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, challenge, heartbeat;
+    core::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins,
+        open_positions, open_orders_snapshot, open_orders, fills_snapshot, fills;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

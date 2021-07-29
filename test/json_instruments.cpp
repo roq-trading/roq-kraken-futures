@@ -45,7 +45,6 @@ TEST(json_instruments, simple) {
       R"(],)"
       R"("serverTime":"2021-07-28T05:32:46.371Z")"
       R"(})";
-
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::Instruments>(message, buffer_);

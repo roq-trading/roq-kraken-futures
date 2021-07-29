@@ -20,6 +20,10 @@ fill.h
 fill.cpp
 fill_type.h
 fill_type.cpp
+fills.h
+fills.cpp
+fills_snapshot.h
+fills_snapshot.cpp
 heartbeat.h
 heartbeat.cpp
 info.h

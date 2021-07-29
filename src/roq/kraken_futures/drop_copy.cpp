@@ -49,6 +49,12 @@ DropCopy::DropCopy(
           .parse = create_metrics(name_, "parse"_sv),
           .challenge = create_metrics(name_, "challenge"_sv),
           .heartbeat = create_metrics(name_, "heartbeat"_sv),
+          .account_balances_and_margins = create_metrics(name_, "account_balances_and_margins"_sv),
+          .open_positions = create_metrics(name_, "open_positions"_sv),
+          .open_orders_snapshot = create_metrics(name_, "open_orders_snapshot"_sv),
+          .open_orders = create_metrics(name_, "open_orders"_sv),
+          .fills_snapshot = create_metrics(name_, "fills_snapshot"_sv),
+          .fills = create_metrics(name_, "fills"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -76,8 +82,14 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
       .write(profile_.parse, metrics::PROFILE)
-      .write(profile_.heartbeat, metrics::PROFILE)
       .write(profile_.challenge, metrics::PROFILE)
+      .write(profile_.heartbeat, metrics::PROFILE)
+      .write(profile_.account_balances_and_margins, metrics::PROFILE)
+      .write(profile_.open_positions, metrics::PROFILE)
+      .write(profile_.open_orders_snapshot, metrics::PROFILE)
+      .write(profile_.open_orders, metrics::PROFILE)
+      .write(profile_.fills_snapshot, metrics::PROFILE)
+      .write(profile_.fills, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
@@ -237,6 +249,54 @@ void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"_sv, heartbeat);
     log::info<3>("heartbeat={}"_sv, heartbeat);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &event) {
+  profile_.account_balances_and_margins([&]() {
+    auto &[trace_info, account_balances_and_margins] = event;
+    log::debug("account_balances_and_margins={}"_sv, account_balances_and_margins);
+    log::info<3>("account_balances_and_margins={}"_sv, account_balances_and_margins);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
+  profile_.open_positions([&]() {
+    auto &[trace_info, open_positions] = event;
+    log::debug("open_positions={}"_sv, open_positions);
+    log::info<3>("open_positions={}"_sv, open_positions);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) {
+  profile_.open_orders_snapshot([&]() {
+    auto &[trace_info, open_orders_snapshot] = event;
+    log::debug("open_orders_snapshot={}"_sv, open_orders_snapshot);
+    log::info<3>("open_orders_snapshot={}"_sv, open_orders_snapshot);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
+  profile_.open_orders([&]() {
+    auto &[trace_info, open_orders] = event;
+    log::debug("open_orders={}"_sv, open_orders);
+    log::info<3>("open_orders={}"_sv, open_orders);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
+  profile_.fills_snapshot([&]() {
+    auto &[trace_info, fills_snapshot] = event;
+    log::debug("fills_snapshot={}"_sv, fills_snapshot);
+    log::info<3>("fills_snapshot={}"_sv, fills_snapshot);
+  });
+}
+
+void DropCopy::operator()(const server::Trace<json::Fills> &event) {
+  profile_.fills([&]() {
+    auto &[trace_info, fills] = event;
+    log::debug("fills={}"_sv, fills);
+    log::info<3>("fills={}"_sv, fills);
   });
 }
 

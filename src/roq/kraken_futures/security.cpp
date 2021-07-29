@@ -37,6 +37,15 @@ Security::Security(const Config &config, const std::string_view &account)
       nonce_(std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock())) {
 }
 
+Security::Security(
+    const std::string_view &account,
+    const std::string_view &key,
+    const std::string_view &password,
+    const std::string_view &secret)
+    : account_(account), key_(key), password_(password), hmac_(create_hmac(secret)),
+      nonce_(std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock())) {
+}
+
 std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
   assert(!path.empty());
   assert(!query.empty());

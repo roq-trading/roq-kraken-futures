@@ -188,6 +188,7 @@ bool ParserPublic::dispatch(
         case Feed::OPEN_ORDERS_SNAPSHOT:
         case Feed::OPEN_ORDERS:
         case Feed::OPEN_ORDERS_VERBOSE:
+        case Feed::FILLS_SNAPSHOT:
         case Feed::FILLS:
           log::fatal("Unexpected: feed={}"_sv, feed);
           break;

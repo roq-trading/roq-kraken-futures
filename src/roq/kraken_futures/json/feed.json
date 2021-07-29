@@ -14,6 +14,7 @@
 	{ "name": "open_orders_snapshot" },
 	{ "name": "open_orders" },
 	{ "name": "open_orders_verbose" },
+	{ "name": "fills_snapshot" },
 	{ "name": "fills" }
 ]
 }
