@@ -47,6 +47,7 @@ DropCopy::DropCopy(
       },
       profile_{
           .parse = create_metrics(name_, "parse"_sv),
+          .challenge = create_metrics(name_, "challenge"_sv),
           .heartbeat = create_metrics(name_, "heartbeat"_sv),
       },
       latency_{
@@ -76,9 +77,24 @@ void DropCopy::operator()(metrics::Writer &writer) {
       // profile
       .write(profile_.parse, metrics::PROFILE)
       .write(profile_.heartbeat, metrics::PROFILE)
+      .write(profile_.challenge, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
+}
+
+void DropCopy::get_challenge() {
+  assert(original_challenge_.empty());
+  assert(signed_challenge_.empty());
+  auto message = roq::format(
+      R"({{)"
+      R"("event":"challenge",)"
+      R"("api_key":"{}")"
+      R"(}})"_sv,
+      security_.get_key());
+  log::debug(R"(request="{}")"_sv, message);
+  log::info<3>(R"(request="{}")"_sv, message);
+  connection_.send_text(message);
 }
 
 void DropCopy::subscribe() {
@@ -99,8 +115,8 @@ void DropCopy::subscribe(const std::string_view &feed) {
       R"(}})"_sv,
       feed,
       security_.get_key(),
-      "original_challenge"_sv,
-      "signed_challenge"_sv);
+      original_challenge_,
+      signed_challenge_);
   log::debug(R"(request="{}")"_sv, message);
   log::info<3>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
@@ -116,6 +132,8 @@ void DropCopy::operator()(const core::web::Socket::Disconnected &) {
   next_heartbeat_ = {};
   (*this)(ConnectionStatus::DISCONNECTED);
   download_.reset();
+  original_challenge_.clear();
+  signed_challenge_.clear();
 }
 
 void DropCopy::operator()(const core::web::Socket::Ready &) {
@@ -161,6 +179,9 @@ uint32_t DropCopy::download(DropCopyState state) {
     case DropCopyState::UNDEFINED:
       assert(false);
       break;
+    case DropCopyState::GET_CHALLENGE:
+      get_challenge();
+      return 1;
     case DropCopyState::SUBSCRIBE:
       subscribe();
       return {};
@@ -190,6 +211,19 @@ void DropCopy::operator()(const server::Trace<json::Error> &event) {
   auto &[trace_info, error] = event;
   log::debug("error={}"_sv, error);
   log::warn("error={}"_sv, error);
+}
+
+void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
+  profile_.challenge([&]() {
+    auto &[trace_info, challenge] = event;
+    log::debug("challenge={}"_sv, challenge);
+    log::info<3>("challenge={}"_sv, challenge);
+    assert(original_challenge_.empty());
+    assert(signed_challenge_.empty());
+    original_challenge_ = challenge.message;
+    signed_challenge_ = security_.signed_challenge(original_challenge_);
+    download_.check(DropCopyState::GET_CHALLENGE);  // note!
+  });
 }
 
 void DropCopy::operator()(const server::Trace<json::Subscribed> &event) {

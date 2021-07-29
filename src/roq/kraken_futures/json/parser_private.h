@@ -12,6 +12,8 @@
 #include "roq/kraken_futures/json/error.h"
 #include "roq/kraken_futures/json/info.h"
 
+#include "roq/kraken_futures/json/challenge.h"
+
 #include "roq/kraken_futures/json/subscribed.h"
 
 #include "roq/kraken_futures/json/heartbeat.h"
@@ -25,6 +27,8 @@ struct ParserPrivate final {
     virtual void operator()(const server::Trace<Info> &) = 0;
     virtual void operator()(const server::Trace<Alert> &) = 0;
     virtual void operator()(const server::Trace<Error> &) = 0;
+
+    virtual void operator()(const server::Trace<Challenge> &) = 0;
 
     virtual void operator()(const server::Trace<Subscribed> &) = 0;
 

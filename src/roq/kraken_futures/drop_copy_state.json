@@ -2,6 +2,7 @@
 "name": "DropCopyState",
 "type": "enum",
 "values": [
+	{ "name": "get_challenge" },
 	{ "name": "subscribe" },
 	{ "name": "done" }
 ]

@@ -49,7 +49,6 @@ std::string Security::create_headers(const std::string_view &path, const std::st
   auto length_1 = sha_.digest(buffer_1);
   assert(length_1 == buffer_1.size());
   hmac_.clear();
-  hmac_.update(path.data(), path.length());
   hmac_.update(buffer_1.data(), buffer_1.size());
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
@@ -62,6 +61,21 @@ std::string Security::create_headers(const std::string_view &path, const std::st
       key_,
       nonce,
       authent);
+}
+
+std::string Security::signed_challenge(const std::string_view &original_challenge) {
+  sha_.clear();
+  sha_.update(original_challenge);
+  std::array<char, 32> buffer_1;
+  auto length_1 = sha_.digest(buffer_1);
+  assert(length_1 == buffer_1.size());
+  hmac_.clear();
+  hmac_.update(buffer_1.data(), buffer_1.size());
+  std::array<char, 64> buffer_2;
+  auto length_2 = hmac_.digest(buffer_2);
+  assert(length_2 == buffer_2.size());
+  auto result = core::binascii::Base64::encode(buffer_2);
+  return result;
 }
 
 }  // namespace kraken_futures

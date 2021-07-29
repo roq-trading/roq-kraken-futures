@@ -56,6 +56,8 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
 
   uint32_t download(DropCopyState);
 
+  void get_challenge();
+
   void subscribe();
   void subscribe(const std::string_view &feed);
 
@@ -64,6 +66,8 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   void operator()(const server::Trace<json::Info> &) override;
   void operator()(const server::Trace<json::Alert> &) override;
   void operator()(const server::Trace<json::Error> &) override;
+
+  void operator()(const server::Trace<json::Challenge> &) override;
 
   void operator()(const server::Trace<json::Subscribed> &) override;
 
@@ -89,7 +93,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, heartbeat;
+    core::metrics::Profile parse, challenge, heartbeat;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
@@ -103,6 +107,9 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   server::Download<DropCopyState> download_;
+  // challenge
+  std::string original_challenge_;
+  std::string signed_challenge_;
 };
 
 }  // namespace kraken_futures

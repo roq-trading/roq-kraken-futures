@@ -10,6 +10,7 @@ set(AUTOGEN_SCHEMAS
     book.json
     book_item.json
     book_snapshot.json
+    challenge.json
     error.json
     event.json
     feed.json

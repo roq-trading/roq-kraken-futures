@@ -143,6 +143,9 @@ bool ParserPublic::dispatch(
         case Event::ERROR:
           dispatch_error(handler, message, trace_info);
           return true;
+        case Event::CHALLENGE:
+          log::fatal("Unexpected: event={}"_sv, event);
+          break;
         case Event::SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);
           return true;
@@ -179,6 +182,7 @@ bool ParserPublic::dispatch(
         case Feed::TRADE:
           dispatch_trade(handler, message, trace_info);
           return true;
+        case Feed::CHALLENGE:
         case Feed::ACCOUNT_BALANCES_AND_MARGINS:
         case Feed::OPEN_POSITIONS:
         case Feed::OPEN_ORDERS_SNAPSHOT:

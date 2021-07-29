@@ -27,6 +27,8 @@ class Security final {
 
   std::string create_headers(const std::string_view &path, const std::string_view &body);
 
+  std::string signed_challenge(const std::string_view &original_challenge);
+
  private:
   const std::string account_;
   const std::string key_;

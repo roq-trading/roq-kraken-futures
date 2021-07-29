@@ -43,6 +43,15 @@ static void dispatch_error(
 }
 
 template <typename H>
+static void dispatch_challenge(
+    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+  core::json::Parser parser(message);
+  auto root = parser.root();
+  Challenge challenge(root);
+  server::create_trace_and_dispatch(trace_info, challenge, handler);
+}
+
+template <typename H>
 static void dispatch_subscribed(
     H &handler,
     const std::string_view &message,
@@ -93,6 +102,9 @@ bool ParserPrivate::dispatch(
         case Event::ERROR:
           dispatch_error(handler, message, trace_info);
           return true;
+        case Event::CHALLENGE:
+          dispatch_challenge(handler, message, trace_info);
+          return true;
         case Event::SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);
           return true;
@@ -121,6 +133,9 @@ bool ParserPrivate::dispatch(
         case Feed::TRADE:
           log::fatal("Unexpected: feed={}"_sv, feed);
           break;
+        case Feed::CHALLENGE:
+          dispatch_challenge(handler, message, trace_info);
+          return true;
         case Feed::ACCOUNT_BALANCES_AND_MARGINS:
         case Feed::OPEN_POSITIONS:
         case Feed::OPEN_ORDERS_SNAPSHOT:
