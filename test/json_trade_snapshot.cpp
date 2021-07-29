@@ -7,14 +7,14 @@
 #include "roq/core/json/buffer.h"
 #include "roq/core/json/parser.h"
 
-#include "roq/kraken_futures/json/trades.h"
+#include "roq/kraken_futures/json/trade_snapshot.h"
 
 using namespace roq;
 using namespace roq::kraken_futures;
 
 using namespace std::chrono_literals;
 
-TEST(json_trades, simple) {
+TEST(json_trade_snapshot, simple) {
   auto message =
       R"({)"
       R"("feed":"trade_snapshot",)"
@@ -27,7 +27,7 @@ TEST(json_trades, simple) {
       R"(})";
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::Trades>(message, buffer_);
+  auto obj = core::json::Parser::create<json::TradeSnapshot>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::TRADE_SNAPSHOT);
   EXPECT_EQ(obj.product_id, "PI_XBTUSD"_sv);
   EXPECT_EQ(std::size(obj.trades), 3);
