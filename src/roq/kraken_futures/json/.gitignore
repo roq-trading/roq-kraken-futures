@@ -50,6 +50,10 @@ open_positions.h
 open_positions.cpp
 order.h
 order.cpp
+order_event.h
+order_event.cpp
+order_event_item.h
+order_event_item.cpp
 order_type.h
 order_type.cpp
 position.h

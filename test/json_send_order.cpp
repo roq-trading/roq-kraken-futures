@@ -52,7 +52,10 @@ TEST(json_send_order, simple) {
   EXPECT_EQ(obj.send_status.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
   EXPECT_EQ(obj.send_status.status, json::Status::PLACED);
   EXPECT_EQ(obj.send_status.received_time, 1627618780804ms);
-  // XXX EXPECT_EQ(std::size(obj.send_status.order_events), 1);
+  EXPECT_EQ(std::size(obj.send_status.order_events), 1);
+  // idx 0
+  auto &event_0 = obj.send_status.order_events[0];
+  EXPECT_EQ(event_0.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
   // XXX order_events
   // XXX EXPECT_TRUE(std ::isnan(obj.send_status..order_events[0].reduced_quantity));
   // XXX EXPECT_EQ(obj.send_status.order_events[0].type, "PLACE"_sv);

@@ -64,5 +64,12 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(obj.edit_status.status, json::Status::EDITED);
   EXPECT_EQ(obj.edit_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
   EXPECT_EQ(obj.edit_status.received_time, 1627648619235ms);
-  // XXX order_events
+  EXPECT_EQ(std::size(obj.edit_status.order_events), 1);
+  auto &old_event = obj.edit_status.order_events[0].old;
+  EXPECT_EQ(old_event.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  EXPECT_DOUBLE_EQ(old_event.limit_price, 39033.0);
+  auto &new_event = obj.edit_status.order_events[0].new_;
+  EXPECT_EQ(new_event.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  // ...
+  EXPECT_DOUBLE_EQ(new_event.limit_price, 38981.5);
 }

@@ -1,11 +1,11 @@
 {
 "name": "CancelStatus",
-"type": "item",
+"type": "comp",
 "values": [
 	{ "name": "order_id", "type": "std::string_view" },
 	{ "name": "cliOrdId", "type": "std::string_view" },
 	{ "name": "status", "type": "Status" },
 	{ "name": "receivedTime", "type": "std::chrono::milliseconds" },
-	{ "name": "orderEvents" }
+	{ "name": "orderEvents", "type": "roq::span<OrderEvent>" }
 ]
 }

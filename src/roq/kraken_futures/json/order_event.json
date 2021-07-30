@@ -1,0 +1,11 @@
+{
+"name": "OrderEvent",
+"type": "item",
+"values": [
+	{ "name": "order", "type": "OrderEventItem" },
+	{ "name": "old", "type": "OrderEventItem" },
+	{ "raw": "new", "name": "new_", "type": "OrderEventItem" },
+	{ "name": "reducedQuantity", "type": "double" },
+	{ "name": "type", "type": "std::string_view" }
+]
+}

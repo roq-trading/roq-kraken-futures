@@ -13,8 +13,9 @@ using namespace roq;
 using namespace roq::kraken_futures;
 
 using namespace std::chrono_literals;
-/*
+
 TEST(json_cancel_order, simple) {
+  /*
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("serverTime":"2021-07-30T12:36:59.235Z",)"
@@ -65,5 +66,6 @@ TEST(json_cancel_order, simple) {
   EXPECT_EQ(obj.cancel_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
   EXPECT_EQ(obj.cancel_status.received_time, 1627648619235ms);
   // XXX order_events
+  EXPECT_EQ(std::size(obj.edit_status.order_events), 2);
+  */
 }
-*/

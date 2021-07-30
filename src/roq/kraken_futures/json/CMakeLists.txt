@@ -31,6 +31,8 @@ set(AUTOGEN_SCHEMAS
     open_orders_snapshot.json
     open_positions.json
     order.json
+    order_event.json
+    order_event_item.json
     order_type.json
     position.json
     product_id.json
