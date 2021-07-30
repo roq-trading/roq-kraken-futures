@@ -25,6 +25,8 @@ OrderStatus compute_order_status(json::Status status) {
       break;
     case json::Status::CANCELLED:
       return OrderStatus::CANCELED;
+    case json::Status::NO_ORDERS_TO_CANCEL:
+      break;
   }
   return {};
 }
