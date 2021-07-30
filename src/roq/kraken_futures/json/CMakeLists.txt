@@ -10,7 +10,11 @@ set(AUTOGEN_SCHEMAS
     book.json
     book_item.json
     book_snapshot.json
+    cancel_order.json
+    cancel_status.json
     challenge.json
+    edit_order.json
+    edit_status.json
     error.json
     event.json
     feed.json
@@ -35,6 +39,7 @@ set(AUTOGEN_SCHEMAS
     send_order.json
     send_status.json
     side.json
+    status.json
     subscribed.json
     tag.json
     ticker.json

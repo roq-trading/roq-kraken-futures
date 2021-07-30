@@ -1,9 +1,9 @@
 {
-"name": "SendStatus",
+"name": "EditStatus",
 "type": "item",
 "values": [
-	{ "name": "order_id", "type": "std::string_view" },
-	{ "name": "cliOrdId", "type": "std::string_view" },
+	{ "name": "orderId", "type": "std::string_view" },
+	{ "name": "cliOrdId", "type": "std::string_view", "required": false },
 	{ "name": "status", "type": "Status" },
 	{ "name": "receivedTime", "type": "std::chrono::milliseconds" },
 	{ "name": "orderEvents" }

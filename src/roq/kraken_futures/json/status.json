@@ -1,0 +1,10 @@
+{
+"name": "Status",
+"type": "enum",
+"values": [
+	{ "name": "placed" },
+	{ "name": "edited" },
+	{ "name": "cancelled" },
+	{ "name": "noOrdersToCancel" }
+]
+}

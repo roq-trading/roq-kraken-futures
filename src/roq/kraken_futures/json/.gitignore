@@ -8,8 +8,16 @@ book_item.h
 book_item.cpp
 book_snapshot.h
 book_snapshot.cpp
+cancel_order.h
+cancel_order.cpp
+cancel_status.h
+cancel_status.cpp
 challenge.h
 challenge.cpp
+edit_order.h
+edit_order.cpp
+edit_status.h
+edit_status.cpp
 error.h
 error.cpp
 event.h
@@ -58,6 +66,8 @@ send_status.h
 send_status.cpp
 side.h
 side.cpp
+status.h
+status.cpp
 subscribed.h
 subscribed.cpp
 tag.h

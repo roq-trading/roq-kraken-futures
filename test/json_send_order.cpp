@@ -50,7 +50,7 @@ TEST(json_send_order, simple) {
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
   EXPECT_EQ(obj.send_status.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
   EXPECT_EQ(obj.send_status.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
-  EXPECT_EQ(obj.send_status.status, "placed"_sv);
+  EXPECT_EQ(obj.send_status.status, json::Status::PLACED);
   EXPECT_EQ(obj.send_status.received_time, 1627618780804ms);
   // XXX EXPECT_EQ(std::size(obj.send_status.order_events), 1);
   // XXX order_events

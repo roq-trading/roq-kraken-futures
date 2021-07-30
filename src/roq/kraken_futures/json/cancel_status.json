@@ -1,5 +1,5 @@
 {
-"name": "SendStatus",
+"name": "CancelStatus",
 "type": "item",
 "values": [
 	{ "name": "order_id", "type": "std::string_view" },

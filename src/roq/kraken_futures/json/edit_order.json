@@ -1,0 +1,9 @@
+{
+"name": "EditOrder",
+"type": "comp",
+"values": [
+	{ "name": "result", "type": "Result" },
+	{ "name": "editStatus", "type": "EditStatus" },
+	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
+]
+}

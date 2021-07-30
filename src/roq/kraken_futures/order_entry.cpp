@@ -12,8 +12,12 @@
 #include "roq/core/metrics/factory.h"
 
 #include "roq/kraken_futures/flags.h"
+#include "roq/kraken_futures/order_update.h"
 
+#include "roq/kraken_futures/json/edit_order.h"
+#include "roq/kraken_futures/json/rest_error.h"
 #include "roq/kraken_futures/json/result.h"
+#include "roq/kraken_futures/json/send_order.h"
 
 using namespace roq::literals;
 
@@ -181,8 +185,7 @@ uint16_t OrderEntry::operator()(
     auto query = roq::format(
         "?orderId={}"
         "&size={}"
-        "&limitPrice={}"
-        "&symbol={}"_sv,
+        "&limitPrice={}"_sv,
         order.external_order_id,
         modify_order.quantity,
         modify_order.price);
@@ -321,13 +324,13 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
-  /*
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
         auto body = response.body();
-        auto order_item = core::json::Parser::create<json::OrderItem>(body);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
+        core::json::Buffer buffer(decode_buffer_);
+        auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(send_order, trace_info);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
@@ -336,14 +339,7 @@ void OrderEntry::create_order_ack(
       case core::http::Status::NOT_FOUND: {   // 404
         std::string_view text;
         auto body = response.body();
-        if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_sv, error);
-              text = error.message;
-            })) {
-        } else {
-          log::warn(R"(Unable to parse response="{}")"_sv, body);
-          text = "Unknown"_sv;
-        }
+        auto rest_error = core::json::Parser::create<json::RestError>(body);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -352,7 +348,7 @@ void OrderEntry::create_order_ack(
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
-            .text = text,
+            .text = rest_error.message,
             .version = {},
             .request_id = {},
         };
@@ -378,7 +374,6 @@ void OrderEntry::create_order_ack(
     };
     server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
-  */
 }
 
 void OrderEntry::modify_order_ack(
@@ -390,25 +385,18 @@ void OrderEntry::modify_order_ack(
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
-        // auto order_item = core::json::Parser::create<json::OrderItem>(response.body());
-        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order_item, trace_info);
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(edit_order, trace_info);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
       case core::http::Status::NOT_FOUND: {   // 404
-        /*
-        std::string_view text;
         auto body = response.body();
-        if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_sv, error);
-              text = error.message;
-            })) {
-        } else {
-          log::warn(R"(Unable to parse response="{}")"_sv, body);
-          text = "Unknown"_sv;
-        }
+        auto rest_error = core::json::Parser::create<json::RestError>(body);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -417,12 +405,11 @@ void OrderEntry::modify_order_ack(
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
-            .text = text,
+            .text = rest_error.message,
             .version = version,
             .request_id = {},
         };
         server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-        */
         break;
       }
       default:
@@ -455,26 +442,18 @@ void OrderEntry::cancel_order_ack(
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
-        // core::json::Buffer buffer(decode_buffer_);
-        // auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(cancel_order, trace_info);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
       case core::http::Status::NOT_FOUND: {   // 404
-        /*
-        std::string_view text;
         auto body = response.body();
-        if (json::ErrorParser::dispatch(body, [&](auto &error) {
-              log::warn("error={}"_sv, error);
-              text = error.message;
-            })) {
-        } else {
-          log::warn(R"(Unable to parse response="{}")"_sv, body);
-          text = "Unknown"_sv;
-        }
+        auto rest_error = core::json::Parser::create<json::RestError>(body);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -483,12 +462,11 @@ void OrderEntry::cancel_order_ack(
             .origin = Origin::EXCHANGE,
             .status = RequestStatus::REJECTED,
             .error = Error::UNKNOWN,
-            .text = text,
+            .text = rest_error.message,
             .version = version,
             .request_id = {},
         };
         server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-        */
         break;
       }
       default:

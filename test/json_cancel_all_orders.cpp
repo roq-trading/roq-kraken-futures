@@ -7,7 +7,7 @@
 #include "roq/core/json/buffer.h"
 #include "roq/core/json/parser.h"
 
-// #include "roq/kraken_futures/json/cancel_all_orders_ack.h"
+// #include "roq/kraken_futures/json/cancel_all_orders.h"
 
 using namespace roq;
 // using namespace roq::kraken_futures;
@@ -15,7 +15,7 @@ using namespace roq;
 using namespace std::chrono_literals;
 
 /*
-TEST(json_cancel_all_orders_ack, no_orders) {
+TEST(json_cancel_all_orders, no_orders) {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("cancelStatus":{)"
@@ -29,7 +29,7 @@ TEST(json_cancel_all_orders_ack, no_orders) {
                  R"(})";
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::CancelAllOrdersAck>(message, buffer_);
+  auto obj = core::json::Parser::create<json::CancelAllOrders>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
   EXPECT_EQ(obj.result.cancel_status.received_time, 1627609582153ms);
   EXPECT_EQ(obj.result.cancel_status.cancel_only, "all"_sv);

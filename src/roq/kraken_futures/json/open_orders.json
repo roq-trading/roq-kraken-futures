@@ -4,6 +4,7 @@
 "values": [
 	{ "name": "feed", "type": "Feed" },
 	{ "name": "order_id", "type": "std::string_view" },
+	{ "name": "cli_ord_id", "type": "std::string_view", "required": false },
 	{ "name": "order", "type": "Order" },
 	{ "name": "is_cancel", "type": "bool" },
 	{ "name": "reason", "type": "std::string_view" }

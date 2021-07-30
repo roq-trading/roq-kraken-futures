@@ -1,0 +1,9 @@
+{
+"name": "CancelOrder",
+"type": "comp",
+"values": [
+	{ "name": "result", "type": "Result" },
+	{ "name": "cancelStatus", "type": "CancelStatus" },
+	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
+]
+}
