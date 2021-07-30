@@ -1,0 +1,12 @@
+{
+"name": "RestError",
+"type": "item",
+"values": [
+	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
+	{ "name": "path", "type": "std::string_view" },
+	{ "name": "status", "type": "int32_t" },
+	{ "name": "error", "type": "std::string_view" },
+	{ "name": "message", "type": "std::string_view" },
+	{ "name": "requestId", "type": "std::string_view" }
+]
+}

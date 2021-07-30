@@ -30,7 +30,10 @@ set(AUTOGEN_SCHEMAS
     order_type.json
     position.json
     product_id.json
+    rest_error.json
     result.json
+    send_order.json
+    send_status.json
     side.json
     subscribed.json
     tag.json

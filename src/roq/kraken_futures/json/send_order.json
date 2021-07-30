@@ -1,0 +1,9 @@
+{
+"name": "SendOrder",
+"type": "comp",
+"values": [
+	{ "name": "result", "type": "Result" },
+	{ "name": "sendStatus", "type": "SendStatus" },
+	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
+]
+}

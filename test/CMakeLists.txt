@@ -5,13 +5,14 @@ set(SOURCES
     json_book.cpp
     json_book_snapshot.cpp
     json_cancel_all_orders_ack.cpp
-    json_create_order_ack.cpp
     json_instruments.cpp
     json_instruments_item.cpp
     json_margin_account.cpp
-    json_open_orders_snapshot.cpp
     json_open_orders.cpp
+    json_open_orders_snapshot.cpp
     json_order.cpp
+    json_rest_error.cpp
+    json_send_order.cpp
     json_ticker.cpp
     json_trade.cpp
     json_trade_snapshot.cpp
