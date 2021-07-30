@@ -155,8 +155,7 @@ bool ParserPrivate::dispatch(
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     // event
     if (key.compare("event"_sv) == 0) {
-      Event event = {};
-      update(event, value);
+      Event event(value);
       switch (event) {
         case Event::UNDEFINED:
           assert(false);
@@ -185,8 +184,7 @@ bool ParserPrivate::dispatch(
     }
     // feed
     if (key.compare("feed"_sv) == 0) {
-      Feed feed = {};
-      update(feed, value);
+      Feed feed(value);
       switch (feed) {
         case Feed::UNDEFINED:
           assert(false);

@@ -14,7 +14,6 @@ using namespace roq::kraken_futures;
 
 using namespace std::chrono_literals;
 
-/*
 TEST(json_open_orders, new_placed_order_by_user) {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
@@ -38,11 +37,20 @@ TEST(json_open_orders, new_placed_order_by_user) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  // XXX
+  EXPECT_EQ(obj.order.instrument, "PI_XBTUSD"_sv);
+  EXPECT_EQ(obj.order.time, 1627578394576ms);
+  EXPECT_EQ(obj.order.last_update_time, 1627578394576ms);
+  EXPECT_DOUBLE_EQ(obj.order.qty, 1.0);
+  EXPECT_DOUBLE_EQ(obj.order.filled, 0.0);
+  EXPECT_DOUBLE_EQ(obj.order.limit_price, 39547.0);
+  EXPECT_DOUBLE_EQ(obj.order.stop_price, 0.0);
+  EXPECT_EQ(obj.order.type, json::OrderType::LIMIT);
+  EXPECT_EQ(obj.order.order_id, "85d803ca-da36-4231-846a-fd3979770d67"_sv);
+  EXPECT_EQ(obj.order.direction, 0);
+  EXPECT_EQ(obj.order.reduce_only, false);
   EXPECT_EQ(obj.is_cancel, false);
   EXPECT_EQ(obj.reason, "new_placed_order_by_user");
 }
-*/
 
 TEST(json_open_orders, cancelled_by_user) {
   auto message = R"({)"

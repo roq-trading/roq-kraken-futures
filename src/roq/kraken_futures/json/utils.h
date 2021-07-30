@@ -10,14 +10,7 @@
 
 #include "roq/core/charconv/datetime.h"
 
-#include "roq/kraken_futures/json/event.h"
-#include "roq/kraken_futures/json/feed.h"
-#include "roq/kraken_futures/json/fill_type.h"
-#include "roq/kraken_futures/json/order_type.h"
-#include "roq/kraken_futures/json/result.h"
 #include "roq/kraken_futures/json/side.h"
-#include "roq/kraken_futures/json/tag.h"
-#include "roq/kraken_futures/json/trade_type.h"
 
 namespace roq {
 namespace kraken_futures {
@@ -45,54 +38,6 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
           [](const core::json::array_t &) { throw std::bad_cast(); },
       },
       value);
-}
-
-template <>
-inline void update(Event &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Feed &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(FillType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(OrderType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Result &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Side &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Tag &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(TradeType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
 }
 
 inline roq::Side map(json::Side side) {
