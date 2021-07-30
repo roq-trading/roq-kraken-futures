@@ -4,6 +4,8 @@ set(SOURCES
     json_account_balances_and_margins.cpp
     json_book.cpp
     json_book_snapshot.cpp
+    json_cancel_all_orders_ack.cpp
+    json_create_order_ack.cpp
     json_instruments.cpp
     json_instruments_item.cpp
     json_margin_account.cpp

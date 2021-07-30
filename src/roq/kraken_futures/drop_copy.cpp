@@ -16,7 +16,12 @@ namespace kraken_futures {
 
 namespace {
 static const auto NAME = "ex"_sv;
-static const auto SUPPORTS = utils::Mask<SupportType>{};
+static const auto SUPPORTS = utils::Mask{
+    SupportType::ORDER,
+    SupportType::TRADE,
+    SupportType::POSITION,
+    SupportType::FUNDS,
+};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)

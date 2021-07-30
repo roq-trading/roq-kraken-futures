@@ -128,14 +128,14 @@ uint16_t OrderEntry::operator()(
     auto side = "buy"_sv;
     auto reduce_only = false;
     auto query = roq::format(
-        "orderType={}&"
-        "symbol={}&"
-        "side={}&"
-        "size={}&"
-        "limitPrice={}&"
-        "stopPrice={}&"
-        "cliOrdId={}&"
-        "reduceOnly={}"_sv,
+        "?orderType={}"
+        "&symbol={}"
+        "&side={}"
+        "&size={}"
+        "&limitPrice={}"
+        "&stopPrice={}"
+        "&cliOrdId={}"
+        "&reduceOnly={}"_sv,
         order_type,
         create_order.symbol,
         side,
@@ -179,10 +179,10 @@ uint16_t OrderEntry::operator()(
     auto path = "/api/v3/editorder"_sv;
     // XXX HANS price has max 2 decimals, size is integer
     auto query = roq::format(
-        "orderId={}&"
-        "size={}&"
-        "limitPrice={}&"
-        "symbol={}"_sv,
+        "?orderId={}"
+        "&size={}"
+        "&limitPrice={}"
+        "&symbol={}"_sv,
         order.external_order_id,
         modify_order.quantity,
         modify_order.price);
@@ -223,7 +223,7 @@ uint16_t OrderEntry::operator()(
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelorder"_sv;
-    auto query = roq::format("order_id={}"_sv, order.external_order_id);
+    auto query = roq::format("?order_id={}"_sv, order.external_order_id);
     log::debug(R"(query="{}")"_sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{

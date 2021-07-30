@@ -48,10 +48,13 @@ Security::Security(
 
 std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
   assert(!path.empty());
-  assert(!query.empty());
   auto nonce = roq::format("{}"_sv, (++nonce_).count());
   sha_.clear();
-  sha_.update(query);
+  if (!query.empty()) {
+    assert(query[0] == '?');
+    auto raw = query.substr(1);  // note! not including '?'
+    sha_.update(raw);
+  }
   sha_.update(nonce);
   sha_.update(path);
   std::array<char, 32> buffer_1;
