@@ -54,10 +54,19 @@ TEST(json_send_order, simple) {
   EXPECT_EQ(obj.send_status.received_time, 1627618780804ms);
   EXPECT_EQ(std::size(obj.send_status.order_events), 1);
   // idx 0
-  auto &event_0 = obj.send_status.order_events[0];
-  EXPECT_EQ(event_0.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
-  // XXX order_events
-  // XXX EXPECT_TRUE(std ::isnan(obj.send_status..order_events[0].reduced_quantity));
-  // XXX EXPECT_EQ(obj.send_status.order_events[0].type, "PLACE"_sv);
+  auto &event = obj.send_status.order_events[0];
+  EXPECT_EQ(event.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
+  EXPECT_EQ(event.order.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
+  EXPECT_EQ(event.order.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.order.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(event.order.filled, 0.0);
+  EXPECT_DOUBLE_EQ(event.order.limit_price, 40166.0);
+  EXPECT_EQ(event.order.reduce_only, false);
+  EXPECT_EQ(event.order.timestamp, 1627618780804ms);
+  EXPECT_EQ(event.order.last_update_timestamp, 1627618780804ms);
+  EXPECT_DOUBLE_EQ(event.reduced_quantity, 0.0);
+  EXPECT_EQ(event.type, "PLACE"_sv);
   EXPECT_EQ(obj.server_time, 1627618780804ms);
 }

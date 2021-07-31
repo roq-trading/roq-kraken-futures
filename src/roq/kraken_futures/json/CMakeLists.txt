@@ -33,6 +33,7 @@ set(AUTOGEN_SCHEMAS
     order.json
     order_event.json
     order_event_item.json
+    order_event_type.json
     order_type.json
     position.json
     product_id.json

@@ -1,0 +1,7 @@
+{
+"name": "OrderEventType",
+"type": "enum",
+"values": [
+	{ "name": "lmt" }
+]
+}

@@ -21,9 +21,9 @@ class OrderUpdate final {
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(const OrderUpdate &) = delete;
 
-  void operator()(const json::SendOrder &, const server::TraceInfo &);
-  void operator()(const json::EditOrder &, const server::TraceInfo &);
-  void operator()(const json::CancelOrder &, const server::TraceInfo &);
+  void operator()(const json::SendOrder &, const server::TraceInfo &, uint32_t order_id);
+  void operator()(const json::EditOrder &, const server::TraceInfo &, uint32_t order_id);
+  void operator()(const json::CancelOrder &, const server::TraceInfo &, uint32_t order_id);
 
  private:
   Shared &shared_;

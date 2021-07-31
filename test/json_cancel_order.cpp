@@ -15,57 +15,58 @@ using namespace roq::kraken_futures;
 using namespace std::chrono_literals;
 
 TEST(json_cancel_order, simple) {
-  /*
   auto message = R"({)"
                  R"("result":"success",)"
-                 R"("serverTime":"2021-07-30T12:36:59.235Z",)"
-                 R"("editStatus":{)"
-                 R"("status":"edited",)"
-                 R"("orderId":"018eb846-5962-430e-af9f-31ee03cf1460",)"
-                 R"("receivedTime":"2021-07-30T12:36:59.235Z",)"
+                 R"("cancelStatus":{)"
+                 R"("status":"cancelled",)"
+                 R"("order_id":"85792364-8163-4e13-b62d-695e7f802e22",)"
+                 R"("receivedTime":"2021-07-31T04:53:14.376Z",)"
                  R"("orderEvents":[)"
                  R"({)"
-                 R"("old":{)"
-                 R"("orderId":"018eb846-5962-430e-af9f-31ee03cf1460",)"
-                 R"("cliOrdId":"2AAF6QMAAQAAHugQDIsQ",)"
+                 R"("uid":"85792364-8163-4e13-b62d-695e7f802e22",)"
+                 R"("order":{)"
+                 R"("orderId":"85792364-8163-4e13-b62d-695e7f802e22",)"
+                 R"("cliOrdId":"DwAF6QMAAQAAxMacsJgQ",)"
                  R"("type":"lmt",)"
                  R"("symbol":"pi_xbtusd",)"
                  R"("side":"buy",)"
                  R"("quantity":1,)"
                  R"("filled":0,)"
-                 R"("limitPrice":39033,)"
+                 R"("limitPrice":41936,)"
                  R"("reduceOnly":false,)"
-                 R"("timestamp":"2021-07-30T12:36:29.044Z",)"
-                 R"("lastUpdateTimestamp":"2021-07-30T12:36:29.044Z")"
+                 R"("timestamp":"2021-07-31T04:53:04.171Z",)"
+                 R"("lastUpdateTimestamp":"2021-07-31T04:53:09.310Z")"
                  R"(},)"
-                 R"("new":{)"
-                 R"("orderId":"018eb846-5962-430e-af9f-31ee03cf1460",)"
-                 R"("cliOrdId":"2AAF6QMAAQAAHugQDIsQ",)"
-                 R"("type":"lmt",)"
-                 R"("symbol":"pi_xbtusd",)"
-                 R"("side":"buy",)"
-                 R"("quantity":1,)"
-                 R"("filled":0,)"
-                 R"("limitPrice":38981.5,)"
-                 R"("reduceOnly":false,)"
-                 R"("timestamp":"2021-07-30T12:36:29.044Z",)"
-                 R"("lastUpdateTimestamp":"2021-07-30T12:36:59.124Z")"
-                 R"(},)"
-                 R"("reducedQuantity":null,)"
-                 R"("type":"EDIT")"
+                 R"("type":"CANCEL")"
                  R"(})"
                  R"(])"
-                 R"(})"
+                 R"(},)"
+                 R"("serverTime":"2021-07-31T04:53:14.376Z")"
                  R"(})";
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(obj.server_time, 1627648619235ms);
-  EXPECT_EQ(obj.cancel_status.status, json::Status::EDITED);
-  EXPECT_EQ(obj.cancel_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
-  EXPECT_EQ(obj.cancel_status.received_time, 1627648619235ms);
-  // XXX order_events
-  EXPECT_EQ(std::size(obj.edit_status.order_events), 2);
-  */
+  EXPECT_EQ(obj.cancel_status.status, json::Status::CANCELLED);
+  EXPECT_EQ(obj.cancel_status.order_id, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
+  EXPECT_EQ(obj.cancel_status.received_time, 1627707194376ms);
+  EXPECT_EQ(std::size(obj.cancel_status.order_events), 1);
+  // idx 0
+  auto &event = obj.cancel_status.order_events[0];
+  EXPECT_EQ(event.uid, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
+  EXPECT_EQ(event.order.order_id, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
+  EXPECT_EQ(event.order.cli_ord_id, "DwAF6QMAAQAAxMacsJgQ"_sv);
+  EXPECT_EQ(event.order.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.order.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(event.order.filled, 0.0);
+  EXPECT_DOUBLE_EQ(event.order.limit_price, 41936.0);
+  EXPECT_EQ(event.order.reduce_only, false);
+  EXPECT_EQ(event.order.timestamp, 1627707184171ms);
+  EXPECT_EQ(event.order.last_update_timestamp, 1627707189310ms);
+  // ...
+  EXPECT_EQ(event.type, "CANCEL"_sv);
+  // ...
+  EXPECT_EQ(obj.server_time, 1627707194376ms);
 }

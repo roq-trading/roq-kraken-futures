@@ -3,6 +3,7 @@
 "type": "comp",
 "values": [
 	{ "name": "result", "type": "Result" },
+	{ "name": "error", "type": "std::string_view" },
 	{ "name": "cancelStatus", "type": "CancelStatus" },
 	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
 ]

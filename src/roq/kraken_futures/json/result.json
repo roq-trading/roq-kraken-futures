@@ -2,7 +2,7 @@
 "name": "Result",
 "type": "enum",
 "values": [
-	{ "name": "success" },
-	{ "name": "error" }
+	{ "name": "error" },
+	{ "name": "success" }
 ]
 }

@@ -10,6 +10,7 @@
 
 #include "roq/core/charconv/datetime.h"
 
+#include "roq/kraken_futures/json/order_event_type.h"
 #include "roq/kraken_futures/json/side.h"
 
 namespace roq {
@@ -40,8 +41,20 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
       value);
 }
 
-inline roq::Side map(json::Side side) {
-  switch (side) {
+inline roq::OrderType map(json::OrderEventType value) {
+  switch (value) {
+    case json::OrderEventType::UNDEFINED:
+      break;
+    case json::OrderEventType::UNKNOWN:
+      break;
+    case json::OrderEventType::LMT:
+      return roq::OrderType::LIMIT;
+  }
+  return {};
+}
+
+inline roq::Side map(json::Side value) {
+  switch (value) {
     case json::Side::UNDEFINED:
       break;
     case json::Side::UNKNOWN:
@@ -51,7 +64,7 @@ inline roq::Side map(json::Side side) {
     case json::Side::SELL:
       return roq::Side::SELL;
   }
-  return roq::Side::UNDEFINED;
+  return {};
 }
 
 }  // namespace json

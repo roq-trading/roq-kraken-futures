@@ -330,7 +330,7 @@ void OrderEntry::create_order_ack(
         auto body = response.body();
         core::json::Buffer buffer(decode_buffer_);
         auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(send_order, trace_info);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(send_order, trace_info, order_id);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
@@ -373,7 +373,23 @@ void OrderEntry::create_order_ack(
         .request_id = {},
     };
     server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  } catch (Exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CREATE_ORDER,
+        .origin = Origin::EXCHANGE,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = 1,  // XXX HANS allow 0
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
+  // XXX HANS what about OMS_Error?
 }
 
 void OrderEntry::modify_order_ack(
@@ -388,7 +404,7 @@ void OrderEntry::modify_order_ack(
         auto body = response.body();
         core::json::Buffer buffer(decode_buffer_);
         auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(edit_order, trace_info);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(edit_order, trace_info, order_id);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
@@ -430,7 +446,23 @@ void OrderEntry::modify_order_ack(
         .request_id = {},
     };
     server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  } catch (Exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::MODIFY_ORDER,
+        .origin = Origin::EXCHANGE,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
+  // XXX HANS what about OMS_Error?
 }
 
 void OrderEntry::cancel_order_ack(
@@ -445,7 +477,8 @@ void OrderEntry::cancel_order_ack(
         auto body = response.body();
         core::json::Buffer buffer(decode_buffer_);
         auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(cancel_order, trace_info);
+        OrderUpdate{shared_, stream_id_, security_.get_account()}(
+            cancel_order, trace_info, order_id);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
@@ -480,6 +513,21 @@ void OrderEntry::cancel_order_ack(
         .order_id = order_id,
         .type = RequestType::CANCEL_ORDER,
         .origin = Origin::GATEWAY,
+        .status = RequestStatus::REJECTED,
+        .error = Error::UNKNOWN,
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+    };
+    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  } catch (Exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    server::Ack ack{
+        .stream_id = stream_id_,
+        .account = security_.get_account(),
+        .order_id = order_id,
+        .type = RequestType::CANCEL_ORDER,
+        .origin = Origin::EXCHANGE,
         .status = RequestStatus::REJECTED,
         .error = Error::UNKNOWN,
         .text = e.what(),

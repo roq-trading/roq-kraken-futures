@@ -6,6 +6,7 @@
 	{ "name": "old", "type": "OrderEventItem" },
 	{ "raw": "new", "name": "new_", "type": "OrderEventItem" },
 	{ "name": "reducedQuantity", "type": "double" },
-	{ "name": "type", "type": "std::string_view" }
+	{ "name": "type", "type": "std::string_view" },
+	{ "name": "uid", "type": "std::string_view", "comment": "cancelorder" }
 ]
 }

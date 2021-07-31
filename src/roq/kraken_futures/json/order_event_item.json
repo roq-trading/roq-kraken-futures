@@ -4,7 +4,7 @@
 "values": [
 	{ "name": "orderId", "type": "std::string_view" },
 	{ "name": "cliOrdId", "type": "std::string_view" },
-	{ "name": "type", "type": "std::string_view" },
+	{ "name": "type", "type": "OrderEventType" },
 	{ "name": "symbol", "type": "std::string_view" },
 	{ "name": "side", "type": "Side" },
 	{ "name": "quantity", "type": "double" },

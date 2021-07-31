@@ -65,11 +65,45 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(obj.edit_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
   EXPECT_EQ(obj.edit_status.received_time, 1627648619235ms);
   EXPECT_EQ(std::size(obj.edit_status.order_events), 1);
-  auto &old_event = obj.edit_status.order_events[0].old;
-  EXPECT_EQ(old_event.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
-  EXPECT_DOUBLE_EQ(old_event.limit_price, 39033.0);
-  auto &new_event = obj.edit_status.order_events[0].new_;
-  EXPECT_EQ(new_event.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  // idx 0
+  auto &event = obj.edit_status.order_events[0];
+  // ... old
+  EXPECT_EQ(event.old.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  EXPECT_EQ(event.old.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
+  EXPECT_EQ(event.old.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.old.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.old.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(event.old.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(event.old.filled, 0.0);
+  EXPECT_DOUBLE_EQ(event.old.limit_price, 39033.0);
+  EXPECT_EQ(event.old.timestamp, 1627648589044ms);
+  EXPECT_EQ(event.old.last_update_timestamp, 1627648589044ms);
+  // ... new
+  EXPECT_EQ(event.new_.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  EXPECT_EQ(event.new_.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
+  EXPECT_EQ(event.new_.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.new_.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.new_.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(event.new_.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(event.new_.filled, 0.0);
+  EXPECT_DOUBLE_EQ(event.new_.limit_price, 38981.5);
+  EXPECT_EQ(event.new_.timestamp, 1627648589044ms);
+  EXPECT_EQ(event.new_.last_update_timestamp, 1627648619124ms);
   // ...
-  EXPECT_DOUBLE_EQ(new_event.limit_price, 38981.5);
+  EXPECT_DOUBLE_EQ(event.reduced_quantity, 0.0);
+  EXPECT_EQ(event.type, "EDIT"_sv);
+}
+
+TEST(json_edit_order, error) {
+  auto message = R"({)"
+                 R"("result":"error",)"
+                 R"("error":"authenticationError",)"
+                 R"("serverTime":"2021-07-31T04:30:20.840Z")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  EXPECT_EQ(obj.result, json::Result::ERROR);
+  EXPECT_EQ(obj.error, "authenticationError"_sv);
+  EXPECT_EQ(obj.server_time, 1627705820840ms);
 }
