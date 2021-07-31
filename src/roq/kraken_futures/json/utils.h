@@ -11,6 +11,7 @@
 #include "roq/core/charconv/datetime.h"
 
 #include "roq/kraken_futures/json/order_event_type.h"
+#include "roq/kraken_futures/json/order_type.h"
 #include "roq/kraken_futures/json/side.h"
 
 namespace roq {
@@ -49,6 +50,20 @@ inline roq::OrderType map(json::OrderEventType value) {
       break;
     case json::OrderEventType::LMT:
       return roq::OrderType::LIMIT;
+  }
+  return {};
+}
+
+inline roq::OrderType map(json::OrderType value) {
+  switch (value) {
+    case json::OrderType::UNDEFINED:
+      break;
+    case json::OrderType::UNKNOWN:
+      break;
+    case json::OrderType::LIMIT:
+      return roq::OrderType::LIMIT;
+    case json::OrderType::STOP:
+      return roq::OrderType::LIMIT;  // XXX could also be market ???
   }
   return {};
 }

@@ -8,6 +8,8 @@
 
 #include "roq/kraken_futures/json/cancel_order.h"
 #include "roq/kraken_futures/json/edit_order.h"
+#include "roq/kraken_futures/json/open_orders.h"
+#include "roq/kraken_futures/json/open_orders_snapshot.h"
 #include "roq/kraken_futures/json/send_order.h"
 
 namespace roq {
@@ -24,6 +26,12 @@ class OrderUpdate final {
   void operator()(const json::SendOrder &, const server::TraceInfo &, uint32_t order_id);
   void operator()(const json::EditOrder &, const server::TraceInfo &, uint32_t order_id);
   void operator()(const json::CancelOrder &, const server::TraceInfo &, uint32_t order_id);
+
+  void operator()(const json::OpenOrdersSnapshot &, const server::TraceInfo &);
+  void operator()(const json::OpenOrders &, const server::TraceInfo &);
+
+ protected:
+  void operator()(const json::Order &, const server::TraceInfo &);
 
  private:
   Shared &shared_;

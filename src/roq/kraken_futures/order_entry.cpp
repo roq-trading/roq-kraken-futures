@@ -14,6 +14,8 @@
 #include "roq/kraken_futures/flags.h"
 #include "roq/kraken_futures/order_update.h"
 
+#include "roq/kraken_futures/json/cancel_all_orders.h"
+#include "roq/kraken_futures/json/cancel_order.h"
 #include "roq/kraken_futures/json/edit_order.h"
 #include "roq/kraken_futures/json/rest_error.h"
 #include "roq/kraken_futures/json/result.h"
@@ -340,6 +342,7 @@ void OrderEntry::create_order_ack(
         std::string_view text;
         auto body = response.body();
         auto rest_error = core::json::Parser::create<json::RestError>(body);
+        log::warn("error={}"_sv, rest_error);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -413,6 +416,7 @@ void OrderEntry::modify_order_ack(
       case core::http::Status::NOT_FOUND: {   // 404
         auto body = response.body();
         auto rest_error = core::json::Parser::create<json::RestError>(body);
+        log::warn("error={}"_sv, rest_error);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -487,6 +491,7 @@ void OrderEntry::cancel_order_ack(
       case core::http::Status::NOT_FOUND: {   // 404
         auto body = response.body();
         auto rest_error = core::json::Parser::create<json::RestError>(body);
+        log::warn("error={}"_sv, rest_error);
         server::Ack ack{
             .stream_id = stream_id_,
             .account = security_.get_account(),
@@ -543,23 +548,18 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
-        // core::json::Buffer buffer(decode_buffer_);
-        // auto order = core::json::Parser::create<json::Order>(response.body(), buffer);
-        // OrderUpdate{shared_, stream_id_, security_.get_account()}(order, trace_info);
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
       case core::http::Status::UNAUTHORIZED:  // 401
       case core::http::Status::FORBIDDEN:     // 403
       case core::http::Status::NOT_FOUND: {   // 404
-                                              /*
-          auto body = response.body();
-          if (json::ErrorParser::dispatch(
-                  body, [&](auto &error) { log::warn("error={}"_sv, error); })) {
-          } else {
-            log::warn(R"(Unable to parse response="{}")"_sv, body);
-          }
-          */
+        auto body = response.body();
+        auto rest_error = core::json::Parser::create<json::RestError>(body);
+        log::warn("error={}"_sv, rest_error);
         // note! this event does not require an ack
         break;
       }

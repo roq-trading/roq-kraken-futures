@@ -8,6 +8,10 @@ book_item.h
 book_item.cpp
 book_snapshot.h
 book_snapshot.cpp
+cancel_all_orders.h
+cancel_all_orders.cpp
+cancel_all_status.h
+cancel_all_status.cpp
 cancel_order.h
 cancel_order.cpp
 cancel_status.h

@@ -8,6 +8,7 @@
 #include "roq/core/metrics/factory.h"
 
 #include "roq/kraken_futures/flags.h"
+#include "roq/kraken_futures/order_update.h"
 
 using namespace roq::literals;
 
@@ -278,6 +279,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) 
     auto &[trace_info, open_orders_snapshot] = event;
     log::debug("open_orders_snapshot={}"_sv, open_orders_snapshot);
     log::info<3>("open_orders_snapshot={}"_sv, open_orders_snapshot);
+    OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders_snapshot, trace_info);
   });
 }
 
@@ -286,6 +288,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
     auto &[trace_info, open_orders] = event;
     log::debug("open_orders={}"_sv, open_orders);
     log::info<3>("open_orders={}"_sv, open_orders);
+    OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders, trace_info);
   });
 }
 
