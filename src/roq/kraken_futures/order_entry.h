@@ -74,8 +74,6 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void create_order_ack(
       const core::web::Response &, const uint8_t user_id, const uint32_t order_id);
-  void create_order_ack_new(
-      const core::web::Response &, const uint8_t user_id, const uint32_t order_id);
 
   void modify_order_ack(
       const core::web::Response &,

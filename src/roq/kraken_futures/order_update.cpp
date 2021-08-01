@@ -16,36 +16,6 @@ using namespace roq::literals;
 namespace roq {
 namespace kraken_futures {
 
-namespace {
-Side compute_side(int32_t direction) {
-  switch (direction) {
-    case 0:
-      return Side::BUY;
-    case 1:
-      return Side::SELL;
-    default:
-      return {};
-  }
-}
-
-OrderStatus compute_order_status(json::Status status) {
-  switch (status) {
-    case json::Status::UNDEFINED:
-    case json::Status::UNKNOWN:
-      break;
-    case json::Status::PLACED:
-      return OrderStatus::WORKING;
-    case json::Status::EDITED:
-      break;
-    case json::Status::CANCELLED:
-      return OrderStatus::CANCELED;
-    case json::Status::NO_ORDERS_TO_CANCEL:
-      break;
-  }
-  return {};
-}
-}  // namespace
-
 void OrderUpdate::operator()(
     const json::SendOrder &send_order, const server::TraceInfo &trace_info, uint32_t order_id) {
   if (send_order.result != json::Result::SUCCESS) {

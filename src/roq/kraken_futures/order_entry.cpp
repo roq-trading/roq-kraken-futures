@@ -326,106 +326,53 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
-  try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
-        auto body = response.body();
-        core::json::Buffer buffer(decode_buffer_);
-        auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(send_order, trace_info, order_id);
-        break;
-      }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
-        std::string_view text;
-        auto body = response.body();
-        auto rest_error = core::json::Parser::create<json::RestError>(body);
-        log::warn("error={}"_sv, rest_error);
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
-            .type = RequestType::CREATE_ORDER,
-            .origin = Origin::EXCHANGE,
-            .status = RequestStatus::REJECTED,
-            .error = Error::UNKNOWN,
-            .text = rest_error.message,
-            .version = {},
-            .request_id = {},
-        };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-        break;
-      }
-      default:
-        response.expect(core::http::Status::OK);  // throws
-    }
-  } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::CREATE_ORDER,
-        .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = 1,  // XXX HANS allow 0
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-  } catch (Exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::CREATE_ORDER,
-        .origin = Origin::EXCHANGE,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = 1,  // XXX HANS allow 0
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  if (shared_.ack_order_request(
+          trace_info,
+          stream_id_,
+          user_id,
+          order_id,
+          1,  // version
+          [&](auto &order, auto accept, auto reject) {
+            switch (response.category()) {
+              case core::http::Category::SUCCESS: {
+                auto body = response.body();
+                core::json::Buffer buffer(decode_buffer_);
+                auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
+                switch (send_order.result) {
+                  case json::Result::UNDEFINED:
+                  case json::Result::UNKNOWN:
+                    log::warn(R"(response="{}")"_sv, body);
+                    log::fatal("Unexpected: send_order={}"_sv, send_order);
+                    break;
+                  case json::Result::ERROR:
+                    log::warn("send_order={}"_sv, send_order);
+                    reject(Error::UNKNOWN, send_order.error);
+                    break;
+                  case json::Result::SUCCESS:
+                    OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                        order, send_order, [&](auto &order_update) {
+                          log::debug("order_update={}"_sv, order_update);
+                          auto request_id = send_order.send_status.cli_ord_id;
+                          accept(order_update, request_id);
+                        });
+                    break;
+                }
+                break;
+              }
+              case core::http::Category::CLIENT_ERROR: {
+                auto body = response.body();
+                auto error = core::json::Parser::create<json::RestError>(body);
+                log::warn("error={}"_sv, error);
+                reject(Error::UNKNOWN, error.message);
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
+          })) {
+  } else {
+    log::warn("Unexpected: no order matching user_id={}, order_id={}"_sv, user_id, order_id);
   }
-  // XXX HANS what about OMS_Error?
-}
-
-void OrderEntry::create_order_ack_new(
-    const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
-  server::TraceInfo trace_info;
-  shared_.ack_order_request(
-      trace_info,
-      stream_id_,
-      user_id,
-      order_id,
-      1,  // version
-      [&]([[maybe_unused]] auto &order, auto success, auto reject) {
-        switch (response.category()) {
-          case core::http::Category::SUCCESS: {
-            auto body = response.body();
-            core::json::Buffer buffer(decode_buffer_);
-            auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
-            OrderUpdate{shared_, stream_id_, security_.get_account()}(
-                send_order, trace_info, order_id);
-            // XXX accept(order_update, request_id)
-            break;
-          }
-          case core::http::Category::CLIENT_ERROR: {
-            auto body = response.body();
-            auto error = core::json::Parser::create<json::RestError>(body);
-            log::warn("error={}"_sv, error);
-            reject(Error::UNKNOWN, error.message);
-            break;
-          }
-          default:
-            response.expect(core::http::Status::OK);  // throws
-        }
-      });
 }
 
 void OrderEntry::modify_order_ack(
