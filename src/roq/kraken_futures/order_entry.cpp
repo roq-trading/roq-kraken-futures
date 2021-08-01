@@ -326,20 +326,6 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
-  /*
-  shared_.ack_order_request(
-      trace_info,
-      user_id,
-      order_id,
-      1,
-      [&]([[maybe_unused]] auto &order,
-          [[maybe_unused]] auto &request,
-          [[maybe_unused]] auto callback) {
-        // parse
-        // update order?
-        // send ack
-      });
-  */
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
@@ -407,6 +393,39 @@ void OrderEntry::create_order_ack(
     server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
   }
   // XXX HANS what about OMS_Error?
+}
+
+void OrderEntry::create_order_ack_new(
+    const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
+  server::TraceInfo trace_info;
+  shared_.ack_order_request(
+      trace_info,
+      stream_id_,
+      user_id,
+      order_id,
+      1,  // version
+      [&]([[maybe_unused]] auto &order, auto success, auto reject) {
+        switch (response.category()) {
+          case core::http::Category::SUCCESS: {
+            auto body = response.body();
+            core::json::Buffer buffer(decode_buffer_);
+            auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
+            OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                send_order, trace_info, order_id);
+            // XXX accept(order_update, request_id)
+            break;
+          }
+          case core::http::Category::CLIENT_ERROR: {
+            auto body = response.body();
+            auto error = core::json::Parser::create<json::RestError>(body);
+            log::warn("error={}"_sv, error);
+            reject(Error::UNKNOWN, error.message);
+            break;
+          }
+          default:
+            response.expect(core::http::Status::OK);  // throws
+        }
+      });
 }
 
 void OrderEntry::modify_order_ack(
