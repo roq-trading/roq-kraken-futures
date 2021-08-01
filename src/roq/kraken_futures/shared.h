@@ -28,6 +28,11 @@ struct Shared final {
   }
 
   template <typename... Args>
+  auto ack_order_request(Args &&...args) {
+    return dispatcher_.ack_order_request(std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
   auto operator()(Args &&...args) {
     return dispatcher_(std::forward<Args>(args)...);
   }

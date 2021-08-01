@@ -98,7 +98,7 @@ void OrderUpdate::operator()(
   };
   auto request_id = send_status.cli_ord_id;
   if (shared_.find_order(
-          stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
+          stream_id_, trace_info, order_update, request_id, [&](auto &order, auto callback) {
             server::Ack ack{
                 .stream_id = stream_id_,
                 .account = account_,
@@ -172,7 +172,7 @@ void OrderUpdate::operator()(
   };
   auto request_id = edit_status.cli_ord_id;
   if (shared_.find_order(
-          stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
+          stream_id_, trace_info, order_update, request_id, [&](auto &order, auto callback) {
             server::Ack ack{
                 .stream_id = stream_id_,
                 .account = account_,
@@ -245,7 +245,7 @@ void OrderUpdate::operator()(
   };
   auto request_id = cancel_status.cli_ord_id;
   if (shared_.find_order(
-          stream_id_, trace_info, order_update, request_id, [&](const auto &order, auto callback) {
+          stream_id_, trace_info, order_update, request_id, [&](auto &order, auto callback) {
             server::Ack ack{
                 .stream_id = stream_id_,
                 .account = account_,
@@ -321,7 +321,7 @@ void OrderUpdate::operator()(const json::Order &order, const server::TraceInfo &
           trace_info,
           order_update,
           request_id,
-          [&]([[maybe_unused]] const auto &order, [[maybe_unused]] auto callback) {})) {
+          [&]([[maybe_unused]] auto &order, [[maybe_unused]] auto callback) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"_sv);
     log::warn("order={}"_sv, order);

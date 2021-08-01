@@ -326,6 +326,20 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
+  /*
+  shared_.ack_order_request(
+      trace_info,
+      user_id,
+      order_id,
+      1,
+      [&]([[maybe_unused]] auto &order,
+          [[maybe_unused]] auto &request,
+          [[maybe_unused]] auto callback) {
+        // parse
+        // update order?
+        // send ack
+      });
+  */
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
@@ -401,6 +415,20 @@ void OrderEntry::modify_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
+  /*
+  shared_.ack_order_request(
+      trace_info,
+      user_id,
+      order_id,
+      version,
+      [&]([[maybe_unused]] auto &order,
+          [[maybe_unused]] auto &request,
+          [[maybe_unused]] auto callback) {
+        // parse
+        // update order?
+        // send ack
+      });
+  */
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
@@ -475,6 +503,23 @@ void OrderEntry::cancel_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
+  /*
+  shared_.ack_order_request(
+      trace_info,
+      user_id,
+      order_id,
+      version,
+      [&]([[maybe_unused]] auto &order,
+          [[maybe_unused]] auto &request,
+          [[maybe_unused]] auto callback) {
+        // parse
+        // how? update order?
+        // send ack --> update request
+        //
+        // why? if fails --> we must mark the request
+        // why? always make it possible to send an ack
+      });
+  */
   try {
     switch (response.raw_status()) {
       case core::http::Status::OK: {  // 200
