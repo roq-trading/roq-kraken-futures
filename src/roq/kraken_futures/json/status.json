@@ -5,6 +5,7 @@
 	{ "name": "placed" },
 	{ "name": "edited" },
 	{ "name": "cancelled" },
-	{ "name": "noOrdersToCancel" }
+	{ "name": "noOrdersToCancel" },
+	{ "name": "notFound" }
 ]
 }

@@ -70,3 +70,22 @@ TEST(json_cancel_order, simple) {
   // ...
   EXPECT_EQ(obj.server_time, 1627707194376ms);
 }
+
+TEST(json_cancel_order, not_found) {
+  auto message = R"({)"
+                 R"("result":"success",)"
+                 R"("cancelStatus":{)"
+                 R"("status":"notFound",)"
+                 R"("receivedTime":"2021-08-02T07:46:05.900Z")"
+                 R"(},)"
+                 R"("serverTime":"2021-08-02T07:46:05.900Z")"
+                 R"(})"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
+  EXPECT_EQ(obj.result, json::Result::SUCCESS);
+  EXPECT_EQ(obj.cancel_status.status, json::Status::NOT_FOUND);
+  EXPECT_EQ(obj.cancel_status.received_time, 1627890365900ms);
+  EXPECT_EQ(obj.server_time, 1627890365900ms);
+}

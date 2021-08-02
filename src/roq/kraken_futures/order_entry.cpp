@@ -364,9 +364,12 @@ void OrderEntry::create_order_ack(
               }
               case core::http::Category::CLIENT_ERROR: {
                 auto body = response.body();
-                auto error = core::json::Parser::create<json::RestError>(body);
+                core::json::Buffer buffer(decode_buffer_);
+                auto error = core::json::Parser::create<json::RestError>(body, buffer);
                 log::warn("error={}"_sv, error);
-                reject(Error::UNKNOWN, error.message);
+                auto message =
+                    std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+                reject(Error::UNKNOWN, message);
                 break;
               }
               default:
@@ -384,86 +387,59 @@ void OrderEntry::modify_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
-  /*
-  shared_.ack_order_request(
-      trace_info,
-      user_id,
-      order_id,
-      version,
-      [&]([[maybe_unused]] auto &order,
-          [[maybe_unused]] auto &request,
-          [[maybe_unused]] auto callback) {
-        // parse
-        // update order?
-        // send ack
-      });
-  */
-  try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
-        auto body = response.body();
-        core::json::Buffer buffer(decode_buffer_);
-        auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(edit_order, trace_info, order_id);
-        break;
-      }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
-        auto body = response.body();
-        auto rest_error = core::json::Parser::create<json::RestError>(body);
-        log::warn("error={}"_sv, rest_error);
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
-            .type = RequestType::MODIFY_ORDER,
-            .origin = Origin::EXCHANGE,
-            .status = RequestStatus::REJECTED,
-            .error = Error::UNKNOWN,
-            .text = rest_error.message,
-            .version = version,
-            .request_id = {},
-        };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-        break;
-      }
-      default:
-        response.expect(core::http::Status::OK);  // throws
-    }
-  } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::MODIFY_ORDER,
-        .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = version,
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-  } catch (Exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::MODIFY_ORDER,
-        .origin = Origin::EXCHANGE,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = version,
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  if (shared_.ack_order_request(
+          trace_info,
+          stream_id_,
+          user_id,
+          order_id,
+          version,  // version
+          [&](auto &order, auto accept, auto reject) {
+            switch (response.category()) {
+              case core::http::Category::SUCCESS: {
+                auto body = response.body();
+                core::json::Buffer buffer(decode_buffer_);
+                auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
+                switch (edit_order.result) {
+                  case json::Result::UNDEFINED:
+                  case json::Result::UNKNOWN:
+                    log::warn(R"(response="{}")"_sv, body);
+                    log::fatal("Unexpected: edit_order={}"_sv, edit_order);
+                    break;
+                  case json::Result::ERROR:
+                    log::warn("edit_order={}"_sv, edit_order);
+                    reject(Error::UNKNOWN, edit_order.error);
+                    break;
+                  case json::Result::SUCCESS:
+                    OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                        order,
+                        edit_order,
+                        [&](auto &order_update) {
+                          log::debug("order_update={}"_sv, order_update);
+                          auto request_id = edit_order.edit_status.cli_ord_id;
+                          accept(order_update, request_id);
+                        },
+                        reject);
+                    break;
+                }
+                break;
+              }
+              case core::http::Category::CLIENT_ERROR: {
+                auto body = response.body();
+                core::json::Buffer buffer(decode_buffer_);
+                auto error = core::json::Parser::create<json::RestError>(body, buffer);
+                log::warn("error={}"_sv, error);
+                auto message =
+                    std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+                reject(Error::UNKNOWN, message);
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
+          })) {
+  } else {
+    log::warn("Unexpected: no order matching user_id={}, order_id={}"_sv, user_id, order_id);
   }
-  // XXX HANS what about OMS_Error?
 }
 
 void OrderEntry::cancel_order_ack(
@@ -472,88 +448,58 @@ void OrderEntry::cancel_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
-  /*
-  shared_.ack_order_request(
-      trace_info,
-      user_id,
-      order_id,
-      version,
-      [&]([[maybe_unused]] auto &order,
-          [[maybe_unused]] auto &request,
-          [[maybe_unused]] auto callback) {
-        // parse
-        // how? update order?
-        // send ack --> update request
-        //
-        // why? if fails --> we must mark the request
-        // why? always make it possible to send an ack
-      });
-  */
-  try {
-    switch (response.raw_status()) {
-      case core::http::Status::OK: {  // 200
-        auto body = response.body();
-        core::json::Buffer buffer(decode_buffer_);
-        auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
-        OrderUpdate{shared_, stream_id_, security_.get_account()}(
-            cancel_order, trace_info, order_id);
-        break;
-      }
-      case core::http::Status::BAD_REQUEST:   // 400
-      case core::http::Status::UNAUTHORIZED:  // 401
-      case core::http::Status::FORBIDDEN:     // 403
-      case core::http::Status::NOT_FOUND: {   // 404
-        auto body = response.body();
-        auto rest_error = core::json::Parser::create<json::RestError>(body);
-        log::warn("error={}"_sv, rest_error);
-        server::Ack ack{
-            .stream_id = stream_id_,
-            .account = security_.get_account(),
-            .order_id = order_id,
-            .type = RequestType::CANCEL_ORDER,
-            .origin = Origin::EXCHANGE,
-            .status = RequestStatus::REJECTED,
-            .error = Error::UNKNOWN,
-            .text = rest_error.message,
-            .version = version,
-            .request_id = {},
-        };
-        server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-        break;
-      }
-      default:
-        response.expect(core::http::Status::OK);  // throws
-    }
-  } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::CANCEL_ORDER,
-        .origin = Origin::GATEWAY,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = version,
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
-  } catch (Exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-    server::Ack ack{
-        .stream_id = stream_id_,
-        .account = security_.get_account(),
-        .order_id = order_id,
-        .type = RequestType::CANCEL_ORDER,
-        .origin = Origin::EXCHANGE,
-        .status = RequestStatus::REJECTED,
-        .error = Error::UNKNOWN,
-        .text = e.what(),
-        .version = version,
-        .request_id = {},
-    };
-    server::create_trace_and_dispatch(trace_info, ack, shared_, true, user_id);
+  if (shared_.ack_order_request(
+          trace_info,
+          stream_id_,
+          user_id,
+          order_id,
+          version,  // version
+          [&](auto &order, auto accept, auto reject) {
+            switch (response.category()) {
+              case core::http::Category::SUCCESS: {
+                auto body = response.body();
+                core::json::Buffer buffer(decode_buffer_);
+                auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
+                switch (cancel_order.result) {
+                  case json::Result::UNDEFINED:
+                  case json::Result::UNKNOWN:
+                    log::warn(R"(response="{}")"_sv, body);
+                    log::fatal("Unexpected: cancel_order={}"_sv, cancel_order);
+                    break;
+                  case json::Result::ERROR:
+                    log::warn("cancel_order={}"_sv, cancel_order);
+                    reject(Error::UNKNOWN, cancel_order.error);
+                    break;
+                  case json::Result::SUCCESS:
+                    OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                        order,
+                        cancel_order,
+                        [&](auto &order_update) {
+                          log::debug("order_update={}"_sv, order_update);
+                          auto request_id = cancel_order.cancel_status.cli_ord_id;
+                          accept(order_update, request_id);
+                        },
+                        reject);
+                    break;
+                }
+                break;
+              }
+              case core::http::Category::CLIENT_ERROR: {
+                auto body = response.body();
+                core::json::Buffer buffer(decode_buffer_);
+                auto error = core::json::Parser::create<json::RestError>(body, buffer);
+                log::warn("error={}"_sv, error);
+                auto message =
+                    std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+                reject(Error::UNKNOWN, message);
+                break;
+              }
+              default:
+                response.expect(core::http::Status::OK);  // throws
+            }
+          })) {
+  } else {
+    log::warn("Unexpected: no order matching user_id={}, order_id={}"_sv, user_id, order_id);
   }
 }
 
@@ -572,7 +518,8 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
       case core::http::Status::FORBIDDEN:     // 403
       case core::http::Status::NOT_FOUND: {   // 404
         auto body = response.body();
-        auto rest_error = core::json::Parser::create<json::RestError>(body);
+        core::json::Buffer buffer(decode_buffer_);
+        auto rest_error = core::json::Parser::create<json::RestError>(body, buffer);
         log::warn("error={}"_sv, rest_error);
         // note! this event does not require an ack
         break;

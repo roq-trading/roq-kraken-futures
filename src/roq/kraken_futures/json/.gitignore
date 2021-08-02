@@ -70,6 +70,8 @@ product_id.h
 product_id.cpp
 rest_error.h
 rest_error.cpp
+rest_error_item.h
+rest_error_item.cpp
 result.h
 result.cpp
 send_order.h
