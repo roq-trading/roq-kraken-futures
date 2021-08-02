@@ -58,6 +58,8 @@ order_event.h
 order_event.cpp
 order_event_item.h
 order_event_item.cpp
+order_event_order_type.h
+order_event_order_type.cpp
 order_event_type.h
 order_event_type.cpp
 order_type.h

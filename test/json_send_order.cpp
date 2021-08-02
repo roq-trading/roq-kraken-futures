@@ -57,7 +57,7 @@ TEST(json_send_order, simple) {
   auto &event = obj.send_status.order_events[0];
   EXPECT_EQ(event.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
   EXPECT_EQ(event.order.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
-  EXPECT_EQ(event.order.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.order.type, json::OrderEventOrderType::LMT);
   EXPECT_EQ(event.order.symbol, "pi_xbtusd"_sv);
   EXPECT_EQ(event.order.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
@@ -67,6 +67,6 @@ TEST(json_send_order, simple) {
   EXPECT_EQ(event.order.timestamp, 1627618780804ms);
   EXPECT_EQ(event.order.last_update_timestamp, 1627618780804ms);
   EXPECT_DOUBLE_EQ(event.reduced_quantity, 0.0);
-  EXPECT_EQ(event.type, "PLACE"_sv);
+  EXPECT_EQ(event.type, json::OrderEventType::PLACE);
   EXPECT_EQ(obj.server_time, 1627618780804ms);
 }

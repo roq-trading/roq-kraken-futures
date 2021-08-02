@@ -70,7 +70,7 @@ TEST(json_edit_order, simple) {
   // ... old
   EXPECT_EQ(event.old.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
   EXPECT_EQ(event.old.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
-  EXPECT_EQ(event.old.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.old.type, json::OrderEventOrderType::LMT);
   EXPECT_EQ(event.old.symbol, "pi_xbtusd"_sv);
   EXPECT_EQ(event.old.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.old.quantity, 1.0);
@@ -81,7 +81,7 @@ TEST(json_edit_order, simple) {
   // ... new
   EXPECT_EQ(event.new_.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
   EXPECT_EQ(event.new_.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
-  EXPECT_EQ(event.new_.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.new_.type, json::OrderEventOrderType::LMT);
   EXPECT_EQ(event.new_.symbol, "pi_xbtusd"_sv);
   EXPECT_EQ(event.new_.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.new_.quantity, 1.0);
@@ -91,10 +91,10 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(event.new_.last_update_timestamp, 1627648619124ms);
   // ...
   EXPECT_DOUBLE_EQ(event.reduced_quantity, 0.0);
-  EXPECT_EQ(event.type, "EDIT"_sv);
+  EXPECT_EQ(event.type, json::OrderEventType::EDIT);
 }
 
-TEST(json_edit_order, error) {
+TEST(json_edit_order, authentication_error) {
   auto message = R"({)"
                  R"("result":"error",)"
                  R"("error":"authenticationError",)"
@@ -106,4 +106,59 @@ TEST(json_edit_order, error) {
   EXPECT_EQ(obj.result, json::Result::ERROR);
   EXPECT_EQ(obj.error, "authenticationError"_sv);
   EXPECT_EQ(obj.server_time, 1627705820840ms);
+}
+
+TEST(json_edit_order, edit_has_no_effect) {
+  auto message = R"({)"
+                 R"("result":"success",)"
+                 R"("serverTime":"2021-08-02T03:51:50.939Z",)"
+                 R"("editStatus":{)"
+                 R"("status":"edited",)"
+                 R"("orderId":"f109eb54-a223-4503-99c5-00f053b9411e",)"
+                 R"("receivedTime":"2021-08-02T03:51:50.939Z",)"
+                 R"("orderEvents":[{"uid":"f109eb54-a223-4503-99c5-00f053b9411e",)"
+                 R"("order":{"orderId":"f109eb54-a223-4503-99c5-00f053b9411e",)"
+                 R"("cliOrdId":"egAF6gMAAQAAyEmOD8AQ",)"
+                 R"("type":"lmt",)"
+                 R"("symbol":"pi_xbtusd",)"
+                 R"("side":"buy",)"
+                 R"("quantity":1,)"
+                 R"("filled":0,)"
+                 R"("limitPrice":40065,)"
+                 R"("reduceOnly":false,)"
+                 R"("timestamp":"2021-08-02T03:51:20.856Z",)"
+                 R"("lastUpdateTimestamp":"2021-08-02T03:51:20.856Z")"
+                 R"(},)"
+                 R"("reason":"EDIT_HAS_NO_EFFECT",)"
+                 R"("type":"REJECT")"
+                 R"(})"
+                 R"(])"
+                 R"(})"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  EXPECT_EQ(obj.result, json::Result::SUCCESS);
+  EXPECT_EQ(obj.server_time, 1627876310939ms);
+  // edit_status
+  auto &edit_status = obj.edit_status;
+  EXPECT_EQ(edit_status.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(edit_status.received_time, 1627876310939ms);
+  EXPECT_EQ(std::size(edit_status.order_events), 1);
+  // idx 0
+  auto &order_event = edit_status.order_events[0];
+  EXPECT_EQ(order_event.uid, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(order_event.order.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(order_event.order.cli_ord_id, "egAF6gMAAQAAyEmOD8AQ"_sv);
+  EXPECT_EQ(order_event.order.type, json::OrderEventOrderType::LMT);
+  EXPECT_EQ(order_event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(order_event.order.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(order_event.order.filled, 0.0);
+  EXPECT_DOUBLE_EQ(order_event.order.limit_price, 40065.0);
+  EXPECT_DOUBLE_EQ(order_event.order.reduce_only, false);
+  EXPECT_EQ(order_event.order.timestamp, 1627876280856ms);
+  EXPECT_EQ(order_event.order.last_update_timestamp, 1627876280856ms);
+  EXPECT_EQ(order_event.reason, "EDIT_HAS_NO_EFFECT");
+  EXPECT_EQ(order_event.type, json::OrderEventType::REJECT);
 }

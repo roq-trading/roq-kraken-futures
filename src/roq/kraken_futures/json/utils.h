@@ -10,7 +10,7 @@
 
 #include "roq/core/charconv/datetime.h"
 
-#include "roq/kraken_futures/json/order_event_type.h"
+#include "roq/kraken_futures/json/order_event_order_type.h"
 #include "roq/kraken_futures/json/order_type.h"
 #include "roq/kraken_futures/json/side.h"
 
@@ -42,13 +42,13 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
       value);
 }
 
-inline roq::OrderType map(json::OrderEventType value) {
+inline roq::OrderType map(json::OrderEventOrderType value) {
   switch (value) {
-    case json::OrderEventType::UNDEFINED:
+    case json::OrderEventOrderType::UNDEFINED:
       break;
-    case json::OrderEventType::UNKNOWN:
+    case json::OrderEventOrderType::UNKNOWN:
       break;
-    case json::OrderEventType::LMT:
+    case json::OrderEventOrderType::LMT:
       return roq::OrderType::LIMIT;
   }
   return {};

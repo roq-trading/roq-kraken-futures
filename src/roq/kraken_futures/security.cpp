@@ -2,6 +2,7 @@
 
 #include "roq/kraken_futures/security.h"
 
+#include <algorithm>
 #include <array>
 #include <random>
 
@@ -17,6 +18,8 @@
 
 using namespace std::literals;
 using namespace roq::literals;
+
+using namespace std::chrono_literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -48,7 +51,7 @@ Security::Security(
 
 std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
   assert(!path.empty());
-  auto nonce = roq::format("{}"_sv, (++nonce_).count());
+  auto nonce = roq::format("{}"_sv, get_nonce().count());
   sha_.clear();
   if (!query.empty()) {
     assert(query[0] == '?');
@@ -88,6 +91,12 @@ std::string Security::signed_challenge(const std::string_view &original_challeng
   assert(length_2 == buffer_2.size());
   auto result = core::binascii::Base64::encode(buffer_2);
   return result;
+}
+
+std::chrono::milliseconds Security::get_nonce() {
+  auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
+  nonce_ = std::max(now, nonce_ + 1ms);  // note! can't reuse
+  return nonce_;
 }
 
 }  // namespace kraken_futures

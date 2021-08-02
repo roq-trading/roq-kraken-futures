@@ -350,11 +350,14 @@ void OrderEntry::create_order_ack(
                     break;
                   case json::Result::SUCCESS:
                     OrderUpdate{shared_, stream_id_, security_.get_account()}(
-                        order, send_order, [&](auto &order_update) {
+                        order,
+                        send_order,
+                        [&](auto &order_update) {
                           log::debug("order_update={}"_sv, order_update);
                           auto request_id = send_order.send_status.cli_ord_id;
                           accept(order_update, request_id);
-                        });
+                        },
+                        reject);
                     break;
                 }
                 break;

@@ -9,6 +9,7 @@
 	{ "name": "buy", "type": "bool" },
 	{ "name": "qty", "type": "double" },
 	{ "name": "order_id", "type": "std::string_view" },
+	{ "name": "cli_ord_id", "type": "std::string_view" },
 	{ "name": "fill_id", "type": "std::string_view" },
 	{ "name": "fill_type", "type": "FillType" },
 	{ "name": "fee_paid", "type": "double" },

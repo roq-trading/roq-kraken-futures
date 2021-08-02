@@ -2,6 +2,9 @@
 "name": "OrderEventType",
 "type": "enum",
 "values": [
-	{ "name": "lmt" }
+	{ "name": "PLACE" },
+	{ "name": "EDIT" },
+	{ "name": "CANCEL" },
+	{ "name": "REJECT" }
 ]
 }

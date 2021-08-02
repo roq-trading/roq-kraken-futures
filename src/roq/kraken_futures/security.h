@@ -35,6 +35,9 @@ class Security final {
 
   std::string signed_challenge(const std::string_view &original_challenge);
 
+ protected:
+  std::chrono::milliseconds get_nonce();
+
  private:
   const std::string account_;
   const std::string key_;

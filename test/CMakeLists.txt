@@ -7,11 +7,13 @@ set(SOURCES
     json_cancel_order.cpp
     json_cancel_all_orders.cpp
     json_edit_order.cpp
+    json_fills_snapshot.cpp
     json_instruments.cpp
     json_instruments_item.cpp
     json_margin_account.cpp
     json_open_orders.cpp
     json_open_orders_snapshot.cpp
+    json_open_positions.cpp
     json_order.cpp
     json_rest_error.cpp
     json_send_order.cpp

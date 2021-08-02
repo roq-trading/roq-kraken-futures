@@ -7,6 +7,10 @@
 	{ "name": "entry_price", "type": "double" },
 	{ "name": "mark_price", "type": "double" },
 	{ "name": "index_price", "type": "double" },
-	{ "name": "pnl", "type": "double" }
+	{ "name": "pnl", "type": "double" },
+	{ "name": "liquidation_threshold", "type": "double" },
+	{ "name": "effective_leverage", "type": "double" },
+	{ "name": "return_on_equity", "type": "double" },
+	{ "name": "unrealized_funding", "type": "double" }
 ]
 }

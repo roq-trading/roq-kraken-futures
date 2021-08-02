@@ -56,7 +56,7 @@ TEST(json_cancel_order, simple) {
   EXPECT_EQ(event.uid, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
   EXPECT_EQ(event.order.order_id, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
   EXPECT_EQ(event.order.cli_ord_id, "DwAF6QMAAQAAxMacsJgQ"_sv);
-  EXPECT_EQ(event.order.type, json::OrderEventType::LMT);
+  EXPECT_EQ(event.order.type, json::OrderEventOrderType::LMT);
   EXPECT_EQ(event.order.symbol, "pi_xbtusd"_sv);
   EXPECT_EQ(event.order.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
@@ -66,7 +66,7 @@ TEST(json_cancel_order, simple) {
   EXPECT_EQ(event.order.timestamp, 1627707184171ms);
   EXPECT_EQ(event.order.last_update_timestamp, 1627707189310ms);
   // ...
-  EXPECT_EQ(event.type, "CANCEL"_sv);
+  EXPECT_EQ(event.type, json::OrderEventType::CANCEL);
   // ...
   EXPECT_EQ(obj.server_time, 1627707194376ms);
 }
