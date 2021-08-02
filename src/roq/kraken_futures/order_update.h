@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <string>
 #include <string_view>
 
 #include "roq/kraken_futures/shared.h"

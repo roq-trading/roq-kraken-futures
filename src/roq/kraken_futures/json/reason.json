@@ -1,0 +1,24 @@
+{
+"name": "Reason",
+"type": "enum",
+"values": [
+	{ "name": "new_placed_order_by_user" },
+	{ "name": "liquidation" },
+	{ "name": "stop_order_triggered" },
+	{ "name": "limit_order_from_stop" },
+	{ "name": "partial_fill" },
+	{ "name": "full_fill" },
+	{ "name": "cancelled_by_user" },
+	{ "name": "contract_expired" },
+	{ "name": "not_enough_margin" },
+	{ "name": "market_inactive" },
+	{ "name": "cancelled_by_admin" },
+	{ "name": "dead_man_switch" },
+	{ "name": "ioc_order_failed_because_it_would_not" },
+	{ "name": "post_order_failed_because_it_would_filled" },
+	{ "name": "would_execute_self" },
+	{ "name": "would_not_reduce_position" },
+	{ "name": "order_for_edit_not_found" },
+	{ "name": "edited_by_user" }
+]
+}

@@ -6,6 +6,9 @@
 	{ "name": "alert" },
 	{ "name": "error" },
 	{ "name": "challenge" },
-	{ "name": "subscribed" }
+	{ "name": "subscribed" },
+	{ "name": "subscribed_failed" },
+	{ "name": "unsubscribed" },
+	{ "name": "unsubscribed_failed" }
 ]
 }

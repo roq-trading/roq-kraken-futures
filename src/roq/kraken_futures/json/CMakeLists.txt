@@ -40,6 +40,7 @@ set(AUTOGEN_SCHEMAS
     order_type.json
     position.json
     product_id.json
+    reason.json
     rest_error.json
     rest_error_item.json
     result.json

@@ -49,7 +49,7 @@ TEST(json_open_orders, new_placed_order_by_user) {
   EXPECT_EQ(obj.order.direction, 0);
   EXPECT_EQ(obj.order.reduce_only, false);
   EXPECT_EQ(obj.is_cancel, false);
-  EXPECT_EQ(obj.reason, "new_placed_order_by_user");
+  EXPECT_EQ(obj.reason, json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
 TEST(json_open_orders, new_placed_order_by_user_with_cli_ord_id) {
@@ -89,7 +89,7 @@ TEST(json_open_orders, new_placed_order_by_user_with_cli_ord_id) {
   EXPECT_EQ(obj.order.direction, 0);
   EXPECT_EQ(obj.order.reduce_only, false);
   EXPECT_EQ(obj.is_cancel, false);
-  EXPECT_EQ(obj.reason, "new_placed_order_by_user");
+  EXPECT_EQ(obj.reason, json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
 TEST(json_open_orders, cancelled_by_user) {
@@ -105,7 +105,7 @@ TEST(json_open_orders, cancelled_by_user) {
   EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
   EXPECT_EQ(obj.order_id, "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"_sv);
   EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, "cancelled_by_user");
+  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
 }
 
 TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
@@ -123,5 +123,44 @@ TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
   EXPECT_EQ(obj.order_id, "f18e006d-c95e-4d89-b470-4402949d5a15"_sv);
   EXPECT_EQ(obj.cli_ord_id, "QAAF6QMAAQAA7DBK5YoQ"_sv);
   EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, "cancelled_by_user");
+  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
+}
+
+TEST(json_open_orders, edited_by_user) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order":{)"
+                 R"("instrument":"PI_XBTUSD",)"
+                 R"("time":1627906165185,)"
+                 R"("last_update_time":1627906170258,)"
+                 R"("qty":1.0,)"
+                 R"("filled":0.0,)"
+                 R"("limit_price":39726.5,)"
+                 R"("stop_price":0.0,)"
+                 R"("type":"limit",)"
+                 R"("order_id":"8a9a24e8-7d90-4b3c-9838-0474d06bfd40",)"
+                 R"("cli_ord_id":"hwAF6wMAAQAAPg/OBMcQ",)"
+                 R"("direction":0,)"
+                 R"("reduce_only":false)"
+                 R"(},)"
+                 R"("is_cancel":false,)"
+                 R"("reason":"edited_by_user")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  EXPECT_EQ(obj.order.instrument, "PI_XBTUSD"_sv);
+  EXPECT_EQ(obj.order.time, 1627906165185ms);
+  EXPECT_EQ(obj.order.last_update_time, 1627906170258ms);
+  EXPECT_DOUBLE_EQ(obj.order.qty, 1.0);
+  EXPECT_DOUBLE_EQ(obj.order.limit_price, 39726.5);
+  EXPECT_DOUBLE_EQ(obj.order.stop_price, 0.0);
+  EXPECT_DOUBLE_EQ(obj.order.type, json::OrderType::LIMIT);
+  EXPECT_EQ(obj.order.order_id, "8a9a24e8-7d90-4b3c-9838-0474d06bfd40"_sv);
+  EXPECT_EQ(obj.order.cli_ord_id, "hwAF6wMAAQAAPg/OBMcQ"_sv);
+  EXPECT_EQ(obj.order.direction, 0);
+  EXPECT_EQ(obj.order.reduce_only, false);
+  EXPECT_EQ(obj.is_cancel, false);
+  EXPECT_EQ(obj.reason, json::Reason::EDITED_BY_USER);
 }

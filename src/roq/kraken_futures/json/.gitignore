@@ -68,6 +68,8 @@ position.h
 position.cpp
 product_id.h
 product_id.cpp
+reason.h
+reason.cpp
 rest_error.h
 rest_error.cpp
 rest_error_item.h
