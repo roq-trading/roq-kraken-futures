@@ -50,6 +50,14 @@ inline roq::OrderType map(json::OrderEventOrderType value) {
       break;
     case json::OrderEventOrderType::LMT:
       return roq::OrderType::LIMIT;
+    case json::OrderEventOrderType::MKT:
+      return roq::OrderType::MARKET;
+    case json::OrderEventOrderType::STP:
+      break;
+    case json::OrderEventOrderType::TAKE_PROFIT:
+      break;
+    case json::OrderEventOrderType::IOC:
+      return roq::OrderType::LIMIT;
   }
   return {};
 }
@@ -78,6 +86,18 @@ inline roq::Side map(json::Side value) {
       return roq::Side::BUY;
     case json::Side::SELL:
       return roq::Side::SELL;
+  }
+  return {};
+}
+
+inline json::Side map(roq::Side value) {
+  switch (value) {
+    case roq::Side::UNDEFINED:
+      break;
+    case roq::Side::BUY:
+      return json::Side::BUY;
+    case roq::Side::SELL:
+      return json::Side::SELL;
   }
   return {};
 }

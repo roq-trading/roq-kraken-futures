@@ -122,6 +122,35 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::LATENCY);
 }
 
+namespace {
+json::OrderEventOrderType compute_order_type(
+    OrderType order_type,
+    TimeInForce time_in_force,
+    ExecutionInstruction execution_instruction,
+    double stop_price) {
+  if (time_in_force == TimeInForce::IOC)
+    return json::OrderEventOrderType::IOC;
+  switch (order_type) {
+    case roq::OrderType::UNDEFINED:
+      break;
+    case roq::OrderType::MARKET:
+      return json::OrderEventOrderType::MKT;
+    case roq::OrderType::LIMIT:
+      if (std::isnan(stop_price))
+        return json::OrderEventOrderType::LMT;
+      else
+        return json::OrderEventOrderType::STP;
+      break;
+  }
+  throw RuntimeErrorException(
+      "Unexpected combination of order_type={}, time_in_force={}, execution_instruction={}, stop_price={}"_sv,
+      order_type,
+      time_in_force,
+      execution_instruction,
+      stop_price);
+}
+}  // namespace
+
 uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &event, const std::string_view &request_id) {
   profile_.create_order([&]() {
@@ -130,26 +159,65 @@ uint16_t OrderEntry::operator()(
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/sendorder"_sv;
-    auto order_type = "lmt"_sv;
-    auto side = "buy"_sv;
-    auto reduce_only = false;
-    auto query = roq::format(
-        "?orderType={}"
-        "&symbol={}"
-        "&side={}"
-        "&size={}"
-        "&limitPrice={}"
-        "&stopPrice={}"
-        "&cliOrdId={}"
-        "&reduceOnly={}"_sv,
-        order_type,
-        create_order.symbol,
-        side,
-        create_order.quantity,
-        create_order.price,
-        create_order.stop_price,
-        request_id,
-        reduce_only);
+    auto order_type = compute_order_type(
+        create_order.order_type,
+        create_order.time_in_force,
+        create_order.execution_instruction,
+        create_order.stop_price);
+    auto side = json::map(create_order.side);
+    auto reduce_only = create_order.execution_instruction == ExecutionInstruction::DO_NOT_INCREASE;
+    std::string query;
+    if (!std::isnan(create_order.price)) {
+      if (std::isnan(create_order.stop_price)) {
+        query = roq::format(  // limit
+            "?orderType={}"
+            "&symbol={}"
+            "&side={}"
+            "&size={}"
+            "&limitPrice={}"
+            "&cliOrdId={}"
+            "&reduceOnly={}"_sv,
+            order_type.as_raw_text(),
+            create_order.symbol,
+            side.as_raw_text(),
+            create_order.quantity,
+            create_order.price,
+            request_id,
+            reduce_only);
+      } else {
+        query = roq::format(  // limit + stop
+            "?orderType={}"
+            "&symbol={}"
+            "&side={}"
+            "&size={}"
+            "&limitPrice={}"
+            "&stopPrice={}"
+            "&cliOrdId={}"
+            "&reduceOnly={}"_sv,
+            order_type.as_raw_text(),
+            create_order.symbol,
+            side.as_raw_text(),
+            create_order.quantity,
+            create_order.price,
+            create_order.stop_price,
+            request_id,
+            reduce_only);
+      }
+    } else {
+      query = roq::format(  // market
+          "?orderType={}"
+          "&symbol={}"
+          "&side={}"
+          "&size={}"
+          "&cliOrdId={}"
+          "&reduceOnly={}"_sv,
+          order_type.as_raw_text(),
+          create_order.symbol,
+          side.as_raw_text(),
+          create_order.quantity,
+          request_id,
+          reduce_only);
+    }
     log::debug(R"(query="{}")"_sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{
