@@ -38,6 +38,7 @@ struct Shared final {
   }
 
  public:
+  core::page_aligned_vector<Fill> fills;
   core::page_aligned_vector<MBPUpdate> bids, asks;
   core::page_aligned_vector<Trade> trades;
 

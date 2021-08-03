@@ -10,6 +10,7 @@
 
 #include "roq/core/charconv/datetime.h"
 
+#include "roq/kraken_futures/json/fill_type.h"
 #include "roq/kraken_futures/json/order_event_order_type.h"
 #include "roq/kraken_futures/json/order_type.h"
 #include "roq/kraken_futures/json/side.h"
@@ -40,6 +41,31 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
           [](const core::json::array_t &) { throw std::bad_cast(); },
       },
       value);
+}
+
+inline roq::Liquidity map(json::FillType value) {
+  switch (value) {
+    case json::FillType::UNDEFINED:
+    case json::FillType::UNKNOWN:
+      break;
+    case json::FillType::MAKER:
+      return Liquidity::MAKER;
+    case json::FillType::TAKER:
+      return Liquidity::TAKER;
+    case json::FillType::LIQUIDATION:
+      break;
+    case json::FillType::ASSIGNEE:
+      break;
+    case json::FillType::ASSIGNOR:
+      break;
+    case json::FillType::UNWIND_BANKRUPT:
+      break;
+    case json::FillType::UNWIND_COUNTERPARTY:
+      break;
+    case json::FillType::TAKER_AFTER_EDIT:
+      break;
+  }
+  return {};
 }
 
 inline roq::OrderType map(json::OrderEventOrderType value) {

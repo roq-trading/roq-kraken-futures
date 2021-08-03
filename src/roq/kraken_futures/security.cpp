@@ -19,7 +19,7 @@
 using namespace std::literals;
 using namespace roq::literals;
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT
 
 namespace roq {
 namespace kraken_futures {

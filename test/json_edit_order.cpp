@@ -162,3 +162,79 @@ TEST(json_edit_order, edit_has_no_effect) {
   EXPECT_EQ(order_event.reason, "EDIT_HAS_NO_EFFECT");
   EXPECT_EQ(order_event.type, json::OrderEventType::REJECT);
 }
+
+TEST(json_edit_order, execution) {
+  auto message = R"({)"
+                 R"("result":"success",)"
+                 R"("serverTime":"2021-08-03T06:42:05.376Z",)"
+                 R"("editStatus":{)"
+                 R"("status":"filled",)"
+                 R"("orderId":"4178c9d1-b033-4113-afaf-610c97631d07",)"
+                 R"("receivedTime":"2021-08-03T06:42:05.376Z",)"
+                 R"("orderEvents":[)"
+                 R"({)"
+                 R"("executionId":"7d484ed2-0dbe-48de-9002-45f6ac5f3a90",)"
+                 R"("price":38621.0,)"
+                 R"("amount":1,)"
+                 R"("orderPriorEdit":{)"
+                 R"("orderId":"4178c9d1-b033-4113-afaf-610c97631d07",)"
+                 R"("cliOrdId":"ewAF6QMAAQAAXXO1j9YQ",)"
+                 R"("type":"lmt",)"
+                 R"("symbol":"pi_xbtusd",)"
+                 R"("side":"buy",)"
+                 R"("quantity":1,)"
+                 R"("filled":0,)"
+                 R"("limitPrice":38562.5,)"
+                 R"("reduceOnly":false,)"
+                 R"("timestamp":"2021-08-03T06:42:00.184Z",)"
+                 R"("lastUpdateTimestamp":"2021-08-03T06:42:00.184Z")"
+                 R"(},)"
+                 R"("orderPriorExecution":{)"
+                 R"("orderId":"4178c9d1-b033-4113-afaf-610c97631d07",)"
+                 R"("cliOrdId":"ewAF6QMAAQAAXXO1j9YQ",)"
+                 R"("type":"lmt",)"
+                 R"("symbol":"pi_xbtusd",)"
+                 R"("side":"buy",)"
+                 R"("quantity":1,)"
+                 R"("filled":0,)"
+                 R"("limitPrice":38652,)"
+                 R"("reduceOnly":false,)"
+                 R"("timestamp":"2021-08-03T06:42:00.184Z",)"
+                 R"("lastUpdateTimestamp":"2021-08-03T06:42:05.259Z")"
+                 R"(},)"
+                 R"("takerReducedQuantity":null,)"
+                 R"("type":"EXECUTION")"
+                 R"(})"
+                 R"(])"
+                 R"(})"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  EXPECT_EQ(obj.result, json::Result::SUCCESS);
+  EXPECT_EQ(obj.server_time, 1627972925376ms);
+  // edit_status
+  auto &edit_status = obj.edit_status;
+  EXPECT_EQ(edit_status.status, json::Status::FILLED);
+  EXPECT_EQ(edit_status.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
+  EXPECT_EQ(edit_status.received_time, 1627972925376ms);
+  EXPECT_EQ(std::size(edit_status.order_events), 1);
+  /*
+  // idx 0
+  auto &order_event = edit_status.order_events[0];
+  EXPECT_EQ(order_event.uid, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(order_event.order.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(order_event.order.cli_ord_id, "egAF6gMAAQAAyEmOD8AQ"_sv);
+  EXPECT_EQ(order_event.order.type, json::OrderEventOrderType::LMT);
+  EXPECT_EQ(order_event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(order_event.order.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(order_event.order.filled, 0.0);
+  EXPECT_DOUBLE_EQ(order_event.order.limit_price, 40065.0);
+  EXPECT_DOUBLE_EQ(order_event.order.reduce_only, false);
+  EXPECT_EQ(order_event.order.timestamp, 1627876280856ms);
+  EXPECT_EQ(order_event.order.last_update_timestamp, 1627876280856ms);
+  EXPECT_EQ(order_event.reason, "EDIT_HAS_NO_EFFECT");
+  EXPECT_EQ(order_event.type, json::OrderEventType::REJECT);
+  */
+}

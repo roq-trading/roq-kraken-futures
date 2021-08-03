@@ -7,6 +7,7 @@ set(SOURCES
     json_cancel_order.cpp
     json_cancel_all_orders.cpp
     json_edit_order.cpp
+    json_fills.cpp
     json_fills_snapshot.cpp
     json_instruments.cpp
     json_instruments_item.cpp

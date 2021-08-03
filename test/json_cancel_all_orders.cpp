@@ -14,8 +14,6 @@ using namespace roq::kraken_futures;
 
 using namespace std::chrono_literals;
 
-// {"result":"success","cancelStatus":{"receivedTime":"2021-07-31T06:20:10.487Z","cancelOnly":"all","status":"cancelled","cancelledOrders":[{"cliOrdId":"ewAF6QMAAQAAly0J6JkQ","order_id":"74f63887-f69c-491e-937d-3e53d038c806"}],"orderEvents":[{"uid":"74f63887-f69c-491e-937d-3e53d038c806","order":{"orderId":"74f63887-f69c-491e-937d-3e53d038c806","cliOrdId":"ewAF6QMAAQAAly0J6JkQ","type":"lmt","symbol":"pi_xbtusd","side":"buy","quantity":1,"filled":0,"limitPrice":41753.5,"reduceOnly":false,"timestamp":"2021-07-31T06:20:08.997Z","lastUpdateTimestamp":"2021-07-31T06:20:08.997Z"},"type":"CANCEL"}]},"serverTime":"2021-07-31T06:20:10.488Z"}
-
 TEST(json_cancel_all_orders, no_orders) {
   auto message = R"({)"
                  R"("result":"success",)"
@@ -69,8 +67,8 @@ TEST(json_cancel_all_orders, cancelled) {
                  R"("reduceOnly":false,)"
                  R"("timestamp":"2021-07-31T06:20:08.997Z",)"
                  R"("lastUpdateTimestamp":"2021-07-31T06:20:08.997Z")"
-                 R"(})"
-                 R"(,"type":"CANCEL"})"
+                 R"(},)"
+                 R"("type":"CANCEL"})"
                  R"(])"
                  R"(},)"
                  R"("serverTime":"2021-07-31T06:20:10.488Z")"

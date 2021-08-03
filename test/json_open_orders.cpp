@@ -92,40 +92,6 @@ TEST(json_open_orders, new_placed_order_by_user_with_cli_ord_id) {
   EXPECT_EQ(obj.reason, json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
-TEST(json_open_orders, cancelled_by_user) {
-  auto message = R"({)"
-                 R"("feed":"open_orders",)"
-                 R"("order_id":"494f7cb0-6936-495f-a0c5-663ad9b9fbdd",)"
-                 R"("is_cancel":true,)"
-                 R"("reason":"cancelled_by_user")"
-                 R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order_id, "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"_sv);
-  EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
-}
-
-TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
-  auto message = R"({)"
-                 R"("feed":"open_orders",)"
-                 R"("order_id":"f18e006d-c95e-4d89-b470-4402949d5a15",)"
-                 R"("cli_ord_id":"QAAF6QMAAQAA7DBK5YoQ",)"
-                 R"("is_cancel":true,)"
-                 R"("reason":"cancelled_by_user")"
-                 R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order_id, "f18e006d-c95e-4d89-b470-4402949d5a15"_sv);
-  EXPECT_EQ(obj.cli_ord_id, "QAAF6QMAAQAA7DBK5YoQ"_sv);
-  EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
-}
-
 TEST(json_open_orders, edited_by_user) {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
@@ -163,4 +129,56 @@ TEST(json_open_orders, edited_by_user) {
   EXPECT_EQ(obj.order.reduce_only, false);
   EXPECT_EQ(obj.is_cancel, false);
   EXPECT_EQ(obj.reason, json::Reason::EDITED_BY_USER);
+}
+
+TEST(json_open_orders, cancelled_by_user) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order_id":"494f7cb0-6936-495f-a0c5-663ad9b9fbdd",)"
+                 R"("is_cancel":true,)"
+                 R"("reason":"cancelled_by_user")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  EXPECT_EQ(obj.order_id, "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"_sv);
+  EXPECT_EQ(obj.is_cancel, true);
+  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
+}
+
+TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order_id":"f18e006d-c95e-4d89-b470-4402949d5a15",)"
+                 R"("cli_ord_id":"QAAF6QMAAQAA7DBK5YoQ",)"
+                 R"("is_cancel":true,)"
+                 R"("reason":"cancelled_by_user")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  EXPECT_EQ(obj.order_id, "f18e006d-c95e-4d89-b470-4402949d5a15"_sv);
+  EXPECT_EQ(obj.cli_ord_id, "QAAF6QMAAQAA7DBK5YoQ"_sv);
+  EXPECT_EQ(obj.is_cancel, true);
+  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
+}
+
+TEST(json_open_orders, full_fill) {
+  auto message = R"({)"
+                 R"("feed":"open_orders",)"
+                 R"("order_id":"df2fa719-23bc-4cd7-8a84-5c3c41d75757",)"
+                 R"("cli_ord_id":"EwAF7gMAAQAAnNBFcdUQ",)"
+                 R"("is_cancel":true,)"
+                 R"("reason":"full_fill")"
+                 R"(})";
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_(buffer);
+  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
+  EXPECT_EQ(obj.order_id, "df2fa719-23bc-4cd7-8a84-5c3c41d75757"_sv);
+  EXPECT_EQ(obj.cli_ord_id, "EwAF7gMAAQAAnNBFcdUQ"_sv);
+  EXPECT_EQ(obj.is_cancel, true);  // note!
+  EXPECT_EQ(obj.reason, json::Reason::FULL_FILL);
 }

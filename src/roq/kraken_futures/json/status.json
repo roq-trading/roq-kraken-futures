@@ -4,6 +4,7 @@
 "values": [
 	{ "name": "placed" },
 	{ "name": "edited" },
+	{ "name": "filled" },
 	{ "name": "cancelled" },
 	{ "name": "noOrdersToCancel" },
 	{ "name": "notFound" }

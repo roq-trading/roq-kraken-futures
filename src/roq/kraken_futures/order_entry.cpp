@@ -323,11 +323,10 @@ uint16_t OrderEntry::operator()(
   return stream_id_;
 }
 
-uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &event) {
+uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
   profile_.cancel_all_orders([&]() {
     if (!ready())
       throw server::OMS_ErrorException(Error::GATEWAY_NOT_READY);
-    auto &[message_info, cancel_all_orders] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelallorders"_sv;
     auto headers = security_.create_headers(path, {});
@@ -579,6 +578,9 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
         auto body = response.body();
         core::json::Buffer buffer(decode_buffer_);
         auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
+        log::info(
+            "*** CANCELED {} ORDER(S) ***"_sv,
+            std::size(cancel_all_orders.cancel_status.order_events));
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400

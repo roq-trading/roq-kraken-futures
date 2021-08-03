@@ -6,6 +6,10 @@
 #include <string>
 #include <string_view>
 
+#include "roq/logging.h"
+
+#include "roq/utils/compare.h"
+
 #include "roq/kraken_futures/shared.h"
 
 #include "roq/kraken_futures/json/cancel_order.h"
@@ -40,6 +44,7 @@ class OrderUpdate final {
       case json::Status::UNDEFINED:
       case json::Status::UNKNOWN:
       case json::Status::EDITED:
+      case json::Status::FILLED:  // note! have only seen event type execution
       case json::Status::CANCELLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
       case json::Status::NOT_FOUND:
@@ -100,6 +105,52 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
+          case json::OrderEventType::EXECUTION: {
+            auto &order_ = order_event.order_prior_execution;
+            auto symbol = std::string{order_.symbol};
+            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            auto side = json::map(order_.side);
+            auto order_type = json::map(order_.type);
+            auto status =
+                compute_order_status(send_status.status, order_.quantity, order_event.amount);
+            auto traded_quantity = order_event.amount;
+            auto remaining_quantity = order_.quantity - traded_quantity;
+            // XXX HANS should we use reduced_quantity to log a warning ???
+            roq::OrderUpdate order_update{
+                .stream_id = stream_id_,
+                .account = account_,
+                .order_id = order.order_id,
+                .exchange = order.exchange,
+                .symbol = symbol,
+                .side = side,
+                .position_effect = {},
+                .max_show_quantity = NaN,
+                .order_type = order_type,
+                .time_in_force = {},
+                .execution_instruction = {},
+                .order_template = {},
+                .create_time_utc = {},
+                .update_time_utc = send_status.received_time,
+                .external_account = {},
+                .external_order_id = send_status.order_id,
+                .status = status,
+                .quantity = order_.quantity,
+                .price = order_.limit_price,
+                .stop_price = NaN,
+                .remaining_quantity = remaining_quantity,
+                .traded_quantity = traded_quantity,
+                .average_traded_price = NaN,
+                .last_traded_quantity = NaN,
+                .last_traded_price = NaN,
+                .last_liquidity = {},
+                .routing_id = {},
+                .max_request_version = {},
+                .max_response_version = {},
+                .max_accepted_version = {},
+            };
+            accept(std::as_const(order_update));
+            break;
+          }
           case json::OrderEventType::REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
             break;
@@ -118,6 +169,7 @@ class OrderUpdate final {
       case json::Status::UNDEFINED:
       case json::Status::UNKNOWN:
       case json::Status::PLACED:
+      case json::Status::FILLED:
       case json::Status::CANCELLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
       case json::Status::NOT_FOUND:
@@ -178,6 +230,11 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
+          case json::OrderEventType::EXECUTION: {
+            // XXX HANS FIX THIS
+            log::warn("order_event={}"_sv, order_event);
+            log::fatal("Unexpected"_sv);
+          }
           case json::OrderEventType::REJECT: {
             auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"_sv) == 0
                              ? Error::MODIFY_HAS_NO_EFFECT
@@ -203,6 +260,7 @@ class OrderUpdate final {
       case json::Status::UNKNOWN:
       case json::Status::PLACED:
       case json::Status::EDITED:
+      case json::Status::FILLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
         throw RuntimeErrorException("Unexpected: status={}"_sv, cancel_status.status);
         break;
@@ -260,6 +318,11 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
+          case json::OrderEventType::EXECUTION: {
+            // XXX HANS FIX THIS
+            log::warn("order_event={}"_sv, order_event);
+            log::fatal("Unexpected"_sv);
+          }
           case json::OrderEventType::REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
             break;
@@ -274,7 +337,13 @@ class OrderUpdate final {
   }
 
  protected:
-  void operator()(const json::Order &, const server::TraceInfo &);
+  void operator()(
+      const json::Order &,
+      const std::string_view &order_id,
+      const std::string_view &cli_ord_id,
+      const json::Reason,
+      bool is_cancel,
+      const server::TraceInfo &);
 
   Side compute_side(int32_t direction) {
     switch (direction) {
@@ -295,7 +364,31 @@ class OrderUpdate final {
       case json::Status::PLACED:
         return OrderStatus::WORKING;
       case json::Status::EDITED:
+        return OrderStatus::WORKING;
+      case json::Status::FILLED:
+        return OrderStatus::COMPLETED;
+      case json::Status::CANCELLED:
+        return OrderStatus::CANCELED;
+      case json::Status::NO_ORDERS_TO_CANCEL:
+      case json::Status::NOT_FOUND:
         break;
+    }
+    return {};
+  }
+
+  OrderStatus compute_order_status(json::Status status, double quantity, double filled) {
+    if (utils::compare(quantity, filled) == 0)
+      return OrderStatus::COMPLETED;
+    switch (status) {
+      case json::Status::UNDEFINED:
+      case json::Status::UNKNOWN:
+        break;
+      case json::Status::PLACED:
+        return OrderStatus::WORKING;
+      case json::Status::EDITED:
+        return OrderStatus::WORKING;
+      case json::Status::FILLED:
+        return OrderStatus::COMPLETED;
       case json::Status::CANCELLED:
         return OrderStatus::CANCELED;
       case json::Status::NO_ORDERS_TO_CANCEL:

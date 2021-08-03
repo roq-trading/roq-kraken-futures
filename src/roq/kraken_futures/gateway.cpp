@@ -203,6 +203,18 @@ void Gateway::operator()(const server::Trace<StatisticsUpdate> &event, bool is_l
   dispatcher_(event, is_last);
 }
 
+void Gateway::operator()(const server::Trace<TradeUpdate> &event, bool is_last, uint8_t user_id) {
+  dispatcher_(event, is_last, user_id);
+}
+
+void Gateway::operator()(const server::Trace<FundsUpdate> &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(const server::Trace<PositionUpdate> &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto &symbols = symbols_update.symbols;
   for (auto &iter : market_data_) {

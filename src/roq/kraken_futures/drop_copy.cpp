@@ -2,8 +2,12 @@
 
 #include "roq/kraken_futures/drop_copy.h"
 
+#include <algorithm>
+
 #include "roq/utils/mask.h"
 #include "roq/utils/update.h"
+
+#include "roq/core/back_emplacer.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -263,6 +267,19 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
     auto &[trace_info, account_balances_and_margins] = event;
     log::debug("account_balances_and_margins={}"_sv, account_balances_and_margins);
     log::info<3>("account_balances_and_margins={}"_sv, account_balances_and_margins);
+    for (auto &item : account_balances_and_margins.margin_accounts) {
+      auto currency = std::string{item.name};
+      std::transform(currency.begin(), currency.end(), currency.begin(), ::toupper);
+      FundsUpdate funds_update{
+          .stream_id = stream_id_,
+          .account = security_.get_account(),
+          .currency = currency,
+          .balance = item.balance,
+          .hold = NaN,
+          .external_account = account_balances_and_margins.account,
+      };
+      server::create_trace_and_dispatch(trace_info, funds_update, handler_, true);
+    }
   });
 }
 
@@ -271,6 +288,22 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
     auto &[trace_info, open_positions] = event;
     log::debug("open_positions={}"_sv, open_positions);
     log::info<3>("open_positions={}"_sv, open_positions);
+    for (auto &item : open_positions.positions) {
+      PositionUpdate position_update{
+          .stream_id = stream_id_,
+          .account = security_.get_account(),
+          .exchange = Flags::exchange(),
+          .symbol = item.instrument,
+          .side = {},
+          .position = item.balance,
+          .last_trade_id = {},
+          .position_cost = NaN,
+          .position_yesterday = NaN,
+          .position_cost_yesterday = NaN,
+          .external_account = open_positions.account,
+      };
+      server::create_trace_and_dispatch(trace_info, position_update, handler_, true);
+    }
   });
 }
 
@@ -294,17 +327,98 @@ void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
 
 void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
   profile_.fills_snapshot([&]() {
-    auto &[trace_info, fills_snapshot] = event;
+    // auto &[trace_info, fills_snapshot] = event;
+    auto &trace_info = event.trace_info;
+    auto &fills_snapshot = event.value;
     log::debug("fills_snapshot={}"_sv, fills_snapshot);
     log::info<3>("fills_snapshot={}"_sv, fills_snapshot);
+    for (auto &item : fills_snapshot.fills) {
+      if (shared_.find_order(item.cli_ord_id, [&](auto &order, [[maybe_unused]] auto callback) {
+            auto symbol = std::string{item.instrument};
+            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            if (symbol.compare(order.symbol) != 0)
+              log::warn(R"(Unexpected: symbol="{}"/"{}")"_sv, symbol, order.symbol);
+            auto side = item.buy ? Side::BUY : Side::SELL;
+            if (side != order.side)
+              log::warn("Unexpected: side={}/{})"_sv, side, order.side);
+            Fill fill{
+                .external_trade_id = item.fill_id,
+                .quantity = item.qty,
+                .price = item.price,
+                .liquidity = json::map(item.fill_type),
+            };
+            TradeUpdate trade_update{
+                .stream_id = stream_id_,
+                .account = order.account,
+                .order_id = order.order_id,
+                .exchange = order.exchange,
+                .symbol = order.symbol,
+                .side = order.side,
+                .position_effect = order.position_effect,
+                .create_time_utc = item.time,
+                .update_time_utc = item.time,
+                .external_account = fills_snapshot.account,
+                .external_order_id = item.order_id,
+                .fills = {&fill, 1},
+                .routing_id = order.routing_id,
+            };
+            server::create_trace_and_dispatch(
+                trace_info, trade_update, handler_, true, order.user_id);
+          })) {
+      } else {
+        log::warn("*** EXTERNAL ORDER ***"_sv);
+        log::warn("fill={}"_sv, item);
+      }
+    }
   });
 }
 
 void DropCopy::operator()(const server::Trace<json::Fills> &event) {
   profile_.fills([&]() {
-    auto &[trace_info, fills] = event;
+    // auto &[trace_info, fills] = event;
+    auto &trace_info = event.trace_info;
+    auto &fills = event.value;
     log::debug("fills={}"_sv, fills);
     log::info<3>("fills={}"_sv, fills);
+    // XXX HANS should emplace_back and try to group by order_id
+    for (auto &item : fills.fills) {
+      if (shared_.find_order(item.cli_ord_id, [&](auto &order, [[maybe_unused]] auto callback) {
+            auto symbol = std::string{item.instrument};
+            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            if (symbol.compare(order.symbol) != 0)
+              log::warn(R"(Unexpected: symbol="{}"/"{}")"_sv, symbol, order.symbol);
+            auto side = item.buy ? Side::BUY : Side::SELL;
+            if (side != order.side)
+              log::warn("Unexpected: side={}/{})"_sv, side, order.side);
+            Fill fill{
+                .external_trade_id = item.fill_id,
+                .quantity = item.qty,
+                .price = item.price,
+                .liquidity = json::map(item.fill_type),
+            };
+            TradeUpdate trade_update{
+                .stream_id = stream_id_,
+                .account = order.account,
+                .order_id = order.order_id,
+                .exchange = order.exchange,
+                .symbol = order.symbol,
+                .side = order.side,
+                .position_effect = order.position_effect,
+                .create_time_utc = item.time,
+                .update_time_utc = item.time,
+                .external_account = fills.username,  // note! appears to be account
+                .external_order_id = item.order_id,
+                .fills = {&fill, 1},
+                .routing_id = order.routing_id,
+            };
+            server::create_trace_and_dispatch(
+                trace_info, trade_update, handler_, true, order.user_id);
+          })) {
+      } else {
+        log::warn("*** EXTERNAL ORDER ***"_sv);
+        log::warn("fill={}"_sv, item);
+      }
+    }
   });
 }
 

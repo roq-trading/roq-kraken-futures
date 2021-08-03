@@ -5,6 +5,7 @@
 	{ "name": "PLACE" },
 	{ "name": "EDIT" },
 	{ "name": "CANCEL" },
+	{ "name": "EXECUTION" },
 	{ "name": "REJECT" }
 ]
 }
