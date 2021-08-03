@@ -219,22 +219,36 @@ TEST(json_edit_order, execution) {
   EXPECT_EQ(edit_status.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
   EXPECT_EQ(edit_status.received_time, 1627972925376ms);
   EXPECT_EQ(std::size(edit_status.order_events), 1);
-  /*
   // idx 0
   auto &order_event = edit_status.order_events[0];
-  EXPECT_EQ(order_event.uid, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
-  EXPECT_EQ(order_event.order.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
-  EXPECT_EQ(order_event.order.cli_ord_id, "egAF6gMAAQAAyEmOD8AQ"_sv);
-  EXPECT_EQ(order_event.order.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event.order.symbol, "pi_xbtusd"_sv);
-  EXPECT_EQ(order_event.order.side, json::Side::BUY);
-  EXPECT_DOUBLE_EQ(order_event.order.quantity, 1.0);
-  EXPECT_DOUBLE_EQ(order_event.order.filled, 0.0);
-  EXPECT_DOUBLE_EQ(order_event.order.limit_price, 40065.0);
-  EXPECT_DOUBLE_EQ(order_event.order.reduce_only, false);
-  EXPECT_EQ(order_event.order.timestamp, 1627876280856ms);
-  EXPECT_EQ(order_event.order.last_update_timestamp, 1627876280856ms);
-  EXPECT_EQ(order_event.reason, "EDIT_HAS_NO_EFFECT");
-  EXPECT_EQ(order_event.type, json::OrderEventType::REJECT);
-  */
+  EXPECT_EQ(order_event.execution_id, "7d484ed2-0dbe-48de-9002-45f6ac5f3a90"_sv);
+  EXPECT_DOUBLE_EQ(order_event.price, 38621.0);
+  EXPECT_DOUBLE_EQ(order_event.amount, 1.0);
+  // ... order_prior_edit
+  EXPECT_EQ(order_event.order_prior_edit.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
+  EXPECT_EQ(order_event.order_prior_edit.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"_sv);
+  EXPECT_EQ(order_event.order_prior_edit.type, json::OrderEventOrderType::LMT);
+  EXPECT_EQ(order_event.order_prior_edit.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order_prior_edit.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_edit.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_edit.filled, 0.0);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_edit.limit_price, 38562.5);
+  EXPECT_EQ(order_event.order_prior_edit.reduce_only, false);
+  EXPECT_EQ(order_event.order_prior_edit.timestamp, 1627972920184ms);
+  EXPECT_EQ(order_event.order_prior_edit.last_update_timestamp, 1627972920184ms);
+  // ... order_prior_execution
+  EXPECT_EQ(order_event.order_prior_execution.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
+  EXPECT_EQ(order_event.order_prior_execution.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"_sv);
+  EXPECT_EQ(order_event.order_prior_execution.type, json::OrderEventOrderType::LMT);
+  EXPECT_EQ(order_event.order_prior_execution.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order_prior_execution.side, json::Side::BUY);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_execution.quantity, 1.0);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_execution.filled, 0.0);
+  EXPECT_DOUBLE_EQ(order_event.order_prior_execution.limit_price, 38652.0);
+  EXPECT_EQ(order_event.order_prior_execution.reduce_only, false);
+  EXPECT_EQ(order_event.order_prior_execution.timestamp, 1627972920184ms);
+  EXPECT_EQ(order_event.order_prior_execution.last_update_timestamp, 1627972925259ms);
+  // ...
+  EXPECT_DOUBLE_EQ(order_event.taker_reduced_quantity, 0.0);
+  EXPECT_EQ(order_event.type, json::OrderEventType::EXECUTION);
 }
