@@ -401,13 +401,16 @@ class OrderUpdate final {
 
   Side compute_side(int32_t direction) {
     switch (direction) {
+      case -1:
+        break;
       case 0:
         return Side::BUY;
       case 1:
         return Side::SELL;
       default:
-        return {};
+        break;
     }
+    return {};
   }
 
   OrderStatus compute_order_status(json::Status status) {

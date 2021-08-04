@@ -12,7 +12,7 @@
 	{ "name": "type", "type": "OrderType" },
 	{ "name": "order_id", "type": "std::string_view" },
 	{ "name": "cli_ord_id", "type": "std::string_view" },
-	{ "name": "direction", "type": "int32_t" },
+	{ "name": "direction", "type": "int32_t", "default": "-1" },
 	{ "name": "reduce_only", "type": "bool" }
 ]
 }
