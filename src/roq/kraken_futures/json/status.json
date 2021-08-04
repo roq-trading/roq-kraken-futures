@@ -7,6 +7,22 @@
 	{ "name": "filled" },
 	{ "name": "cancelled" },
 	{ "name": "noOrdersToCancel" },
-	{ "name": "notFound" }
+	{ "name": "notFound" },
+	{ "name": "invalidOrderType" },
+	{ "name": "invalidSide" },
+	{ "name": "invalidPrice" },
+	{ "name": "insufficientAvailableFunds" },
+	{ "name": "selfFill" },
+	{ "name": "tooManySmallOrders" },
+	{ "name": "maxPositionViolation" },
+	{ "name": "marketSuspended" },
+	{ "name": "marketInactive" },
+	{ "name": "clientOrderIdAlreadyExist" },
+	{ "name": "clientOrderIdTooLong" },
+	{ "name": "outsidePriceCollar" },
+	{ "name": "postWouldExecute" },
+	{ "name": "iocWouldNotExecute" },
+	{ "name": "wouldCauseLiquidation" },
+	{ "name": "wouldNotReducePosition" }
 ]
 }

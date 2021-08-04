@@ -50,6 +50,24 @@ class OrderUpdate final {
       case json::Status::NOT_FOUND:
         throw RuntimeErrorException("Unexpected: status={}"_sv, send_status.status);
         break;
+      case json::Status::INVALID_ORDER_TYPE:
+      case json::Status::INVALID_SIDE:
+      case json::Status::INVALID_PRICE:
+      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
+      case json::Status::SELF_FILL:
+      case json::Status::TOO_MANY_SMALL_ORDERS:
+      case json::Status::MAX_POSITION_VIOLATION:
+      case json::Status::MARKET_SUSPENDED:
+      case json::Status::MARKET_INACTIVE:
+      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
+      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
+      case json::Status::OUTSIDE_PRICE_COLLAR:
+      case json::Status::POST_WOULD_EXECUTE:
+      case json::Status::IOC_WOULD_NOT_EXECUTE:
+      case json::Status::WOULD_CAUSE_LIQUIDATION:
+      case json::Status::WOULD_NOT_REDUCE_POSITION:
+        reject(Error::UNKNOWN, send_status.status.as_text());
+        break;
       case json::Status::PLACED: {
         if (std::size(send_status.order_events) != 1)
           throw RuntimeErrorException(
@@ -172,8 +190,26 @@ class OrderUpdate final {
       case json::Status::FILLED:
       case json::Status::CANCELLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
-      case json::Status::NOT_FOUND:
         throw RuntimeErrorException("Unexpected: status={}"_sv, edit_status.status);
+        break;
+      case json::Status::NOT_FOUND:
+      case json::Status::INVALID_ORDER_TYPE:
+      case json::Status::INVALID_SIDE:
+      case json::Status::INVALID_PRICE:
+      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
+      case json::Status::SELF_FILL:
+      case json::Status::TOO_MANY_SMALL_ORDERS:
+      case json::Status::MAX_POSITION_VIOLATION:
+      case json::Status::MARKET_SUSPENDED:
+      case json::Status::MARKET_INACTIVE:
+      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
+      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
+      case json::Status::OUTSIDE_PRICE_COLLAR:
+      case json::Status::POST_WOULD_EXECUTE:
+      case json::Status::IOC_WOULD_NOT_EXECUTE:
+      case json::Status::WOULD_CAUSE_LIQUIDATION:
+      case json::Status::WOULD_NOT_REDUCE_POSITION:
+        reject(Error::UNKNOWN, edit_status.status.as_text());
         break;
       case json::Status::EDITED: {
         if (std::size(edit_status.order_events) != 1)
@@ -261,8 +297,26 @@ class OrderUpdate final {
       case json::Status::PLACED:
       case json::Status::EDITED:
       case json::Status::FILLED:
-      case json::Status::NO_ORDERS_TO_CANCEL:
         throw RuntimeErrorException("Unexpected: status={}"_sv, cancel_status.status);
+        break;
+      case json::Status::NO_ORDERS_TO_CANCEL:
+      case json::Status::INVALID_ORDER_TYPE:
+      case json::Status::INVALID_SIDE:
+      case json::Status::INVALID_PRICE:
+      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
+      case json::Status::SELF_FILL:
+      case json::Status::TOO_MANY_SMALL_ORDERS:
+      case json::Status::MAX_POSITION_VIOLATION:
+      case json::Status::MARKET_SUSPENDED:
+      case json::Status::MARKET_INACTIVE:
+      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
+      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
+      case json::Status::OUTSIDE_PRICE_COLLAR:
+      case json::Status::POST_WOULD_EXECUTE:
+      case json::Status::IOC_WOULD_NOT_EXECUTE:
+      case json::Status::WOULD_CAUSE_LIQUIDATION:
+      case json::Status::WOULD_NOT_REDUCE_POSITION:
+        reject(Error::UNKNOWN, cancel_status.status.as_text());
         break;
       case json::Status::CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
@@ -372,6 +426,23 @@ class OrderUpdate final {
       case json::Status::NO_ORDERS_TO_CANCEL:
       case json::Status::NOT_FOUND:
         break;
+      case json::Status::INVALID_ORDER_TYPE:
+      case json::Status::INVALID_SIDE:
+      case json::Status::INVALID_PRICE:
+      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
+      case json::Status::SELF_FILL:
+      case json::Status::TOO_MANY_SMALL_ORDERS:
+      case json::Status::MAX_POSITION_VIOLATION:
+      case json::Status::MARKET_SUSPENDED:
+      case json::Status::MARKET_INACTIVE:
+      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
+      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
+      case json::Status::OUTSIDE_PRICE_COLLAR:
+      case json::Status::POST_WOULD_EXECUTE:
+      case json::Status::IOC_WOULD_NOT_EXECUTE:
+      case json::Status::WOULD_CAUSE_LIQUIDATION:
+      case json::Status::WOULD_NOT_REDUCE_POSITION:
+        return OrderStatus::REJECTED;
     }
     return {};
   }
@@ -379,23 +450,7 @@ class OrderUpdate final {
   OrderStatus compute_order_status(json::Status status, double quantity, double filled) {
     if (utils::compare(quantity, filled) == 0)
       return OrderStatus::COMPLETED;
-    switch (status) {
-      case json::Status::UNDEFINED:
-      case json::Status::UNKNOWN:
-        break;
-      case json::Status::PLACED:
-        return OrderStatus::WORKING;
-      case json::Status::EDITED:
-        return OrderStatus::WORKING;
-      case json::Status::FILLED:
-        return OrderStatus::COMPLETED;
-      case json::Status::CANCELLED:
-        return OrderStatus::CANCELED;
-      case json::Status::NO_ORDERS_TO_CANCEL:
-      case json::Status::NOT_FOUND:
-        break;
-    }
-    return {};
+    return compute_order_status(status);
   }
 
  private:
