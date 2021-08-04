@@ -89,4 +89,3 @@ TEST(json_open_positions, simple_2) {
   EXPECT_DOUBLE_EQ(position_0.return_on_equity, -0.06248047485160779);
   EXPECT_DOUBLE_EQ(position_0.unrealized_funding, -6.4769646600617945e-9);
 }
-

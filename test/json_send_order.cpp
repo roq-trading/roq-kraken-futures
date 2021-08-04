@@ -136,4 +136,3 @@ TEST(json_send_order, order_prior_execution) {
   EXPECT_EQ(order_event_0.type, json::OrderEventType::EXECUTION);
   EXPECT_EQ(obj.server_time, 1627970190992ms);
 }
-
