@@ -64,6 +64,12 @@
       "description": "allow more than one in-flight order action? (bool)"
     },
     {
+      "name": "rest_use_nonce",
+      "type": "bool",
+      "default": "true",
+      "description": "use nonce for security?"
+    },
+    {
       "name": "ws_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",
