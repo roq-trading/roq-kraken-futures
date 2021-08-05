@@ -304,6 +304,12 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         },
         {
             .type = StatisticsType::FUNDING_RATE,
+            .value = ticker.funding_rate,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::FUNDING_RATE_PREDICTION,
             .value = ticker.funding_rate_prediction,
             .begin_time_utc = utils::safe_cast(ticker.next_funding_rate_time),
             .end_time_utc = {},

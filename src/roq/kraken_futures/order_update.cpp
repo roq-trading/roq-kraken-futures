@@ -186,6 +186,7 @@ void OrderUpdate::operator()(
                     order_update,
                     request_id,
                     [&]([[maybe_unused]] auto &order, [[maybe_unused]] auto callback) {})) {
+              // XXX HANS we need to ack from here !!!
             } else {
               log::warn("*** EXTERNAL ORDER ***"_sv);
               log::warn("order={}"_sv, order);
