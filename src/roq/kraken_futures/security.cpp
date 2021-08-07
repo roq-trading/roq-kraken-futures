@@ -54,7 +54,7 @@ Security::Security(
 std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
   assert(!path.empty());
   if (Flags::rest_use_nonce()) {
-    auto nonce = roq::format("{}"_sv, get_nonce().count());
+    auto nonce = fmt::format("{}"_sv, get_nonce().count());
     sha_.clear();
     if (!query.empty()) {
       assert(query[0] == '?');
@@ -72,7 +72,7 @@ std::string Security::create_headers(const std::string_view &path, const std::st
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == buffer_2.size());
     auto authent = core::binascii::Base64::encode(buffer_2);
-    return roq::format(
+    return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
         "Authent: {}\r\n"_sv,
@@ -96,7 +96,7 @@ std::string Security::create_headers(const std::string_view &path, const std::st
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == buffer_2.size());
     auto authent = core::binascii::Base64::encode(buffer_2);
-    return roq::format(
+    return fmt::format(
         "APIKey: {}\r\n"
         "Authent: {}\r\n"_sv,
         key_,

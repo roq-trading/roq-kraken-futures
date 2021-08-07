@@ -57,7 +57,7 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
       connection_(
           *this,
           context,
@@ -169,7 +169,7 @@ uint16_t OrderEntry::operator()(
     std::string query;
     if (!std::isnan(create_order.price)) {
       if (std::isnan(create_order.stop_price)) {
-        query = roq::format(  // limit
+        query = fmt::format(  // limit
             "?orderType={}"
             "&symbol={}"
             "&side={}"
@@ -185,7 +185,7 @@ uint16_t OrderEntry::operator()(
             request_id,
             reduce_only);
       } else {
-        query = roq::format(  // limit + stop
+        query = fmt::format(  // limit + stop
             "?orderType={}"
             "&symbol={}"
             "&side={}"
@@ -204,7 +204,7 @@ uint16_t OrderEntry::operator()(
             reduce_only);
       }
     } else {
-      query = roq::format(  // market
+      query = fmt::format(  // market
           "?orderType={}"
           "&symbol={}"
           "&side={}"
@@ -252,7 +252,7 @@ uint16_t OrderEntry::operator()(
     auto method = core::http::Method::POST;
     auto path = "/api/v3/editorder"_sv;
     // XXX HANS price has max 2 decimals, size is integer
-    auto query = roq::format(
+    auto query = fmt::format(
         "?orderId={}"
         "&size={}"
         "&limitPrice={}"_sv,
@@ -296,7 +296,7 @@ uint16_t OrderEntry::operator()(
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelorder"_sv;
-    auto query = roq::format("?order_id={}"_sv, order.external_order_id);
+    auto query = fmt::format("?order_id={}"_sv, order.external_order_id);
     log::debug(R"(query="{}")"_sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{

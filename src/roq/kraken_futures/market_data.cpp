@@ -58,7 +58,7 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"_sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -215,7 +215,7 @@ void MarketData::subscribe(const roq::span<std::string> &symbols) {
 
 void MarketData::subscribe(const std::string_view &feed) {
   log::info(R"(subscribe feed="{}")"_sv, feed);
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("feed":"{}")"
@@ -228,14 +228,14 @@ void MarketData::subscribe(const std::string_view &feed) {
 void MarketData::subscribe(
     const std::string_view &feed, const roq::span<std::string> &product_ids) {
   log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("feed":"{}",)"
       R"("product_ids":["{}"])"
       R"(}})"_sv,
       feed,
-      roq::join(product_ids, R"(",")"_sv));
+      fmt::join(product_ids, R"(",")"_sv));
   log::info<3>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
 }

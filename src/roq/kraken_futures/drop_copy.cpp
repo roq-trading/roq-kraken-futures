@@ -41,7 +41,7 @@ DropCopy::DropCopy(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -108,7 +108,7 @@ void DropCopy::operator()(metrics::Writer &writer) {
 void DropCopy::get_challenge() {
   assert(original_challenge_.empty());
   assert(signed_challenge_.empty());
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("event":"challenge",)"
       R"("api_key":"{}")"
@@ -127,7 +127,7 @@ void DropCopy::subscribe() {
 }
 
 void DropCopy::subscribe(const std::string_view &feed) {
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("feed":"{}",)"
