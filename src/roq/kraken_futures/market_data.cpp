@@ -295,6 +295,7 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
     server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
+    // note! using *relative* funding rate to be compatible with other exchanges
     Statistics statistics[] = {
         {
             .type = StatisticsType::INDEX_VALUE,
@@ -304,13 +305,13 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         },
         {
             .type = StatisticsType::FUNDING_RATE,
-            .value = ticker.funding_rate,
+            .value = ticker.relative_funding_rate,
             .begin_time_utc = {},
             .end_time_utc = {},
         },
         {
             .type = StatisticsType::FUNDING_RATE_PREDICTION,
-            .value = ticker.funding_rate_prediction,
+            .value = ticker.relative_funding_rate_prediction,
             .begin_time_utc = utils::safe_cast(ticker.next_funding_rate_time),
             .end_time_utc = {},
         },
