@@ -47,6 +47,48 @@ static auto get_quality_of_service() {
   return Flags::rest_allow_order_request_pipeline() ? core::web::QualityOfService::IMMEDIATE
                                                     : core::web::QualityOfService::CRITICAL;
 }
+
+static auto url_encode(const std::string_view &value) {
+  std::string result;
+  result.reserve(std::size(value) * 2);  // note! just some more space
+  for (auto &iter : value) {
+    switch (iter) {
+      case '$':
+        result.append(R"(%24)"_sv);
+        break;
+      case '&':
+        result.append(R"(%26)"_sv);
+        break;
+      case '+':
+        result.append(R"(%2B)"_sv);
+        break;
+      case ',':
+        result.append(R"(%2C)"_sv);
+        break;
+      case '/':
+        result.append(R"(%2F)"_sv);
+        break;
+      case ':':
+        result.append(R"(%3A)"_sv);
+        break;
+      case ';':
+        result.append(R"(%3B)"_sv);
+        break;
+      case '=':
+        result.append(R"(%3D)"_sv);
+        break;
+      case '?':
+        result.append(R"(%3F)"_sv);
+        break;
+      case '@':
+        result.append(R"(%40)"_sv);
+        break;
+      default:
+        result.push_back(iter);
+    }
+  }
+  return result;
+}
 }  // namespace
 
 OrderEntry::OrderEntry(
@@ -182,7 +224,7 @@ uint16_t OrderEntry::operator()(
             side.as_raw_text(),
             create_order.quantity,
             create_order.price,
-            request_id,
+            url_encode(request_id),  // note! allocates
             reduce_only);
       } else {
         query = fmt::format(  // limit + stop
@@ -200,7 +242,7 @@ uint16_t OrderEntry::operator()(
             create_order.quantity,
             create_order.price,
             create_order.stop_price,
-            request_id,
+            url_encode(request_id),  // note! allocates
             reduce_only);
       }
     } else {
@@ -215,7 +257,7 @@ uint16_t OrderEntry::operator()(
           create_order.symbol,
           side.as_raw_text(),
           create_order.quantity,
-          request_id,
+          url_encode(request_id),  // note! allocates
           reduce_only);
     }
     log::debug(R"(query="{}")"_sv, query);

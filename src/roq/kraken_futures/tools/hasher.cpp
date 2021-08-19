@@ -1,0 +1,105 @@
+/* Copyright (c) 2017-2021, Hans Erik Thrane */
+
+#include "roq/kraken_futures/tools/hasher.h"
+
+#include <fmt/format.h>
+
+#include <array>
+
+#include "roq/literals.h"
+
+#include "roq/core/binascii/base64.h"
+
+#include "roq/core/crypto/sha.h"
+
+using namespace roq::literals;
+
+namespace roq {
+namespace kraken_futures {
+namespace tools {
+
+namespace {
+static auto create_hmac(const std::string_view &secret) {
+  auto raw_secret = core::binascii::Base64::decode(secret, true);
+  return core::crypto::HMAC_SHA512(raw_secret);
+}
+}  // namespace
+
+Hasher::Hasher(const std::string_view &secret) : hmac_(create_hmac(secret)) {
+}
+
+std::string Hasher::create_headers(
+    const std::string_view &path,
+    const std::string_view &query,
+    const std::string_view &key,
+    std::chrono::milliseconds nonce) {
+  assert(!path.empty());
+  if (nonce.count()) {
+    auto nonce_ = fmt::format("{}"_sv, nonce.count());
+    sha_.clear();
+    if (!query.empty()) {
+      assert(query[0] == '?');
+      auto raw = query.substr(1);  // note! not including '?'
+      sha_.update(raw);
+    }
+    sha_.update(nonce_);
+    sha_.update(path);
+    std::array<char, 32> buffer_1;
+    auto length_1 = sha_.digest(buffer_1);
+    assert(length_1 == buffer_1.size());
+    hmac_.clear();
+    hmac_.update(buffer_1.data(), buffer_1.size());
+    std::array<char, 64> buffer_2;
+    auto length_2 = hmac_.digest(buffer_2);
+    assert(length_2 == buffer_2.size());
+    auto authent = core::binascii::Base64::encode(buffer_2);
+    return fmt::format(
+        "APIKey: {}\r\n"
+        "Nonce: {}\r\n"
+        "Authent: {}\r\n"_sv,
+        key,
+        nonce_,
+        authent);
+  } else {
+    sha_.clear();
+    if (!query.empty()) {
+      assert(query[0] == '?');
+      auto raw = query.substr(1);  // note! not including '?'
+      sha_.update(raw);
+    }
+    sha_.update(path);
+    std::array<char, 32> buffer_1;
+    auto length_1 = sha_.digest(buffer_1);
+    assert(length_1 == buffer_1.size());
+    hmac_.clear();
+    hmac_.update(buffer_1.data(), buffer_1.size());
+    std::array<char, 64> buffer_2;
+    auto length_2 = hmac_.digest(buffer_2);
+    assert(length_2 == buffer_2.size());
+    auto authent = core::binascii::Base64::encode(buffer_2);
+    return fmt::format(
+        "APIKey: {}\r\n"
+        "Authent: {}\r\n"_sv,
+        key,
+        authent);
+  }
+}
+
+std::string Hasher::signed_challenge(const std::string_view &original_challenge) {
+  sha_.clear();
+  sha_.update(original_challenge);
+  std::array<char, 32> buffer_1;
+  auto length_1 = sha_.digest(buffer_1);
+  assert(length_1 == buffer_1.size());
+  hmac_.clear();
+  hmac_.update(buffer_1.data(), buffer_1.size());
+  std::array<char, 64> buffer_2;
+  auto length_2 = hmac_.digest(buffer_2);
+  assert(length_2 == buffer_2.size());
+  auto result = core::binascii::Base64::encode(buffer_2);
+  return result;
+}
+
+}  // namespace tools
+}  // namespace kraken_futures
+}  // namespace roq
