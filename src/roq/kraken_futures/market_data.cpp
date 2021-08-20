@@ -304,6 +304,12 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
             .end_time_utc = {},
         },
         {
+            .type = StatisticsType::SETTLEMENT_PRICE,
+            .value = ticker.mark_price,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
             .type = StatisticsType::FUNDING_RATE,
             .value = ticker.relative_funding_rate,
             .begin_time_utc = {},

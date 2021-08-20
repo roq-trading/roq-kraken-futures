@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Added
+
+* Publish `SETTLEMENT_PRICE` (#27)
+
 ### Fixed
 
 * Post data should be URL encoded (#24)
