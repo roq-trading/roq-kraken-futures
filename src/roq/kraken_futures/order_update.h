@@ -38,7 +38,7 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      const server::Order &order, const json::SendOrder &send_order, Accept accept, Reject reject) {
+      uint32_t order_id, const json::SendOrder &send_order, Accept accept, Reject reject) {
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
       case json::Status::UNDEFINED:
@@ -91,8 +91,8 @@ class OrderUpdate final {
             roq::OrderUpdate order_update{
                 .stream_id = stream_id_,
                 .account = account_,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
+                .order_id = order_id,
+                .exchange = {},
                 .symbol = symbol,
                 .side = side,
                 .position_effect = {},
@@ -137,8 +137,8 @@ class OrderUpdate final {
             roq::OrderUpdate order_update{
                 .stream_id = stream_id_,
                 .account = account_,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
+                .order_id = order_id,
+                .exchange = {},
                 .symbol = symbol,
                 .side = side,
                 .position_effect = {},
@@ -181,7 +181,7 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      const server::Order &order, const json::EditOrder &edit_order, Accept accept, Reject reject) {
+      uint32_t order_id, const json::EditOrder &edit_order, Accept accept, Reject reject) {
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
       case json::Status::UNDEFINED:
@@ -234,8 +234,8 @@ class OrderUpdate final {
             roq::OrderUpdate order_update{
                 .stream_id = stream_id_,
                 .account = account_,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
+                .order_id = order_id,
+                .exchange = {},
                 .symbol = symbol,
                 .side = side,
                 .position_effect = {},
@@ -286,10 +286,7 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      const server::Order &order,
-      const json::CancelOrder &cancel_order,
-      Accept accept,
-      Reject reject) {
+      uint32_t order_id, const json::CancelOrder &cancel_order, Accept accept, Reject reject) {
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
       case json::Status::UNDEFINED:
@@ -340,8 +337,8 @@ class OrderUpdate final {
             roq::OrderUpdate order_update{
                 .stream_id = stream_id_,
                 .account = account_,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
+                .order_id = order_id,
+                .exchange = {},
                 .symbol = symbol,
                 .side = side,
                 .position_effect = {},

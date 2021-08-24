@@ -265,7 +265,6 @@ void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
 void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
-    log::debug("account_balances_and_margins={}"_sv, account_balances_and_margins);
     log::info<3>("account_balances_and_margins={}"_sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
@@ -286,7 +285,6 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
 void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
-    log::debug("open_positions={}"_sv, open_positions);
     log::info<3>("open_positions={}"_sv, open_positions);
     for (auto &item : open_positions.positions) {
       PositionUpdate position_update{
@@ -310,7 +308,6 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
 void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
-    log::debug("open_orders_snapshot={}"_sv, open_orders_snapshot);
     log::info<3>("open_orders_snapshot={}"_sv, open_orders_snapshot);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders_snapshot, trace_info);
   });
@@ -319,7 +316,6 @@ void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) 
 void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
-    log::debug("open_orders={}"_sv, open_orders);
     log::info<3>("open_orders={}"_sv, open_orders);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders, trace_info);
   });
@@ -330,10 +326,9 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
     auto &fills_snapshot = event.value;
-    log::debug("fills_snapshot={}"_sv, fills_snapshot);
     log::info<3>("fills_snapshot={}"_sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
-      if (shared_.find_order(item.cli_ord_id, [&](auto &order, [[maybe_unused]] auto callback) {
+      if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
             std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
             if (symbol.compare(order.symbol) != 0)
@@ -378,11 +373,10 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
-    log::debug("fills={}"_sv, fills);
     log::info<3>("fills={}"_sv, fills);
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
-      if (shared_.find_order(item.cli_ord_id, [&](auto &order, [[maybe_unused]] auto callback) {
+      if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
             std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
             if (symbol.compare(order.symbol) != 0)

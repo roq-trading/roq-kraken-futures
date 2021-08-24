@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* New order management interface (#25)
+
 ### Added
 
 * Publish `SETTLEMENT_PRICE` (#27)

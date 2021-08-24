@@ -139,59 +139,45 @@ void OrderUpdate::operator()(
     const json::Reason reason,
     bool is_cancel,
     const server::TraceInfo &trace_info) {
-  if (shared_.find_order(
-          cli_ord_id, [&]([[maybe_unused]] auto &order_2, [[maybe_unused]] auto callback) {
-            // XXX HANS we need some other way to update order
-            // note! we receive upper-case symbol from websocket
-            auto side = compute_side(order.direction);
-            auto order_type = json::map(order.type);
-            auto status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
-            roq::OrderUpdate order_update{
-                .stream_id = stream_id_,
-                .account = account_,
-                .order_id = {},
-                .exchange = Flags::exchange(),
-                .symbol = order.instrument,
-                .side = side,
-                .position_effect = {},
-                .max_show_quantity = NaN,
-                .order_type = order_type,
-                .time_in_force = {},
-                .execution_instruction = {},
-                .order_template = {},
-                .create_time_utc = {},
-                .update_time_utc = order.last_update_time,
-                .external_account = {},
-                .external_order_id = order.order_id,
-                .status = status,
-                .quantity = order.qty,
-                .price = order.limit_price,
-                .stop_price = NaN,
-                .remaining_quantity = NaN,
-                .traded_quantity = order.filled,
-                .average_traded_price = NaN,
-                .last_traded_quantity = NaN,
-                .last_traded_price = NaN,
-                .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
-            };
-            auto request_type = compute_request_type(reason);  // XXX HANS NEW
-            auto request_id = cli_ord_id;
-            if (shared_.find_order(
-                    stream_id_,
-                    trace_info,
-                    order_update,
-                    request_id,
-                    [&]([[maybe_unused]] auto &order, [[maybe_unused]] auto callback) {})) {
-              // XXX HANS we need to ack from here !!!
-            } else {
-              log::warn("*** EXTERNAL ORDER ***"_sv);
-              log::warn("order={}"_sv, order);
-            }
-          })) {
+  auto side = compute_side(order.direction);
+  auto order_type = json::map(order.type);
+  auto status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
+  roq::OrderUpdate order_update{
+      .stream_id = stream_id_,
+      .account = account_,
+      .order_id = {},
+      .exchange = Flags::exchange(),
+      .symbol = order.instrument,
+      .side = side,
+      .position_effect = {},
+      .max_show_quantity = NaN,
+      .order_type = order_type,
+      .time_in_force = {},
+      .execution_instruction = {},
+      .order_template = {},
+      .create_time_utc = {},
+      .update_time_utc = order.last_update_time,
+      .external_account = {},
+      .external_order_id = order.order_id,
+      .status = status,
+      .quantity = order.qty,
+      .price = order.limit_price,
+      .stop_price = NaN,
+      .remaining_quantity = NaN,
+      .traded_quantity = order.filled,
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+  };
+  auto request_type = compute_request_type(reason);
+  auto request_id = cli_ord_id;
+  if (shared_.update_order(
+          request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"_sv);
     log::warn("order={}"_sv, order);
