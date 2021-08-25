@@ -65,7 +65,12 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   void subscribe(const roq::span<std::string> &symbols);
 
   void subscribe(const std::string_view &feed);
-  void subscribe(const std::string_view &feed, const roq::span<std::string> &product_ids);
+
+  template <typename T>
+  void subscribe(const std::string_view &feed, const roq::span<T> &product_ids);
+
+  template <typename T>
+  void unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids);
 
   // json::ParserPublic::Handler
 
@@ -115,6 +120,8 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   server::Download<MarketDataState> download_;
+  // experimental
+  absl::flat_hash_set<std::string> latch_;
 };
 
 }  // namespace kraken_futures

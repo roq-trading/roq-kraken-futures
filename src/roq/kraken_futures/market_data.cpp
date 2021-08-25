@@ -12,6 +12,8 @@
 
 #include "roq/core/metrics/factory.h"
 
+#include "roq/core/market/exceptions.h"
+
 #include "roq/kraken_futures/flags.h"
 
 #include "roq/kraken_futures/json/utils.h"
@@ -225,12 +227,27 @@ void MarketData::subscribe(const std::string_view &feed) {
   connection_.send_text(message);
 }
 
-void MarketData::subscribe(
-    const std::string_view &feed, const roq::span<std::string> &product_ids) {
+template <typename T>
+void MarketData::subscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
   log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
+      R"("feed":"{}",)"
+      R"("product_ids":["{}"])"
+      R"(}})"_sv,
+      feed,
+      fmt::join(product_ids, R"(",")"_sv));
+  log::info<3>(R"(request="{}")"_sv, message);
+  connection_.send_text(message);
+}
+
+template <typename T>
+void MarketData::unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"unsubscribe",)"
       R"("feed":"{}",)"
       R"("product_ids":["{}"])"
       R"(}})"_sv,
@@ -345,6 +362,8 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
   profile_.book_snapshot([&]() {
     auto &[trace_info, book_snapshot] = event;
     log::info<3>("book_snapshot={}"_sv, book_snapshot);
+    auto &symbol = book_snapshot.product_id;
+    latch_.erase(symbol);  // latch
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
     for (const auto &bid : book_snapshot.bids)
       bids.emplace_back([&](auto &result) { emplace(result, bid); });
@@ -353,7 +372,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
     MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
-        .symbol = book_snapshot.product_id,
+        .symbol = symbol,
         .bids = bids,
         .asks = asks,
         .snapshot = true,
@@ -368,6 +387,10 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
   profile_.book([&]() {
     auto &[trace_info, book] = event;
     log::info<3>("book={}"_sv, book);
+    auto &symbol = book.product_id;
+    if (latch_.find(symbol) != latch_.end()) {
+      return;  // skip processing if we're waiting for snapshot
+    }
     MBPUpdate mbp_update{
         .price = book.price,
         .quantity = book.qty,
@@ -381,14 +404,38 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
-        .symbol = book.product_id,
+        .symbol = symbol,
         .bids = {bid ? &mbp_update : nullptr, bid ? 1u : 0u},
         .asks = {ask ? &mbp_update : nullptr, ask ? 1u : 0u},
         .snapshot = false,
         .exchange_time_utc = book.timestamp,
     };
-    log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+    try {
+      log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+    } catch (core::market::BadState &e) {
+      log::warn(
+          R"(Book in bad state, resubscribing exchange="{}", symbol="{}")"_sv,
+          e.exchange,
+          e.symbol);
+      log::warn<1>("market_by_price_update={}"_sv, market_by_price_update);
+      // reset
+      MarketByPriceUpdate market_by_price_reset{
+          .stream_id = stream_id_,
+          .exchange = Flags::exchange(),
+          .symbol = symbol,
+          .bids = {},
+          .asks = {},
+          .snapshot = true,
+          .exchange_time_utc = book.timestamp,
+      };
+      log::info<3>("market_by_price_update={}"_sv, market_by_price_reset);
+      server::create_trace_and_dispatch(trace_info, market_by_price_reset, handler_, false);
+      latch_.emplace(symbol);  // latch
+      roq::span symbols{&symbol, 1};
+      unsubscribe("book"_sv, symbols);
+      subscribe("book"_sv, symbols);
+    }
   });
 }
 

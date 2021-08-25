@@ -97,13 +97,6 @@
       "description": "request timeout"
     },
     {
-      "name": "ws_subscribe_book_depth",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::Positive<uint32_t>",
-      "default": 10,
-      "description": "book depth (size)"
-    },
-    {
       "name": "ws_max_subscriptions_per_stream",
       "type": "uint32_t",
       "validator": "roq::core::flags::Positive<uint32_t>",

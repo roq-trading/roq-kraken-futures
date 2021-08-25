@@ -6,11 +6,16 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Resubscribe book when bad state is being detected (#31)
 * New order management interface (#25)
 
 ### Added
 
 * Publish `SETTLEMENT_PRICE` (#27)
+
+### Removed
+
+* The `--ws_subscribe_book_depth` flag was incorrectly used to limit depth.
 
 ### Fixed
 
