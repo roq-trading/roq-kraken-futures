@@ -1,5 +1,4 @@
-#symbols = ".*"
-symbols = "PI_XBTUSD"
+symbols = ".*"
 
 [accounts]
 
