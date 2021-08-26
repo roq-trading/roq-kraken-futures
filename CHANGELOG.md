@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Request ID generator using web-safe Base64 encoding (#33)
 * Resubscribe book when bad state is being detected (#31)
 * New order management interface (#25)
 
