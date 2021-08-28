@@ -10,6 +10,10 @@ All notable changes will be documented in this file.
 * Resubscribe book when bad state is being detected (#31)
 * New order management interface (#25)
 
+### Fixed
+
+* Download orders (#25)
+
 ### Added
 
 * Publish `SETTLEMENT_PRICE` (#27)

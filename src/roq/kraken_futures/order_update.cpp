@@ -21,7 +21,7 @@ namespace kraken_futures {
 void OrderUpdate::operator()(
     const json::OpenOrdersSnapshot &open_orders_snapshot, const server::TraceInfo &trace_info) {
   for (auto &order : open_orders_snapshot.orders)
-    (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info);
+    (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
 }
 
 void OrderUpdate::operator()(
@@ -30,7 +30,8 @@ void OrderUpdate::operator()(
   // ... just confusing
   auto order_id = open_orders.order_id.empty() ? order.order_id : open_orders.order_id;
   auto cli_ord_id = open_orders.cli_ord_id.empty() ? order.cli_ord_id : open_orders.cli_ord_id;
-  (*this)(order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info);
+  (*this)(
+      order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
 }
 
 namespace {
@@ -138,7 +139,8 @@ void OrderUpdate::operator()(
     const std::string_view &cli_ord_id,
     const json::Reason reason,
     bool is_cancel,
-    const server::TraceInfo &trace_info) {
+    const server::TraceInfo &trace_info,
+    bool is_download) {
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);
   auto status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
@@ -176,11 +178,20 @@ void OrderUpdate::operator()(
   };
   auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
-  if (shared_.update_order(
-          request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (is_download) {
+    if (shared_.create_order(request_id, stream_id_, trace_info, order_update)) {
+    } else {
+      log::warn("*** EXTERNAL ORDER ***"_sv);
+      log::warn("order={}"_sv, order);
+    }
   } else {
-    log::warn("*** EXTERNAL ORDER ***"_sv);
-    log::warn("order={}"_sv, order);
+    if (shared_.update_order(
+            request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {
+            })) {
+    } else {
+      log::warn("*** EXTERNAL ORDER ***"_sv);
+      log::warn("order={}"_sv, order);
+    }
   }
 }
 

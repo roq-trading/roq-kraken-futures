@@ -394,7 +394,8 @@ class OrderUpdate final {
       const std::string_view &cli_ord_id,
       const json::Reason,
       bool is_cancel,
-      const server::TraceInfo &);
+      const server::TraceInfo &,
+      bool is_download);
 
   Side compute_side(int32_t direction) {
     switch (direction) {
