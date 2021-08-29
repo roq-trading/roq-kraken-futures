@@ -43,6 +43,19 @@
       "description": "URI path used for REST connection keep-alive messages"
     },
     {
+      "name": "rest_cancel_on_disconnect",
+      "type": "bool",
+      "default": true,
+      "description": "cancel orders on disconnect? (bool)"
+    },
+    {
+      "name": "rest_cancel_all_after",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "cancel all after, requires cancel-on-disconnect"
+    },
+    {
       "name": "rest_request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",

@@ -1,0 +1,10 @@
+{
+"name": "CancelAllAfterAck",
+"type": "comp",
+"values": [
+	{ "name": "result", "type": "Result" },
+	{ "name": "status", "type": "CancelAllAfterAckStatus" },
+	{ "name": "serverTime", "type": "std::chrono::milliseconds" },
+	{ "name": "error", "type": "std::string_view" }
+]
+}

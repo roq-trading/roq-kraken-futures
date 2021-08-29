@@ -89,6 +89,10 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void cancel_all_orders_ack(const core::web::Response &);
 
+  void cancel_all_after(std::chrono::nanoseconds timeout);
+
+  void cancel_all_after_ack(const core::web::Response &);
+
   template <typename T>
   void get(std::function<void(const core::Promise<T> &)> &&callback);
 
@@ -123,6 +127,8 @@ class OrderEntry final : public core::web::Client::Handler {
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   server::Download<OrderEntryState> download_;
+  // cancel all
+  std::chrono::nanoseconds next_cancel_all_timer_ = {};
 };
 
 }  // namespace kraken_futures

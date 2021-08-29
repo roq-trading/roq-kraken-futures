@@ -16,6 +16,7 @@ All notable changes will be documented in this file.
 
 ### Added
 
+* Support auto-cancel (#37)
 * Publish `SETTLEMENT_PRICE` (#27)
 
 ### Removed

@@ -62,6 +62,8 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
       order_entry_(
           create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)) {
+  if (!Flags::rest_cancel_on_disconnect())
+    log::warn("Orders will *NOT* be cancelled on disconnect"_sv);
 }
 
 void Gateway::operator()(const Event<Start> &event) {

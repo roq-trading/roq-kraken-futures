@@ -14,6 +14,7 @@
 #include "roq/kraken_futures/flags.h"
 #include "roq/kraken_futures/order_update.h"
 
+#include "roq/kraken_futures/json/cancel_all_after_ack.h"
 #include "roq/kraken_futures/json/cancel_all_orders.h"
 #include "roq/kraken_futures/json/cancel_order.h"
 #include "roq/kraken_futures/json/edit_order.h"
@@ -144,7 +145,13 @@ void OrderEntry::operator()(const Event<Stop> &) {
 }
 
 void OrderEntry::operator()(const Event<Timer> &event) {
-  connection_.refresh(event.value.now);
+  auto now = event.value.now;
+  connection_.refresh(now);
+  if (Flags::rest_cancel_on_disconnect() && Flags::rest_cancel_all_after().count() && ready() &&
+      next_cancel_all_timer_ < now) {
+    next_cancel_all_timer_ = now + Flags::rest_cancel_all_after() / 4;
+    cancel_all_after(Flags::rest_cancel_all_after());
+  }
 }
 
 void OrderEntry::operator()(metrics::Writer &writer) {
@@ -790,6 +797,61 @@ void OrderEntry::cancel_all_orders_ack(const core::web::Response &response) {
         auto rest_error = core::json::Parser::create<json::RestError>(body, buffer);
         log::warn("error={}"_sv, rest_error);
         // note! this event does not require an ack
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
+    }
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    // note! this event does not require an ack
+  }
+}
+
+void OrderEntry::cancel_all_after(std::chrono::nanoseconds timeout) {
+  auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
+  auto method = core::http::Method::POST;
+  auto path = "/api/v3/cancelallordersafter"_sv;
+  auto query = fmt::format("?timeout={}"_sv, value.count());
+  auto headers = security_.create_headers(path, query);
+  core::web::Request request{
+      .method = method,
+      .path = path,
+      .query = query,
+      .accept = core::http::Accept::JSON,
+      .content_type = core::http::ContentType::JSON,
+      .headers = headers,
+      .body = {},
+      .quality_of_service = get_quality_of_service(),
+      .rate_limit_weight = 1,
+  };
+  connection_(request, [this](auto &response) {
+    profile_.cancel_all_orders_ack([&]() { cancel_all_after_ack(response); });
+  });
+}
+
+void OrderEntry::cancel_all_after_ack(const core::web::Response &response) {
+  try {
+    switch (response.raw_status()) {
+      case core::http::Status::OK: {  // 200
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto cancel_all_after_ack =
+            core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
+        log::info<3>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
+        log::debug("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
+        break;
+      }
+      case core::http::Status::BAD_REQUEST:   // 400
+      case core::http::Status::UNAUTHORIZED:  // 401
+      case core::http::Status::FORBIDDEN:     // 403
+      case core::http::Status::NOT_FOUND: {   // 404
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto cancel_all_after_ack =
+            core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
+        log::warn<3>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
+        log::debug("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
         break;
       }
       default:

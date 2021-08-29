@@ -10,6 +10,8 @@ set(AUTOGEN_SCHEMAS
     book.json
     book_item.json
     book_snapshot.json
+    cancel_all_after_ack.json
+    cancel_all_after_ack_status.json
     cancel_all_orders.json
     cancel_all_status.json
     cancel_order.json
