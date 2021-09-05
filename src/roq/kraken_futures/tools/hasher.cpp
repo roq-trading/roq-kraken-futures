@@ -52,7 +52,7 @@ std::string Hasher::create_headers(
     std::array<char, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == buffer_2.size());
-    auto authent = core::binascii::Base64::encode(buffer_2);
+    auto authent = core::binascii::Base64::encode(buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
@@ -76,7 +76,7 @@ std::string Hasher::create_headers(
     std::array<char, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == buffer_2.size());
-    auto authent = core::binascii::Base64::encode(buffer_2);
+    auto authent = core::binascii::Base64::encode(buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Authent: {}\r\n"_sv,
@@ -96,7 +96,7 @@ std::string Hasher::signed_challenge(const std::string_view &original_challenge)
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
-  auto result = core::binascii::Base64::encode(buffer_2);
+  auto result = core::binascii::Base64::encode(buffer_2, false);
   return result;
 }
 
