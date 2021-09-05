@@ -204,8 +204,7 @@ uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &event, const std::string_view &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(
-          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
+      throw oms::NotReadyException();
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/sendorder"_sv;
@@ -292,13 +291,12 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &event,
-    const server::OMS_Order &order,
+    const oms::Order &order,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(
-          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
+      throw oms::NotReadyException();
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/editorder"_sv;
@@ -338,13 +336,12 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &event,
-    const server::OMS_Order &order,
+    const oms::Order &order,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(
-          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
+      throw oms::NotReadyException();
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelorder"_sv;
@@ -378,8 +375,7 @@ uint16_t OrderEntry::operator()(
 uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
   profile_.cancel_all_orders([&]() {
     if (!ready())
-      throw server::OMS_ErrorException(
-          Origin::GATEWAY, RequestStatus::REJECTED, Error::GATEWAY_NOT_READY);
+      throw oms::NotReadyException();
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelallorders"_sv;
     auto headers = security_.create_headers(path, {});
@@ -459,7 +455,7 @@ void OrderEntry::create_order_ack(
           break;
         case json::Result::ERROR: {
           log::warn("send_order={}"_sv, send_order);
-          server::OMS_Ack ack{
+          oms::Response response{
               .type = RequestType::CREATE_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
@@ -471,7 +467,12 @@ void OrderEntry::create_order_ack(
               .price = NaN,
           };
           shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+              user_id,
+              order_id,
+              stream_id_,
+              trace_info,
+              response,
+              []([[maybe_unused]] auto &order) {});
         } break;
         case json::Result::SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;
@@ -480,7 +481,7 @@ void OrderEntry::create_order_ack(
               send_order,
               [&](auto &order_update) {
                 log::debug("order_update={}"_sv, order_update);
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::CREATE_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::ACCEPTED,
@@ -496,12 +497,12 @@ void OrderEntry::create_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     order_update,
                     []([[maybe_unused]] auto &order) {});
               },
               [&](auto error, auto text) {
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::CREATE_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::REJECTED,
@@ -517,7 +518,7 @@ void OrderEntry::create_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     []([[maybe_unused]] auto &order) {});
               });
           break;
@@ -531,7 +532,7 @@ void OrderEntry::create_order_ack(
       auto error = core::json::Parser::create<json::RestError>(body, buffer);
       log::warn("error={}"_sv, error);
       auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      server::OMS_Ack ack{
+      oms::Response response{
           .type = RequestType::CREATE_ORDER,
           .origin = Origin::EXCHANGE,
           .status = RequestStatus::REJECTED,
@@ -543,7 +544,7 @@ void OrderEntry::create_order_ack(
           .price = NaN,
       };
       shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
       break;
     }
     default:
@@ -570,7 +571,7 @@ void OrderEntry::modify_order_ack(
           break;
         case json::Result::ERROR: {
           log::warn("edit_order={}"_sv, edit_order);
-          server::OMS_Ack ack{
+          oms::Response response{
               .type = RequestType::CREATE_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
@@ -582,7 +583,12 @@ void OrderEntry::modify_order_ack(
               .price = NaN,
           };
           shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+              user_id,
+              order_id,
+              stream_id_,
+              trace_info,
+              response,
+              []([[maybe_unused]] auto &order) {});
           break;
         }
         case json::Result::SUCCESS: {
@@ -592,7 +598,7 @@ void OrderEntry::modify_order_ack(
               edit_order,
               [&](auto &order_update) {
                 log::debug("order_update={}"_sv, order_update);
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::MODIFY_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::ACCEPTED,
@@ -608,12 +614,12 @@ void OrderEntry::modify_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     order_update,
                     []([[maybe_unused]] auto &order) {});
               },
               [&](auto error, auto text) {
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::MODIFY_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::REJECTED,
@@ -629,7 +635,7 @@ void OrderEntry::modify_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     []([[maybe_unused]] auto &order) {});
               });
           break;
@@ -643,7 +649,7 @@ void OrderEntry::modify_order_ack(
       auto error = core::json::Parser::create<json::RestError>(body, buffer);
       log::warn("error={}"_sv, error);
       auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      server::OMS_Ack ack{
+      oms::Response response{
           .type = RequestType::MODIFY_ORDER,
           .origin = Origin::EXCHANGE,
           .status = RequestStatus::REJECTED,
@@ -655,7 +661,7 @@ void OrderEntry::modify_order_ack(
           .price = NaN,
       };
       shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
       break;
     }
     default:
@@ -682,7 +688,7 @@ void OrderEntry::cancel_order_ack(
           break;
         case json::Result::ERROR: {
           log::warn("cancel_order={}"_sv, cancel_order);
-          server::OMS_Ack ack{
+          oms::Response response{
               .type = RequestType::CREATE_ORDER,
               .origin = Origin::EXCHANGE,
               .status = RequestStatus::REJECTED,
@@ -694,7 +700,12 @@ void OrderEntry::cancel_order_ack(
               .price = NaN,
           };
           shared_.update_order(
-              user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+              user_id,
+              order_id,
+              stream_id_,
+              trace_info,
+              response,
+              []([[maybe_unused]] auto &order) {});
           break;
         }
         case json::Result::SUCCESS: {
@@ -704,7 +715,7 @@ void OrderEntry::cancel_order_ack(
               cancel_order,
               [&](auto &order_update) {
                 log::debug("order_update={}"_sv, order_update);
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::CANCEL_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::ACCEPTED,
@@ -720,12 +731,12 @@ void OrderEntry::cancel_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     order_update,
                     []([[maybe_unused]] auto &order) {});
               },
               [&](auto error, auto text) {
-                server::OMS_Ack ack{
+                oms::Response response{
                     .type = RequestType::CANCEL_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::REJECTED,
@@ -741,7 +752,7 @@ void OrderEntry::cancel_order_ack(
                     order_id,
                     stream_id_,
                     trace_info,
-                    ack,
+                    response,
                     []([[maybe_unused]] auto &order) {});
               });
           break;
@@ -755,7 +766,7 @@ void OrderEntry::cancel_order_ack(
       auto error = core::json::Parser::create<json::RestError>(body, buffer);
       log::warn("error={}"_sv, error);
       auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      server::OMS_Ack ack{
+      oms::Response response{
           .type = RequestType::CANCEL_ORDER,
           .origin = Origin::EXCHANGE,
           .status = RequestStatus::REJECTED,
@@ -767,7 +778,7 @@ void OrderEntry::cancel_order_ack(
           .price = NaN,
       };
       shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, ack, []([[maybe_unused]] auto &order) {});
+          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
       break;
     }
     default:

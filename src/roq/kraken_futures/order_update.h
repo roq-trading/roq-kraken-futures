@@ -88,10 +88,8 @@ class OrderUpdate final {
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(send_status.status);
             // XXX HANS should we use reduced_quantity to log a warning ???
-            roq::OrderUpdate order_update{
-                .stream_id = stream_id_,
+            oms::OrderUpdate order_update{
                 .account = account_,
-                .order_id = order_id,
                 .exchange = {},
                 .symbol = symbol,
                 .side = side,
@@ -115,10 +113,6 @@ class OrderUpdate final {
                 .last_traded_quantity = NaN,
                 .last_traded_price = NaN,
                 .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
             };
             accept(std::as_const(order_update));
             break;
@@ -134,10 +128,8 @@ class OrderUpdate final {
             auto traded_quantity = order_event.amount;
             auto remaining_quantity = order_.quantity - traded_quantity;
             // XXX HANS should we use reduced_quantity to log a warning ???
-            roq::OrderUpdate order_update{
-                .stream_id = stream_id_,
+            oms::OrderUpdate order_update{
                 .account = account_,
-                .order_id = order_id,
                 .exchange = {},
                 .symbol = symbol,
                 .side = side,
@@ -161,10 +153,6 @@ class OrderUpdate final {
                 .last_traded_quantity = NaN,
                 .last_traded_price = NaN,
                 .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
             };
             accept(std::as_const(order_update));
             break;
@@ -231,10 +219,8 @@ class OrderUpdate final {
             auto order_type = json::map(new_order.type);
             auto status = compute_order_status(edit_status.status);
             // XXX HANS should we use reduced_quantity to compute remaining quantity ???
-            roq::OrderUpdate order_update{
-                .stream_id = stream_id_,
+            oms::OrderUpdate order_update{
                 .account = account_,
-                .order_id = order_id,
                 .exchange = {},
                 .symbol = symbol,
                 .side = side,
@@ -258,10 +244,6 @@ class OrderUpdate final {
                 .last_traded_quantity = NaN,
                 .last_traded_price = NaN,
                 .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
             };
             accept(std::as_const(order_update));
             break;
@@ -334,10 +316,8 @@ class OrderUpdate final {
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(cancel_status.status);
-            roq::OrderUpdate order_update{
-                .stream_id = stream_id_,
+            oms::OrderUpdate order_update{
                 .account = account_,
-                .order_id = order_id,
                 .exchange = {},
                 .symbol = symbol,
                 .side = side,
@@ -361,10 +341,6 @@ class OrderUpdate final {
                 .last_traded_quantity = NaN,
                 .last_traded_price = NaN,
                 .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
             };
             accept(std::as_const(order_update));
             break;

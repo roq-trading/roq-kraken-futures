@@ -144,10 +144,8 @@ void OrderUpdate::operator()(
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);
   auto status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
-  roq::OrderUpdate order_update{
-      .stream_id = stream_id_,
+  oms::OrderUpdate order_update{
       .account = account_,
-      .order_id = {},
       .exchange = Flags::exchange(),
       .symbol = order.instrument,
       .side = side,
@@ -171,10 +169,6 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
-      .routing_id = {},
-      .max_request_version = {},
-      .max_response_version = {},
-      .max_accepted_version = {},
   };
   auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
