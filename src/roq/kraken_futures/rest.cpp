@@ -118,27 +118,31 @@ void Rest::get(std::function<void(const core::Promise<json::Instruments> &)> &&c
       .quality_of_service = {},
       .rate_limit_weight = 1,
   };
-  connection_(request, [this, callback{std::move(callback)}](auto &response) {
-    profile_.instruments([&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto instruments = core::json::Parser::create<json::Instruments>(response.body(), buffer);
-        if (instruments.error.empty()) {
-          log::info<1>("instruments={}"_sv, instruments);
-          core::Promise<json::Instruments> promise(instruments);
-          callback(promise);
-        } else {
-          log::warn("instruments={}"_sv, instruments);
-          log::fatal("Unexpected"_sv);
-        }
-      } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-        core::Promise<json::Instruments> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
+  connection_(
+      "instruments"_sv,
+      request,
+      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
+        profile_.instruments([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            auto instruments =
+                core::json::Parser::create<json::Instruments>(response.body(), buffer);
+            if (instruments.error.empty()) {
+              log::info<1>("instruments={}"_sv, instruments);
+              core::Promise<json::Instruments> promise(instruments);
+              callback(promise);
+            } else {
+              log::warn("instruments={}"_sv, instruments);
+              log::fatal("Unexpected"_sv);
+            }
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            core::Promise<json::Instruments> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
 }
 
 void Rest::operator()(const core::web::Client::Connected &) {
