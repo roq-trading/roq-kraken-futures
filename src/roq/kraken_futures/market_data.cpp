@@ -12,7 +12,7 @@
 
 #include "roq/core/metrics/factory.h"
 
-#include "roq/core/market/exceptions.h"
+#include "roq/market/exceptions.h"
 
 #include "roq/kraken_futures/flags.h"
 
@@ -413,7 +413,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     try {
       log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
       server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
-    } catch (core::market::BadState &e) {
+    } catch (market::BadState &e) {
       log::warn(
           R"(Book in bad state, resubscribing exchange="{}", symbol="{}")"_sv,
           e.exchange,
