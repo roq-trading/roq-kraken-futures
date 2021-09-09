@@ -363,7 +363,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
     auto &[trace_info, book_snapshot] = event;
     log::info<3>("book_snapshot={}"_sv, book_snapshot);
     auto &symbol = book_snapshot.product_id;
-    latch_.erase(symbol);  // latch
+    latch_.erase(symbol);  // unlatch
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
     for (const auto &bid : book_snapshot.bids)
       bids.emplace_back([&](auto &result) { emplace(result, bid); });
@@ -388,9 +388,8 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     auto &[trace_info, book] = event;
     log::info<3>("book={}"_sv, book);
     auto &symbol = book.product_id;
-    if (latch_.find(symbol) != latch_.end()) {
-      return;  // skip processing if we're waiting for snapshot
-    }
+    if (latch_.find(symbol) != latch_.end())
+      return;  //  waiting for snapshot
     MBPUpdate mbp_update{
         .price = book.price,
         .quantity = book.qty,
@@ -414,27 +413,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
       log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
       server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
     } catch (market::BadState &e) {
-      log::warn(
-          R"(Book in bad state, resubscribing exchange="{}", symbol="{}")"_sv,
-          e.exchange,
-          e.symbol);
-      log::warn<1>("market_by_price_update={}"_sv, market_by_price_update);
-      // reset
-      MarketByPriceUpdate market_by_price_reset{
-          .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
-          .symbol = symbol,
-          .bids = {},
-          .asks = {},
-          .snapshot = true,
-          .exchange_time_utc = book.timestamp,
-      };
-      log::info<3>("market_by_price_update={}"_sv, market_by_price_reset);
-      server::create_trace_and_dispatch(trace_info, market_by_price_reset, handler_, false);
-      latch_.emplace(symbol);  // latch
-      roq::span symbols{&symbol, 1};
-      unsubscribe("book"_sv, symbols);
-      subscribe("book"_sv, symbols);
+      resubscribe(trace_info, symbol);
     }
   });
 }
@@ -463,6 +442,24 @@ void MarketData::operator()(const server::Trace<json::Trade> &event) {
     };
     server::create_trace_and_dispatch(trace_info, trade_summary, handler_, true);
   });
+}
+
+void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::string_view &symbol) {
+  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))", symbol);
+  MarketByPriceUpdate market_by_price_update{
+      .stream_id = stream_id_,
+      .exchange = Flags::exchange(),
+      .symbol = symbol,
+      .bids = {},
+      .asks = {},
+      .snapshot = true,
+      .exchange_time_utc = {},
+  };
+  log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+  server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+  latch_.emplace(symbol);  // latch
+  unsubscribe("book"_sv, symbol);
+  subscribe("book"_sv, symbol);
 }
 
 }  // namespace kraken_futures

@@ -68,9 +68,15 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
 
   template <typename T>
   void subscribe(const std::string_view &feed, const roq::span<T> &product_ids);
+  void subscribe(const std::string_view &feed, const std::string_view &symbol) {
+    return subscribe(feed, roq::span{&symbol, 1});
+  }
 
   template <typename T>
   void unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids);
+  void unsubscribe(const std::string_view &feed, const std::string_view &symbol) {
+    return unsubscribe(feed, roq::span{&symbol, 1});
+  }
 
   // json::ParserPublic::Handler
 
@@ -92,6 +98,8 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   void parse(const std::string_view &message);
 
   void reset();
+
+  void resubscribe(const server::TraceInfo &, const std::string_view &symbol);
 
  private:
   Handler &handler_;
