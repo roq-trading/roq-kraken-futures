@@ -38,7 +38,10 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      uint32_t order_id, const json::SendOrder &send_order, Accept accept, Reject reject) {
+      [[maybe_unused]] uint32_t order_id,
+      const json::SendOrder &send_order,
+      Accept accept,
+      Reject reject) {
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
       case json::Status::UNDEFINED:
@@ -169,7 +172,10 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      uint32_t order_id, const json::EditOrder &edit_order, Accept accept, Reject reject) {
+      [[maybe_unused]] uint32_t order_id,
+      const json::EditOrder &edit_order,
+      Accept accept,
+      Reject reject) {
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
       case json::Status::UNDEFINED:
@@ -268,7 +274,10 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      uint32_t order_id, const json::CancelOrder &cancel_order, Accept accept, Reject reject) {
+      [[maybe_unused]] uint32_t order_id,
+      const json::CancelOrder &cancel_order,
+      Accept accept,
+      Reject reject) {
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
       case json::Status::UNDEFINED:
