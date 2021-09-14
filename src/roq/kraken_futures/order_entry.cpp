@@ -546,8 +546,6 @@ void OrderEntry::modify_order_ack(
     const uint32_t version) {
   server::TraceInfo trace_info;
   try {
-    log::info("HERE"_sv);
-    throw TimedOutException("xyz"_sv);
     switch (response.category()) {
       case core::http::Category::SUCCESS: {
         auto body = response.body();
