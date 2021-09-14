@@ -8,6 +8,10 @@ All notable changes will be documented in this file.
 
 * Added HTTP `request_id` (#55)
 
+### Fixed
+
+* HTTP response was not protected by try-catch (#58)
+
 ## 0.7.6 &ndash; 2021-09-02
 
 ### Changed

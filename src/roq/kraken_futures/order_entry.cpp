@@ -405,113 +405,137 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 void OrderEntry::create_order_ack(
     const core::web::Response &response, const uint8_t user_id, const uint32_t order_id) {
   server::TraceInfo trace_info;
-  switch (response.category()) {
-    case core::http::Category::SUCCESS: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
-      switch (send_order.result) {
-        case json::Result::UNDEFINED:
-        case json::Result::UNKNOWN:
-          log::warn(R"(response="{}")"_sv, body);
-          log::fatal("Unexpected: send_order={}"_sv, send_order);
-          break;
-        case json::Result::ERROR: {
-          log::warn("send_order={}"_sv, send_order);
-          oms::Response response{
-              .type = RequestType::CREATE_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,
-              .text = send_order.error,
-              .version = 1,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {});
-        } break;
-        case json::Result::SUCCESS: {
-          auto request_id = send_order.send_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order_id,
-              send_order,
-              [&](auto &order_update) {
-                log::debug("order_update={}"_sv, order_update);
-                oms::Response response{
-                    .type = RequestType::CREATE_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = 1,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    order_update,
-                    []([[maybe_unused]] auto &order) {});
-              },
-              [&](auto error, auto text) {
-                oms::Response response{
-                    .type = RequestType::CREATE_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::REJECTED,
-                    .error = error,
-                    .text = text,
-                    .version = 1,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    []([[maybe_unused]] auto &order) {});
-              });
-          break;
+  uint8_t version = 1;
+  try {
+    switch (response.category()) {
+      case core::http::Category::SUCCESS: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
+        switch (send_order.result) {
+          case json::Result::UNDEFINED:
+          case json::Result::UNKNOWN:
+            log::warn(R"(response="{}")"_sv, body);
+            log::fatal("Unexpected: send_order={}"_sv, send_order);
+            break;
+          case json::Result::ERROR: {
+            log::warn("send_order={}"_sv, send_order);
+            oms::Response response{
+                .type = RequestType::CREATE_ORDER,
+                .origin = Origin::EXCHANGE,
+                .status = RequestStatus::REJECTED,
+                .error = Error::UNKNOWN,
+                .text = send_order.error,
+                .version = version,
+                .request_id = {},
+                .quantity = NaN,
+                .price = NaN,
+            };
+            shared_.update_order(
+                user_id,
+                order_id,
+                stream_id_,
+                trace_info,
+                response,
+                []([[maybe_unused]] auto &order) {});
+          } break;
+          case json::Result::SUCCESS: {
+            auto request_id = send_order.send_status.cli_ord_id;
+            OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                order_id,
+                send_order,
+                [&](auto &order_update) {
+                  log::debug("order_update={}"_sv, order_update);
+                  oms::Response response{
+                      .type = RequestType::CREATE_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::ACCEPTED,
+                      .error = {},
+                      .text = {},
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      order_update,
+                      []([[maybe_unused]] auto &order) {});
+                },
+                [&](auto error, auto text) {
+                  oms::Response response{
+                      .type = RequestType::CREATE_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::REJECTED,
+                      .error = error,
+                      .text = text,
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      []([[maybe_unused]] auto &order) {});
+                });
+            break;
+          }
         }
+        break;
       }
-      break;
+      case core::http::Category::CLIENT_ERROR: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto error = core::json::Parser::create<json::RestError>(body, buffer);
+        log::warn("error={}"_sv, error);
+        auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+        oms::Response response{
+            .type = RequestType::CREATE_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = version,
+            .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
+        };
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            });
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
     }
-    case core::http::Category::CLIENT_ERROR: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto error = core::json::Parser::create<json::RestError>(body, buffer);
-      log::warn("error={}"_sv, error);
-      auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      oms::Response response{
-          .type = RequestType::CREATE_ORDER,
-          .origin = Origin::EXCHANGE,
-          .status = RequestStatus::REJECTED,
-          .error = Error::UNKNOWN,
-          .text = text,
-          .version = 1,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-      break;
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    oms::Response response{
+        .type = RequestType::CREATE_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = e.request_status(),
+        .error = e.error(),
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
+    };
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            })) {
+    } else {
+      log::warn(
+          "Did not find order: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
     }
-    default:
-      response.expect(core::http::Status::OK);  // throws
   }
 }
 
@@ -521,114 +545,139 @@ void OrderEntry::modify_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
-  switch (response.category()) {
-    case core::http::Category::SUCCESS: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
-      switch (edit_order.result) {
-        case json::Result::UNDEFINED:
-        case json::Result::UNKNOWN:
-          log::warn(R"(response="{}")"_sv, body);
-          log::fatal("Unexpected: edit_order={}"_sv, edit_order);
-          break;
-        case json::Result::ERROR: {
-          log::warn("edit_order={}"_sv, edit_order);
-          oms::Response response{
-              .type = RequestType::CREATE_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,
-              .text = edit_order.error,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {});
-          break;
+  try {
+    log::info("HERE"_sv);
+    throw TimedOutException("xyz"_sv);
+    switch (response.category()) {
+      case core::http::Category::SUCCESS: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
+        switch (edit_order.result) {
+          case json::Result::UNDEFINED:
+          case json::Result::UNKNOWN:
+            log::warn(R"(response="{}")"_sv, body);
+            log::fatal("Unexpected: edit_order={}"_sv, edit_order);
+            break;
+          case json::Result::ERROR: {
+            log::warn("edit_order={}"_sv, edit_order);
+            oms::Response response{
+                .type = RequestType::CREATE_ORDER,
+                .origin = Origin::EXCHANGE,
+                .status = RequestStatus::REJECTED,
+                .error = Error::UNKNOWN,
+                .text = edit_order.error,
+                .version = version,
+                .request_id = {},
+                .quantity = NaN,
+                .price = NaN,
+            };
+            shared_.update_order(
+                user_id,
+                order_id,
+                stream_id_,
+                trace_info,
+                response,
+                []([[maybe_unused]] auto &order) {});
+            break;
+          }
+          case json::Result::SUCCESS: {
+            auto request_id = edit_order.edit_status.cli_ord_id;
+            OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                order_id,
+                edit_order,
+                [&](auto &order_update) {
+                  log::debug("order_update={}"_sv, order_update);
+                  oms::Response response{
+                      .type = RequestType::MODIFY_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::ACCEPTED,
+                      .error = {},
+                      .text = {},
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      order_update,
+                      []([[maybe_unused]] auto &order) {});
+                },
+                [&](auto error, auto text) {
+                  oms::Response response{
+                      .type = RequestType::MODIFY_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::REJECTED,
+                      .error = error,
+                      .text = text,
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      []([[maybe_unused]] auto &order) {});
+                });
+            break;
+          }
         }
-        case json::Result::SUCCESS: {
-          auto request_id = edit_order.edit_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order_id,
-              edit_order,
-              [&](auto &order_update) {
-                log::debug("order_update={}"_sv, order_update);
-                oms::Response response{
-                    .type = RequestType::MODIFY_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    order_update,
-                    []([[maybe_unused]] auto &order) {});
-              },
-              [&](auto error, auto text) {
-                oms::Response response{
-                    .type = RequestType::MODIFY_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::REJECTED,
-                    .error = error,
-                    .text = text,
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    []([[maybe_unused]] auto &order) {});
-              });
-          break;
-        }
+        break;
       }
-      break;
+      case core::http::Category::CLIENT_ERROR: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto error = core::json::Parser::create<json::RestError>(body, buffer);
+        log::warn("error={}"_sv, error);
+        auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+        oms::Response response{
+            .type = RequestType::MODIFY_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = version,
+            .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
+        };
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            });
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
     }
-    case core::http::Category::CLIENT_ERROR: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto error = core::json::Parser::create<json::RestError>(body, buffer);
-      log::warn("error={}"_sv, error);
-      auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      oms::Response response{
-          .type = RequestType::MODIFY_ORDER,
-          .origin = Origin::EXCHANGE,
-          .status = RequestStatus::REJECTED,
-          .error = Error::UNKNOWN,
-          .text = text,
-          .version = version,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-      break;
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    oms::Response response{
+        .type = RequestType::MODIFY_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = e.request_status(),
+        .error = e.error(),
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
+    };
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            })) {
+    } else {
+      log::warn(
+          "Did not find order: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
     }
-    default:
-      response.expect(core::http::Status::OK);  // throws
   }
 }
 
@@ -638,114 +687,137 @@ void OrderEntry::cancel_order_ack(
     const uint32_t order_id,
     const uint32_t version) {
   server::TraceInfo trace_info;
-  switch (response.category()) {
-    case core::http::Category::SUCCESS: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
-      switch (cancel_order.result) {
-        case json::Result::UNDEFINED:
-        case json::Result::UNKNOWN:
-          log::warn(R"(response="{}")"_sv, body);
-          log::fatal("Unexpected: cancel_order={}"_sv, cancel_order);
-          break;
-        case json::Result::ERROR: {
-          log::warn("cancel_order={}"_sv, cancel_order);
-          oms::Response response{
-              .type = RequestType::CREATE_ORDER,
-              .origin = Origin::EXCHANGE,
-              .status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,
-              .text = cancel_order.error,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          shared_.update_order(
-              user_id,
-              order_id,
-              stream_id_,
-              trace_info,
-              response,
-              []([[maybe_unused]] auto &order) {});
-          break;
+  try {
+    switch (response.category()) {
+      case core::http::Category::SUCCESS: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
+        switch (cancel_order.result) {
+          case json::Result::UNDEFINED:
+          case json::Result::UNKNOWN:
+            log::warn(R"(response="{}")"_sv, body);
+            log::fatal("Unexpected: cancel_order={}"_sv, cancel_order);
+            break;
+          case json::Result::ERROR: {
+            log::warn("cancel_order={}"_sv, cancel_order);
+            oms::Response response{
+                .type = RequestType::CREATE_ORDER,
+                .origin = Origin::EXCHANGE,
+                .status = RequestStatus::REJECTED,
+                .error = Error::UNKNOWN,
+                .text = cancel_order.error,
+                .version = version,
+                .request_id = {},
+                .quantity = NaN,
+                .price = NaN,
+            };
+            shared_.update_order(
+                user_id,
+                order_id,
+                stream_id_,
+                trace_info,
+                response,
+                []([[maybe_unused]] auto &order) {});
+            break;
+          }
+          case json::Result::SUCCESS: {
+            auto request_id = cancel_order.cancel_status.cli_ord_id;
+            OrderUpdate{shared_, stream_id_, security_.get_account()}(
+                order_id,
+                cancel_order,
+                [&](auto &order_update) {
+                  log::debug("order_update={}"_sv, order_update);
+                  oms::Response response{
+                      .type = RequestType::CANCEL_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::ACCEPTED,
+                      .error = {},
+                      .text = {},
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      order_update,
+                      []([[maybe_unused]] auto &order) {});
+                },
+                [&](auto error, auto text) {
+                  oms::Response response{
+                      .type = RequestType::CANCEL_ORDER,
+                      .origin = Origin::EXCHANGE,
+                      .status = RequestStatus::REJECTED,
+                      .error = error,
+                      .text = text,
+                      .version = version,
+                      .request_id = request_id,
+                      .quantity = NaN,
+                      .price = NaN,
+                  };
+                  shared_.update_order(
+                      user_id,
+                      order_id,
+                      stream_id_,
+                      trace_info,
+                      response,
+                      []([[maybe_unused]] auto &order) {});
+                });
+            break;
+          }
         }
-        case json::Result::SUCCESS: {
-          auto request_id = cancel_order.cancel_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
-              order_id,
-              cancel_order,
-              [&](auto &order_update) {
-                log::debug("order_update={}"_sv, order_update);
-                oms::Response response{
-                    .type = RequestType::CANCEL_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    order_update,
-                    []([[maybe_unused]] auto &order) {});
-              },
-              [&](auto error, auto text) {
-                oms::Response response{
-                    .type = RequestType::CANCEL_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .status = RequestStatus::REJECTED,
-                    .error = error,
-                    .text = text,
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                shared_.update_order(
-                    user_id,
-                    order_id,
-                    stream_id_,
-                    trace_info,
-                    response,
-                    []([[maybe_unused]] auto &order) {});
-              });
-          break;
-        }
+        break;
       }
-      break;
+      case core::http::Category::CLIENT_ERROR: {
+        auto body = response.body();
+        core::json::Buffer buffer(decode_buffer_);
+        auto error = core::json::Parser::create<json::RestError>(body, buffer);
+        log::warn("error={}"_sv, error);
+        auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
+        oms::Response response{
+            .type = RequestType::CANCEL_ORDER,
+            .origin = Origin::EXCHANGE,
+            .status = RequestStatus::REJECTED,
+            .error = Error::UNKNOWN,
+            .text = text,
+            .version = version,
+            .request_id = {},
+            .quantity = NaN,
+            .price = NaN,
+        };
+        shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            });
+        break;
+      }
+      default:
+        response.expect(core::http::Status::OK);  // throws
     }
-    case core::http::Category::CLIENT_ERROR: {
-      auto body = response.body();
-      core::json::Buffer buffer(decode_buffer_);
-      auto error = core::json::Parser::create<json::RestError>(body, buffer);
-      log::warn("error={}"_sv, error);
-      auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
-      oms::Response response{
-          .type = RequestType::CANCEL_ORDER,
-          .origin = Origin::EXCHANGE,
-          .status = RequestStatus::REJECTED,
-          .error = Error::UNKNOWN,
-          .text = text,
-          .version = version,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      shared_.update_order(
-          user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-      break;
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+    oms::Response response{
+        .type = RequestType::CANCEL_ORDER,
+        .origin = Origin::GATEWAY,
+        .status = e.request_status(),
+        .error = e.error(),
+        .text = e.what(),
+        .version = version,
+        .request_id = {},
+        .quantity = NaN,
+        .price = NaN,
+    };
+    if (shared_.update_order(
+            user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {
+            })) {
+    } else {
+      log::warn(
+          "Did not find order: user_id={}, order_id={}, version={}"_sv, user_id, order_id, version);
     }
-    default:
-      response.expect(core::http::Status::OK);  // throws
   }
 }
 
