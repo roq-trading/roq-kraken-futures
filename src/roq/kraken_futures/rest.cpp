@@ -136,7 +136,7 @@ void Rest::get(std::function<void(const core::Promise<json::Instruments> &)> &&c
               log::warn("instruments={}"_sv, instruments);
               log::fatal("Unexpected"_sv);
             }
-          } catch (NetworkError &e) {
+          } catch (core::NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Instruments> promise(std::current_exception());
             callback(promise);
@@ -196,7 +196,7 @@ void Rest::download_instruments() {
         return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError &) {
+    } catch (core::NetworkError &) {
       download_.retry(state);
     }
   });
