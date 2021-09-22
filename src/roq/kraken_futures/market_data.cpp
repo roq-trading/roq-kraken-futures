@@ -445,7 +445,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event) {
 }
 
 void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::string_view &symbol) {
-  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))", symbol);
+  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"_sv, symbol);
   MarketByPriceUpdate market_by_price_update{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
