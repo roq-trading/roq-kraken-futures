@@ -22,7 +22,7 @@ class Hasher final {
 
   std::string create_headers(
       const std::string_view &path,
-      const std::string_view &body,
+      const std::string_view &query,
       const std::string_view &key,
       std::chrono::milliseconds nonce);
 
