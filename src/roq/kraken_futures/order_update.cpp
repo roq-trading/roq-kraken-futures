@@ -35,6 +35,7 @@ void OrderUpdate::operator()(
 }
 
 namespace {
+/*
 static RequestType compute_request_type(const json::Reason reason) {
   switch (reason) {
     case json::Reason::UNDEFINED:
@@ -79,7 +80,7 @@ static RequestType compute_request_type(const json::Reason reason) {
   }
   return {};
 }
-
+*/
 static OrderStatus compute_order_status_2(
     json::Reason reason, bool is_cancel, double quantity, double filled) {
   switch (reason) {
@@ -170,7 +171,7 @@ void OrderUpdate::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
   };
-  auto request_type = compute_request_type(reason);
+  // auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
   if (is_download) {
     if (shared_.create_order(request_id, stream_id_, trace_info, order_update)) {
