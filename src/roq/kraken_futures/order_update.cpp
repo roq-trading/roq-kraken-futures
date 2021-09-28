@@ -144,7 +144,7 @@ void OrderUpdate::operator()(
     bool is_download) {
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);
-  auto status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
+  auto order_status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
   oms::OrderUpdate order_update{
       .account = account_,
       .exchange = Flags::exchange(),
@@ -160,7 +160,7 @@ void OrderUpdate::operator()(
       .update_time_utc = order.last_update_time,
       .external_account = {},
       .external_order_id = order.order_id,
-      .status = status,
+      .status = order_status,
       .quantity = order.qty,
       .price = order.limit_price,
       .stop_price = NaN,
