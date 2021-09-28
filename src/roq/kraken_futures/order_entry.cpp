@@ -885,8 +885,8 @@ void OrderEntry::cancel_all_after_ack(const core::web::Response &response) {
         core::json::Buffer buffer(decode_buffer_);
         auto cancel_all_after_ack =
             core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
-        log::info<3>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
         log::debug("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
+        log::info<2>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
         break;
       }
       case core::http::Status::BAD_REQUEST:   // 400
@@ -897,8 +897,8 @@ void OrderEntry::cancel_all_after_ack(const core::web::Response &response) {
         core::json::Buffer buffer(decode_buffer_);
         auto cancel_all_after_ack =
             core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
-        log::warn<3>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
         log::debug("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
+        log::warn<2>("cancel_all_after_ack={}"_sv, cancel_all_after_ack);
         break;
       }
       default:

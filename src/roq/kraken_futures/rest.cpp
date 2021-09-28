@@ -129,7 +129,7 @@ void Rest::get(std::function<void(const core::Promise<json::Instruments> &)> &&c
             auto instruments =
                 core::json::Parser::create<json::Instruments>(response.body(), buffer);
             if (instruments.error.empty()) {
-              log::info<1>("instruments={}"_sv, instruments);
+              log::info<2>("instruments={}"_sv, instruments);
               core::Promise<json::Instruments> promise(instruments);
               callback(promise);
             } else {
@@ -209,7 +209,7 @@ void Rest::operator()(const json::Instruments &instruments) {
   symbols.reserve(instruments.instruments.size());
   size_t counter = {};
   for (auto &item : instruments.instruments) {
-    log::info<1>("item={}"_sv, item);
+    log::info<2>("item={}"_sv, item);
     std::string symbol(item.symbol);  // note! we need the upper-case version
     std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
     if (shared_.discard_symbol(symbol))

@@ -115,7 +115,7 @@ void DropCopy::get_challenge() {
       R"(}})"_sv,
       security_.get_key());
   log::debug(R"(request="{}")"_sv, message);
-  log::info<3>(R"(request="{}")"_sv, message);
+  log::info<2>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
 }
 
@@ -140,7 +140,7 @@ void DropCopy::subscribe(const std::string_view &feed) {
       original_challenge_,
       signed_challenge_);
   log::debug(R"(request="{}")"_sv, message);
-  log::info<3>(R"(request="{}")"_sv, message);
+  log::info<2>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
 }
 
@@ -220,7 +220,7 @@ uint32_t DropCopy::download(DropCopyState state) {
 void DropCopy::operator()(const server::Trace<json::Info> &event) {
   auto &[trace_info, info] = event;
   log::debug("info={}"_sv, info);
-  log::info<1>("info={}"_sv, info);
+  log::info<2>("info={}"_sv, info);
 }
 
 void DropCopy::operator()(const server::Trace<json::Alert> &event) {
@@ -239,7 +239,7 @@ void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"_sv, challenge);
-    log::info<3>("challenge={}"_sv, challenge);
+    log::info<2>("challenge={}"_sv, challenge);
     assert(original_challenge_.empty());
     assert(signed_challenge_.empty());
     original_challenge_ = challenge.message;
@@ -251,21 +251,21 @@ void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
 void DropCopy::operator()(const server::Trace<json::Subscribed> &event) {
   auto &[trace_info, subscribed] = event;
   log::debug("subscribed={}"_sv, subscribed);
-  log::info<1>("subscribed={}"_sv, subscribed);
+  log::info<2>("subscribed={}"_sv, subscribed);
 }
 
 void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"_sv, heartbeat);
-    log::info<3>("heartbeat={}"_sv, heartbeat);
+    log::info<2>("heartbeat={}"_sv, heartbeat);
   });
 }
 
 void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
-    log::info<3>("account_balances_and_margins={}"_sv, account_balances_and_margins);
+    log::info<2>("account_balances_and_margins={}"_sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
       std::transform(currency.begin(), currency.end(), currency.begin(), ::toupper);
@@ -285,7 +285,7 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
 void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
-    log::info<3>("open_positions={}"_sv, open_positions);
+    log::info<2>("open_positions={}"_sv, open_positions);
     for (auto &item : open_positions.positions) {
       PositionUpdate position_update{
           .stream_id = stream_id_,
@@ -308,7 +308,7 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
 void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
-    log::info<3>("open_orders_snapshot={}"_sv, open_orders_snapshot);
+    log::info<2>("open_orders_snapshot={}"_sv, open_orders_snapshot);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders_snapshot, trace_info);
   });
 }
@@ -316,7 +316,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) 
 void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
-    log::info<3>("open_orders={}"_sv, open_orders);
+    log::info<2>("open_orders={}"_sv, open_orders);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders, trace_info);
   });
 }
@@ -326,7 +326,7 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
     auto &fills_snapshot = event.value;
-    log::info<3>("fills_snapshot={}"_sv, fills_snapshot);
+    log::info<2>("fills_snapshot={}"_sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
@@ -361,8 +361,8 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
                 trace_info, trade_update, handler_, true, order.user_id);
           })) {
       } else {
-        log::warn("*** EXTERNAL ORDER ***"_sv);
-        log::warn("fill={}"_sv, item);
+        log::warn<1>("*** EXTERNAL ORDER ***"_sv);
+        log::warn<2>("fill={}"_sv, item);
       }
     }
   });
@@ -373,7 +373,7 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
-    log::info<3>("fills={}"_sv, fills);
+    log::info<2>("fills={}"_sv, fills);
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
@@ -409,8 +409,8 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
                 trace_info, trade_update, handler_, true, order.user_id);
           })) {
       } else {
-        log::warn("*** EXTERNAL ORDER ***"_sv);
-        log::warn("fill={}"_sv, item);
+        log::warn<1>("*** EXTERNAL ORDER ***"_sv);
+        log::warn<2>("fill={}"_sv, item);
       }
     }
   });
