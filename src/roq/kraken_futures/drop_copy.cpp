@@ -287,18 +287,18 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"_sv, open_positions);
     for (auto &item : open_positions.positions) {
+      auto long_quantity = std::max(0.0, item.balance);
+      auto short_quantity = std::max(0.0, -item.balance);
       PositionUpdate position_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.instrument,
-          .side = {},
-          .position = item.balance,
-          .last_trade_id = {},
-          .position_cost = NaN,
-          .position_yesterday = NaN,
-          .position_cost_yesterday = NaN,
           .external_account = open_positions.account,
+          .long_quantity = long_quantity,
+          .short_quantity = short_quantity,
+          .long_quantity_begin = NaN,
+          .short_quantity_begin = NaN,
       };
       server::create_trace_and_dispatch(trace_info, position_update, handler_, true);
     }
