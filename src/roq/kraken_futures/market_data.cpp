@@ -379,7 +379,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
         .exchange_time_utc = book_snapshot.timestamp,
     };
     log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false, false);
   });
 }
 
@@ -411,7 +411,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     };
     try {
       log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false);
+      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false, false);
     } catch (market::BadState &e) {
       resubscribe(trace_info, symbol);
     }
@@ -456,7 +456,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .exchange_time_utc = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-  server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+  server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true, false);
   latch_.emplace(symbol);  // latch
   unsubscribe("book"_sv, symbol);
   subscribe("book"_sv, symbol);
