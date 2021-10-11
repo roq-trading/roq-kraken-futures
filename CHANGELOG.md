@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Allow "market data"-only operation (#96)
 * Review log levels (#72)
 
 ## 0.7.7 &ndash; 2021-09-20
