@@ -308,7 +308,7 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
             .ask_price = ticker.ask,
             .ask_quantity = ticker.ask_size,
         },
-        .snapshot = false,
+        .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
     server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
@@ -344,7 +344,7 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
         .statistics = statistics,
-        .snapshot = false,
+        .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
     server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
@@ -375,7 +375,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
         .symbol = symbol,
         .bids = bids,
         .asks = asks,
-        .snapshot = true,
+        .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = book_snapshot.timestamp,
     };
     log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
@@ -406,7 +406,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
         .symbol = symbol,
         .bids = {bid ? &mbp_update : nullptr, bid ? 1u : 0u},
         .asks = {ask ? &mbp_update : nullptr, ask ? 1u : 0u},
-        .snapshot = false,
+        .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = book.timestamp,
     };
     try {
@@ -452,7 +452,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .symbol = symbol,
       .bids = {},
       .asks = {},
-      .snapshot = true,
+      .update_type = UpdateType::STALE,
       .exchange_time_utc = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
