@@ -5,8 +5,6 @@
 #include <chrono>
 #include <string>
 
-#include "roq/core/http/method.h"
-
 #include "roq/kraken_futures/config.h"
 
 #include "roq/kraken_futures/tools/hasher.h"

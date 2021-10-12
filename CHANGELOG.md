@@ -6,6 +6,7 @@ All notable changes will be documented in this file.
 
 ### Changed
 
+* Moved signature handling to tools library (chore)
 * Allow "market data"-only operation (#96)
 * Review log levels (#72)
 
