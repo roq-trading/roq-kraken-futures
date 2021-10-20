@@ -229,6 +229,8 @@ void Rest::operator()(const json::Instruments &instruments) {
         .tick_size = item.tick_size,
         .multiplier = item.contract_size,
         .min_trade_vol = 1.0,  // XXX check
+        .max_trade_vol = NaN,
+        .trade_vol_step_size = 1.0,  // XXX check
         .option_type = {},
         .strike_currency = {},
         .strike_price = NaN,
