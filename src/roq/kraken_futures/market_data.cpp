@@ -377,6 +377,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
         .asks = asks,
         .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = book_snapshot.timestamp,
+        .exchange_sequence = book_snapshot.seq,
     };
     log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
     server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false, false);
@@ -408,6 +409,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
         .asks = {ask ? &mbp_update : nullptr, ask ? 1u : 0u},
         .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = book.timestamp,
+        .exchange_sequence = book.seq,
     };
     try {
       log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
@@ -454,6 +456,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .asks = {},
       .update_type = UpdateType::STALE,
       .exchange_time_utc = {},
+      .exchange_sequence = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
   server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true, false);
