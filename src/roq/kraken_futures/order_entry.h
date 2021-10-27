@@ -94,9 +94,6 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void cancel_all_after_ack(const core::web::Response &);
 
-  template <typename T>
-  void get(std::function<void(const core::Promise<T> &)> &&callback);
-
   uint32_t download(OrderEntryState);
 
  private:

@@ -59,6 +59,7 @@ Rest::Rest(Handler &handler, core::io::Context &context, uint16_t stream_id, Sha
       },
       profile_{
           .instruments = create_metrics(name_, "instruments"_sv),
+          .instruments_ack = create_metrics(name_, "instruments_ack"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -85,6 +86,7 @@ void Rest::operator()(metrics::Writer &writer) {
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
       .write(profile_.instruments, metrics::PROFILE)
+      .write(profile_.instruments_ack, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY);
 }
@@ -103,46 +105,6 @@ void Rest::operator()(ConnectionStatus status) {
     log::info("stream_status={}"_sv, stream_status);
     server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
-}
-
-template <>
-void Rest::get(std::function<void(const core::Promise<json::Instruments> &)> &&callback) {
-  core::web::Request request{
-      .method = core::http::Method::GET,
-      .path = "/api/v3/instruments"_sv,
-      .query = {},
-      .accept = core::http::Accept::JSON,
-      .content_type = {},
-      .headers = {},
-      .body = {},
-      .quality_of_service = {},
-      .rate_limit_weight = 1,
-  };
-  connection_(
-      "instruments"_sv,
-      request,
-      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
-        profile_.instruments([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto instruments =
-                core::json::Parser::create<json::Instruments>(response.body(), buffer);
-            if (instruments.error.empty()) {
-              log::info<2>("instruments={}"_sv, instruments);
-              core::Promise<json::Instruments> promise(instruments);
-              callback(promise);
-            } else {
-              log::warn("instruments={}"_sv, instruments);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (core::NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-            core::Promise<json::Instruments> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
 }
 
 void Rest::operator()(const core::web::Client::Connected &) {
@@ -177,7 +139,7 @@ uint32_t Rest::download(RestState state) {
       assert(false);
       break;
     case RestState::INSTRUMENTS:
-      download_instruments();
+      get_instruments();
       return 1;
     case RestState::DONE:
       (*this)(ConnectionStatus::READY);
@@ -187,24 +149,65 @@ uint32_t Rest::download(RestState state) {
   return {};
 }
 
-void Rest::download_instruments() {
-  constexpr auto state = RestState::INSTRUMENTS;
-  auto sequence = download_.sequence();
-  get<json::Instruments>([this, sequence](auto &promise) {
+// instruments
+
+void Rest::get_instruments() {
+  profile_.instruments([&]() {
+    auto method = core::http::Method::GET;
+    auto path = "/api/v3/instruments"_sv;
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+        .rate_limit_weight = 1,
+    };
+    auto sequence = download_.sequence();
+    connection_(
+        "instruments"_sv,
+        request,
+        [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+          server::TraceInfo trace_info;
+          server::Trace event(trace_info, response);
+          get_instruments_ack(event, sequence);
+        });
+  });
+}
+
+void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+  auto state = RestState::INSTRUMENTS;
+  profile_.instruments_ack([&]() {
+    auto &[trace_info, response] = event;
     try {
       if (download_.skip(sequence, state))
         return;
-      (*this)(promise.get());
-      download_.check(state);
-    } catch (core::NetworkError &) {
+      response.expect(core::http::Status::OK);
+      auto body = response.body();
+      core::json::Buffer buffer(decode_buffer_);
+      auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
+      if (instruments.error.empty()) {
+        server::Trace event(trace_info, instruments);
+        (*this)(event);
+        download_.check(state);
+      } else {
+        log::warn("instruments={}"_sv, instruments);
+        log::fatal("Unexpected"_sv);
+      }
+    } catch (core::NetworkError &e) {
+      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
 }
 
-void Rest::operator()(const json::Instruments &instruments) {
+void Rest::operator()(const server::Trace<json::Instruments> &events) {
+  auto &[trace_info, instruments] = events;
+  log::info<2>("instruments={}"_sv, instruments);
   assert(instruments.error.empty());
-  server::TraceInfo trace_info;  // XXX not correct (*parsing* already done)
   std::vector<std::string> symbols;
   symbols.reserve(instruments.instruments.size());
   size_t counter = {};

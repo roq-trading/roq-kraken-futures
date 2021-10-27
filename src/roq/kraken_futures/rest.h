@@ -8,8 +8,6 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/promise.h"
-
 #include "roq/core/buffer.h"
 
 #include "roq/core/metrics/counter.h"
@@ -71,14 +69,11 @@ class Rest final : public core::web::Client::Handler {
 
   void operator()(ConnectionStatus);
 
-  template <typename T>
-  void get(std::function<void(const core::Promise<T> &)> &&callback);
-
   uint32_t download(RestState);
 
-  void download_instruments();
-
-  void operator()(const json::Instruments &);
+  void get_instruments();
+  void get_instruments_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
+  void operator()(const server::Trace<json::Instruments> &);
 
  private:
   Handler &handler_;
@@ -94,7 +89,7 @@ class Rest final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile instruments;
+    core::metrics::Profile instruments, instruments_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;
