@@ -21,7 +21,7 @@ static void dispatch_info(
   core::json::Parser parser(message);
   auto root = parser.root();
   Info info(root);
-  server::create_trace_and_dispatch(trace_info, info, handler);
+  server::create_trace_and_dispatch(handler, trace_info, info);
 }
 
 template <typename H>
@@ -30,7 +30,7 @@ static void dispatch_alert(
   core::json::Parser parser(message);
   auto root = parser.root();
   Alert alert(root);
-  server::create_trace_and_dispatch(trace_info, alert, handler);
+  server::create_trace_and_dispatch(handler, trace_info, alert);
 }
 
 template <typename H>
@@ -39,7 +39,7 @@ static void dispatch_error(
   core::json::Parser parser(message);
   auto root = parser.root();
   Error error(root);
-  server::create_trace_and_dispatch(trace_info, error, handler);
+  server::create_trace_and_dispatch(handler, trace_info, error);
 }
 
 template <typename H>
@@ -48,7 +48,7 @@ static void dispatch_challenge(
   core::json::Parser parser(message);
   auto root = parser.root();
   Challenge challenge(root);
-  server::create_trace_and_dispatch(trace_info, challenge, handler);
+  server::create_trace_and_dispatch(handler, trace_info, challenge);
 }
 
 template <typename H>
@@ -60,7 +60,7 @@ static void dispatch_subscribed(
   core::json::Parser parser(message);
   auto root = parser.root();
   Subscribed subscribed(root, buffer);
-  server::create_trace_and_dispatch(trace_info, subscribed, handler);
+  server::create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
 template <typename H>
@@ -69,7 +69,7 @@ static void dispatch_heartbeat(
   core::json::Parser parser(message);
   auto root = parser.root();
   Heartbeat heartbeat(root);
-  server::create_trace_and_dispatch(trace_info, heartbeat, handler);
+  server::create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
 template <typename H>
@@ -81,7 +81,7 @@ static void dispatch_account_balances_and_margins(
   core::json::Parser parser(message);
   auto root = parser.root();
   AccountBalancesAndMargins account_balances_and_margins(root, buffer);
-  server::create_trace_and_dispatch(trace_info, account_balances_and_margins, handler);
+  server::create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
 }
 
 template <typename H>
@@ -93,7 +93,7 @@ static void dispatch_open_positions(
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenPositions open_positions(root, buffer);
-  server::create_trace_and_dispatch(trace_info, open_positions, handler);
+  server::create_trace_and_dispatch(handler, trace_info, open_positions);
 }
 
 template <typename H>
@@ -105,7 +105,7 @@ static void dispatch_open_orders_snapshot(
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenOrdersSnapshot open_orders_snapshot(root, buffer);
-  server::create_trace_and_dispatch(trace_info, open_orders_snapshot, handler);
+  server::create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
 }
 
 template <typename H>
@@ -117,7 +117,7 @@ static void dispatch_open_orders(
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenOrders open_orders(root, buffer);
-  server::create_trace_and_dispatch(trace_info, open_orders, handler);
+  server::create_trace_and_dispatch(handler, trace_info, open_orders);
 }
 
 template <typename H>
@@ -129,7 +129,7 @@ static void dispatch_fills_snapshot(
   core::json::Parser parser(message);
   auto root = parser.root();
   FillsSnapshot fills_snapshot(root, buffer);
-  server::create_trace_and_dispatch(trace_info, fills_snapshot, handler);
+  server::create_trace_and_dispatch(handler, trace_info, fills_snapshot);
 }
 
 template <typename H>
@@ -141,7 +141,7 @@ static void dispatch_fills(
   core::json::Parser parser(message);
   auto root = parser.root();
   Fills fills(root, buffer);
-  server::create_trace_and_dispatch(trace_info, fills, handler);
+  server::create_trace_and_dispatch(handler, trace_info, fills);
 }
 }  // namespace
 

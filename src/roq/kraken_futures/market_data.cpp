@@ -161,12 +161,12 @@ void MarketData::operator()(const core::web::Socket::Close &) {
 }
 
 void MarketData::operator()(const core::web::Socket::Latency &latency) {
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -180,7 +180,7 @@ void MarketData::operator()(const core::web::Socket::Binary &) {
 
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
@@ -190,7 +190,7 @@ void MarketData::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"_sv, stream_status);
-    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
+    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -263,7 +263,7 @@ void MarketData::unsubscribe(const std::string_view &feed, const roq::span<T> &p
 
 void MarketData::parse(const std::string_view &message) {
   profile_.parse([&]() {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
@@ -315,7 +315,7 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
-    server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     // note! using *relative* funding rate to be compatible with other exchanges
     Statistics statistics[] = {
         {
@@ -351,14 +351,14 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
-    server::create_trace_and_dispatch(trace_info, statistics_update, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
     MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
         .trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN,
     };
-    server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
   });
 }
 
@@ -384,7 +384,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
         .exchange_sequence = book_snapshot.seq,
     };
     log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false, false);
+    server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
   });
 }
 
@@ -417,7 +417,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     };
     try {
       log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, false, false);
+      server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
     } catch (market::BadState &e) {
       resubscribe(trace_info, symbol);
     }
@@ -446,7 +446,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event) {
         .trades = trades,
         .exchange_time_utc = trade.time,
     };
-    server::create_trace_and_dispatch(trace_info, trade_summary, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
   });
 }
 
@@ -463,7 +463,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .exchange_sequence = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
-  server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true, false);
+  server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
   latch_.emplace(symbol);  // latch
   unsubscribe("book"_sv, symbol);
   subscribe("book"_sv, symbol);

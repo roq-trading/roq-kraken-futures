@@ -21,7 +21,7 @@ static void dispatch_info(
   core::json::Parser parser(message);
   auto root = parser.root();
   Info info(root);
-  server::create_trace_and_dispatch(trace_info, info, handler);
+  server::create_trace_and_dispatch(handler, trace_info, info);
 }
 
 template <typename H>
@@ -30,7 +30,7 @@ static void dispatch_alert(
   core::json::Parser parser(message);
   auto root = parser.root();
   Alert alert(root);
-  server::create_trace_and_dispatch(trace_info, alert, handler);
+  server::create_trace_and_dispatch(handler, trace_info, alert);
 }
 
 template <typename H>
@@ -39,7 +39,7 @@ static void dispatch_error(
   core::json::Parser parser(message);
   auto root = parser.root();
   Error error(root);
-  server::create_trace_and_dispatch(trace_info, error, handler);
+  server::create_trace_and_dispatch(handler, trace_info, error);
 }
 
 template <typename H>
@@ -51,7 +51,7 @@ static void dispatch_subscribed(
   core::json::Parser parser(message);
   auto root = parser.root();
   Subscribed subscribed(root, buffer);
-  server::create_trace_and_dispatch(trace_info, subscribed, handler);
+  server::create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
 template <typename H>
@@ -60,7 +60,7 @@ static void dispatch_heartbeat(
   core::json::Parser parser(message);
   auto root = parser.root();
   Heartbeat heartbeat(root);
-  server::create_trace_and_dispatch(trace_info, heartbeat, handler);
+  server::create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
 template <typename H>
@@ -69,7 +69,7 @@ static void dispatch_ticker(
   core::json::Parser parser(message);
   auto root = parser.root();
   Ticker ticker(root);
-  server::create_trace_and_dispatch(trace_info, ticker, handler);
+  server::create_trace_and_dispatch(handler, trace_info, ticker);
 }
 
 template <typename H>
@@ -81,7 +81,7 @@ static void dispatch_book_snapshot(
   core::json::Parser parser(message);
   auto root = parser.root();
   BookSnapshot book_snapshot(root, buffer);
-  server::create_trace_and_dispatch(trace_info, book_snapshot, handler);
+  server::create_trace_and_dispatch(handler, trace_info, book_snapshot);
 }
 
 template <typename H>
@@ -90,7 +90,7 @@ static void dispatch_book(
   core::json::Parser parser(message);
   auto root = parser.root();
   Book book(root);
-  server::create_trace_and_dispatch(trace_info, book, handler);
+  server::create_trace_and_dispatch(handler, trace_info, book);
 }
 
 template <typename H>
@@ -102,7 +102,7 @@ static void dispatch_trade_snapshot(
   core::json::Parser parser(message);
   auto root = parser.root();
   TradeSnapshot trade_snapshot(root, buffer);
-  server::create_trace_and_dispatch(trace_info, trade_snapshot, handler);
+  server::create_trace_and_dispatch(handler, trace_info, trade_snapshot);
 }
 
 template <typename H>
@@ -111,7 +111,7 @@ static void dispatch_trade(
   core::json::Parser parser(message);
   auto root = parser.root();
   Trade trade(root);
-  server::create_trace_and_dispatch(trace_info, trade, handler);
+  server::create_trace_and_dispatch(handler, trace_info, trade);
 }
 }  // namespace
 

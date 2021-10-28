@@ -93,7 +93,7 @@ void Rest::operator()(metrics::Writer &writer) {
 
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
@@ -103,7 +103,7 @@ void Rest::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"_sv, stream_status);
-    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
+    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -124,12 +124,12 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 }
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -171,7 +171,7 @@ void Rest::get_instruments() {
         "instruments"_sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          server::TraceInfo trace_info;
+          auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_instruments_ack(event, sequence);
         });
@@ -247,7 +247,7 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    server::create_trace_and_dispatch(trace_info, reference_data, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
   }
   log::info("Instruments {} / {}"_sv, counter, instruments.instruments.size());
   if (!symbols.empty()) {
