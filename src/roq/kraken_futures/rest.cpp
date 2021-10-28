@@ -179,14 +179,17 @@ void Rest::get_instruments() {
 }
 
 void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
-  auto state = RestState::INSTRUMENTS;
   profile_.instruments_ack([&]() {
     auto &[trace_info, response] = event;
+    auto state = RestState::INSTRUMENTS;
     try {
-      if (download_.skip(sequence, state))
+      auto [status, category, body] = response.result();
+      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      if (download_.skip(sequence, state)) {
+        log::info("Download state={} has already been processed"_sv, state);
         return;
+      }
       response.expect(core::http::Status::OK);
-      auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
       auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
       if (instruments.error.empty()) {
@@ -206,7 +209,7 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
 
 void Rest::operator()(const server::Trace<json::Instruments> &events) {
   auto &[trace_info, instruments] = events;
-  log::info<2>("instruments={}"_sv, instruments);
+  log::info<4>("instruments={}"_sv, instruments);
   assert(instruments.error.empty());
   std::vector<std::string> symbols;
   symbols.reserve(instruments.instruments.size());
