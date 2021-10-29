@@ -12,6 +12,8 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
+
 TEST(json_instruments, simple) {
   auto message =
       R"({)"

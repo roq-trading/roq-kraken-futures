@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_send_order, simple) {
@@ -48,17 +49,17 @@ TEST(json_send_order, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::SendOrder>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(obj.send_status.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
-  EXPECT_EQ(obj.send_status.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
+  EXPECT_EQ(obj.send_status.order_id, "f2af600b-5fe8-49be-8983-de874071563b"sv);
+  EXPECT_EQ(obj.send_status.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"sv);
   EXPECT_EQ(obj.send_status.status, json::Status::PLACED);
   EXPECT_EQ(obj.send_status.received_time, 1627618780804ms);
   EXPECT_EQ(std::size(obj.send_status.order_events), 1);
   // idx 0
   auto &order_event_0 = obj.send_status.order_events[0];
-  EXPECT_EQ(order_event_0.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"_sv);
-  EXPECT_EQ(order_event_0.order.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"_sv);
+  EXPECT_EQ(order_event_0.order.order_id, "f2af600b-5fe8-49be-8983-de874071563b"sv);
+  EXPECT_EQ(order_event_0.order.cli_ord_id, "TgAF6QMAAQAAbl1bG4QQ"sv);
   EXPECT_EQ(order_event_0.order.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event_0.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event_0.order.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(order_event_0.order.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(order_event_0.order.quantity, 1.0);
   EXPECT_DOUBLE_EQ(order_event_0.order.filled, 0.0);
@@ -109,22 +110,21 @@ TEST(json_send_order, order_prior_execution) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::SendOrder>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(obj.send_status.order_id, "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"_sv);
-  EXPECT_EQ(obj.send_status.cli_ord_id, "WwAF6QMAAQAAPOEH7dUQ"_sv);
+  EXPECT_EQ(obj.send_status.order_id, "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
+  EXPECT_EQ(obj.send_status.cli_ord_id, "WwAF6QMAAQAAPOEH7dUQ"sv);
   EXPECT_EQ(obj.send_status.status, json::Status::PLACED);
   EXPECT_EQ(obj.send_status.received_time, 1627970190892ms);
   EXPECT_EQ(std::size(obj.send_status.order_events), 1);
   // idx 0
   auto &order_event_0 = obj.send_status.order_events[0];
-  EXPECT_EQ(order_event_0.execution_id, "685571f7-4ba2-4e6d-92f5-0c3c9428ac3f"_sv);
+  EXPECT_EQ(order_event_0.execution_id, "685571f7-4ba2-4e6d-92f5-0c3c9428ac3f"sv);
   EXPECT_DOUBLE_EQ(order_event_0.price, 38539.5);
   EXPECT_DOUBLE_EQ(order_event_0.amount, 1.0);
   // EXPECT_EQ(order_event_0.order_prior_edit,
-  EXPECT_EQ(
-      order_event_0.order_prior_execution.order_id, "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"_sv);
-  EXPECT_EQ(order_event_0.order_prior_execution.cli_ord_id, "WwAF6QMAAQAAPOEH7dUQ"_sv);
+  EXPECT_EQ(order_event_0.order_prior_execution.order_id, "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
+  EXPECT_EQ(order_event_0.order_prior_execution.cli_ord_id, "WwAF6QMAAQAAPOEH7dUQ"sv);
   EXPECT_EQ(order_event_0.order_prior_execution.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event_0.order_prior_execution.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event_0.order_prior_execution.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(order_event_0.order_prior_execution.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(order_event_0.order_prior_execution.quantity, 1.0);
   EXPECT_DOUBLE_EQ(order_event_0.order_prior_execution.filled, 0.0);

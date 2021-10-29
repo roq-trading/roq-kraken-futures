@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_cancel_order, simple) {
@@ -48,16 +49,16 @@ TEST(json_cancel_order, simple) {
   auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
   EXPECT_EQ(obj.cancel_status.status, json::Status::CANCELLED);
-  EXPECT_EQ(obj.cancel_status.order_id, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
+  EXPECT_EQ(obj.cancel_status.order_id, "85792364-8163-4e13-b62d-695e7f802e22"sv);
   EXPECT_EQ(obj.cancel_status.received_time, 1627707194376ms);
   EXPECT_EQ(std::size(obj.cancel_status.order_events), 1);
   // idx 0
   auto &event = obj.cancel_status.order_events[0];
-  EXPECT_EQ(event.uid, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
-  EXPECT_EQ(event.order.order_id, "85792364-8163-4e13-b62d-695e7f802e22"_sv);
-  EXPECT_EQ(event.order.cli_ord_id, "DwAF6QMAAQAAxMacsJgQ"_sv);
+  EXPECT_EQ(event.uid, "85792364-8163-4e13-b62d-695e7f802e22"sv);
+  EXPECT_EQ(event.order.order_id, "85792364-8163-4e13-b62d-695e7f802e22"sv);
+  EXPECT_EQ(event.order.cli_ord_id, "DwAF6QMAAQAAxMacsJgQ"sv);
   EXPECT_EQ(event.order.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.order.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(event.order.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
   EXPECT_DOUBLE_EQ(event.order.filled, 0.0);

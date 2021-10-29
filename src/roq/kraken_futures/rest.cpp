@@ -16,13 +16,13 @@
 
 #include "roq/kraken_futures/json/result.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "rest"_sv;
+static const auto NAME = "rest"sv;
 
 static const auto SUPPORTS = utils::Mask{
     SupportType::REFERENCE_DATA,
@@ -38,7 +38,7 @@ struct create_metrics final : public core::metrics::Factory {
 }  // namespace
 
 Rest::Rest(Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"_sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -55,14 +55,14 @@ Rest::Rest(Handler &handler, core::io::Context &context, uint16_t stream_id, Sha
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .instruments = create_metrics(name_, "instruments"_sv),
-          .instruments_ack = create_metrics(name_, "instruments_ack"_sv),
+          .instruments = create_metrics(name_, "instruments"sv),
+          .instruments_ack = create_metrics(name_, "instruments_ack"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"_sv),
+          .ping = create_metrics(name_, "ping"sv),
       },
       shared_(shared),
       download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
@@ -102,7 +102,7 @@ void Rest::operator()(ConnectionStatus status) {
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_sv, stream_status);
+    log::info("stream_status={}"sv, stream_status);
     server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
@@ -154,7 +154,7 @@ uint32_t Rest::download(RestState state) {
 void Rest::get_instruments() {
   profile_.instruments([&]() {
     auto method = core::http::Method::GET;
-    auto path = "/api/v3/instruments"_sv;
+    auto path = "/api/v3/instruments"sv;
     core::web::Request request{
         .method = method,
         .path = path,
@@ -168,7 +168,7 @@ void Rest::get_instruments() {
     };
     auto sequence = download_.sequence();
     connection_(
-        "instruments"_sv,
+        "instruments"sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
@@ -184,9 +184,9 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
     auto state = RestState::INSTRUMENTS;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"_sv, state);
+        log::info("Download state={} has already been processed"sv, state);
         return;
       }
       response.expect(core::http::Status::OK);
@@ -197,11 +197,11 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
         (*this)(event);
         download_.check(state);
       } else {
-        log::warn("instruments={}"_sv, instruments);
-        log::fatal("Unexpected"_sv);
+        log::warn("instruments={}"sv, instruments);
+        log::fatal("Unexpected"sv);
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -209,13 +209,13 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
 
 void Rest::operator()(const server::Trace<json::Instruments> &events) {
   auto &[trace_info, instruments] = events;
-  log::info<4>("instruments={}"_sv, instruments);
+  log::info<4>("instruments={}"sv, instruments);
   assert(instruments.error.empty());
   std::vector<std::string> symbols;
   symbols.reserve(instruments.instruments.size());
   size_t counter = {};
   for (auto &item : instruments.instruments) {
-    log::info<2>("item={}"_sv, item);
+    log::info<2>("item={}"sv, item);
     std::string symbol(item.symbol);  // note! we need the upper-case version
     std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
     if (shared_.discard_symbol(symbol))
@@ -249,7 +249,7 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
     };
     server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
   }
-  log::info("Instruments {} / {}"_sv, counter, instruments.instruments.size());
+  log::info("Instruments {} / {}"sv, counter, instruments.instruments.size());
   if (!symbols.empty()) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,

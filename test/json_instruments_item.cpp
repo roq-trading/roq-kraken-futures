@@ -9,6 +9,8 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
+
 TEST(json_instruments_item, simple) {
   auto message = R"({)"
                  R"("symbol":"pi_xbtusd",)"
@@ -27,9 +29,9 @@ TEST(json_instruments_item, simple) {
                  R"(])"
                  R"(})";
   auto obj = core::json::Parser::create<json::InstrumentsItem>(message);
-  EXPECT_EQ(obj.symbol, "pi_xbtusd"_sv);
-  EXPECT_EQ(obj.type, "futures_inverse"_sv);
-  EXPECT_EQ(obj.underlying, "rr_xbtusd"_sv);
+  EXPECT_EQ(obj.symbol, "pi_xbtusd"sv);
+  EXPECT_EQ(obj.type, "futures_inverse"sv);
+  EXPECT_EQ(obj.underlying, "rr_xbtusd"sv);
   EXPECT_DOUBLE_EQ(obj.tick_size, 0.5);
   EXPECT_DOUBLE_EQ(obj.contract_size, 1);
   EXPECT_EQ(obj.tradeable, true);

@@ -14,13 +14,13 @@
 #include "roq/kraken_futures/flags.h"
 #include "roq/kraken_futures/order_update.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "ex"_sv;
+static const auto NAME = "ex"sv;
 static const auto SUPPORTS = utils::Mask{
     SupportType::ORDER,
     SupportType::TRADE,
@@ -41,7 +41,7 @@ DropCopy::DropCopy(
     Security &security,
     Shared &shared)
     : handler_(handler), stream_id_(stream_id),
-      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())),
+      name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
       connection_(
           *this,
           context,
@@ -53,22 +53,22 @@ DropCopy::DropCopy(
           []() { return std::string(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .parse = create_metrics(name_, "parse"_sv),
-          .challenge = create_metrics(name_, "challenge"_sv),
-          .heartbeat = create_metrics(name_, "heartbeat"_sv),
-          .account_balances_and_margins = create_metrics(name_, "account_balances_and_margins"_sv),
-          .open_positions = create_metrics(name_, "open_positions"_sv),
-          .open_orders_snapshot = create_metrics(name_, "open_orders_snapshot"_sv),
-          .open_orders = create_metrics(name_, "open_orders"_sv),
-          .fills_snapshot = create_metrics(name_, "fills_snapshot"_sv),
-          .fills = create_metrics(name_, "fills"_sv),
+          .parse = create_metrics(name_, "parse"sv),
+          .challenge = create_metrics(name_, "challenge"sv),
+          .heartbeat = create_metrics(name_, "heartbeat"sv),
+          .account_balances_and_margins = create_metrics(name_, "account_balances_and_margins"sv),
+          .open_positions = create_metrics(name_, "open_positions"sv),
+          .open_orders_snapshot = create_metrics(name_, "open_orders_snapshot"sv),
+          .open_orders = create_metrics(name_, "open_orders"sv),
+          .fills_snapshot = create_metrics(name_, "fills_snapshot"sv),
+          .fills = create_metrics(name_, "fills"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"_sv),
-          .heartbeat = create_metrics(name_, "heartbeat"_sv),
+          .ping = create_metrics(name_, "ping"sv),
+          .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
       security_(security), shared_(shared),
       download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
@@ -112,18 +112,18 @@ void DropCopy::get_challenge() {
       R"({{)"
       R"("event":"challenge",)"
       R"("api_key":"{}")"
-      R"(}})"_sv,
+      R"(}})"sv,
       security_.get_key());
-  log::debug(R"(request="{}")"_sv, message);
-  log::info<2>(R"(request="{}")"_sv, message);
+  log::debug(R"(request="{}")"sv, message);
+  log::info<2>(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
 void DropCopy::subscribe() {
-  subscribe("account_balances_and_margins"_sv);
-  subscribe("open_positions"_sv);
-  subscribe("open_orders"_sv);
-  subscribe("fills"_sv);
+  subscribe("account_balances_and_margins"sv);
+  subscribe("open_positions"sv);
+  subscribe("open_orders"sv);
+  subscribe("fills"sv);
 }
 
 void DropCopy::subscribe(const std::string_view &feed) {
@@ -134,13 +134,13 @@ void DropCopy::subscribe(const std::string_view &feed) {
       R"("api_key":"{}",)"
       R"("original_challenge":"{}",)"
       R"("signed_challenge":"{}")"
-      R"(}})"_sv,
+      R"(}})"sv,
       feed,
       security_.get_key(),
       original_challenge_,
       signed_challenge_);
-  log::debug(R"(request="{}")"_sv, message);
-  log::info<2>(R"(request="{}")"_sv, message);
+  log::debug(R"(request="{}")"sv, message);
+  log::info<2>(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
@@ -181,7 +181,7 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
 }
 
 void DropCopy::operator()(const core::web::Socket::Binary &) {
-  log::fatal("Unexpected"_sv);
+  log::fatal("Unexpected"sv);
 }
 
 void DropCopy::operator()(ConnectionStatus status) {
@@ -195,7 +195,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_sv, stream_status);
+    log::info("stream_status={}"sv, stream_status);
     server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
@@ -223,27 +223,27 @@ uint32_t DropCopy::download(DropCopyState state) {
 
 void DropCopy::operator()(const server::Trace<json::Info> &event) {
   auto &[trace_info, info] = event;
-  log::debug("info={}"_sv, info);
-  log::info<2>("info={}"_sv, info);
+  log::debug("info={}"sv, info);
+  log::info<2>("info={}"sv, info);
 }
 
 void DropCopy::operator()(const server::Trace<json::Alert> &event) {
   auto &[trace_info, alert] = event;
-  log::debug("alert={}"_sv, alert);
-  log::warn<1>("alert={}"_sv, alert);
+  log::debug("alert={}"sv, alert);
+  log::warn<1>("alert={}"sv, alert);
 }
 
 void DropCopy::operator()(const server::Trace<json::Error> &event) {
   auto &[trace_info, error] = event;
-  log::debug("error={}"_sv, error);
-  log::warn("error={}"_sv, error);
+  log::debug("error={}"sv, error);
+  log::warn("error={}"sv, error);
 }
 
 void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
-    log::debug("challenge={}"_sv, challenge);
-    log::info<2>("challenge={}"_sv, challenge);
+    log::debug("challenge={}"sv, challenge);
+    log::info<2>("challenge={}"sv, challenge);
     assert(original_challenge_.empty());
     assert(signed_challenge_.empty());
     original_challenge_ = challenge.message;
@@ -254,22 +254,22 @@ void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
 
 void DropCopy::operator()(const server::Trace<json::Subscribed> &event) {
   auto &[trace_info, subscribed] = event;
-  log::debug("subscribed={}"_sv, subscribed);
-  log::info<2>("subscribed={}"_sv, subscribed);
+  log::debug("subscribed={}"sv, subscribed);
+  log::info<2>("subscribed={}"sv, subscribed);
 }
 
 void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
-    log::debug("heartbeat={}"_sv, heartbeat);
-    log::info<2>("heartbeat={}"_sv, heartbeat);
+    log::debug("heartbeat={}"sv, heartbeat);
+    log::info<2>("heartbeat={}"sv, heartbeat);
   });
 }
 
 void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
-    log::info<2>("account_balances_and_margins={}"_sv, account_balances_and_margins);
+    log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
       std::transform(currency.begin(), currency.end(), currency.begin(), ::toupper);
@@ -289,7 +289,7 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
 void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
-    log::info<2>("open_positions={}"_sv, open_positions);
+    log::info<2>("open_positions={}"sv, open_positions);
     for (auto &item : open_positions.positions) {
       auto long_quantity = std::max(0.0, item.balance);
       auto short_quantity = std::max(0.0, -item.balance);
@@ -312,7 +312,7 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
 void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
-    log::info<2>("open_orders_snapshot={}"_sv, open_orders_snapshot);
+    log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders_snapshot, trace_info);
   });
 }
@@ -320,7 +320,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) 
 void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
-    log::info<2>("open_orders={}"_sv, open_orders);
+    log::info<2>("open_orders={}"sv, open_orders);
     OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders, trace_info);
   });
 }
@@ -330,16 +330,16 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
     auto &fills_snapshot = event.value;
-    log::info<2>("fills_snapshot={}"_sv, fills_snapshot);
+    log::info<2>("fills_snapshot={}"sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
             std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
             if (symbol.compare(order.symbol) != 0)
-              log::warn(R"(Unexpected: symbol="{}"/"{}")"_sv, symbol, order.symbol);
+              log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
             auto side = item.buy ? Side::BUY : Side::SELL;
             if (side != order.side)
-              log::warn("Unexpected: side={}/{})"_sv, side, order.side);
+              log::warn("Unexpected: side={}/{})"sv, side, order.side);
             Fill fill{
                 .external_trade_id = item.fill_id,
                 .quantity = item.qty,
@@ -365,8 +365,8 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
                 handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"_sv);
-        log::warn<2>("fill={}"_sv, item);
+        log::warn<1>("*** EXTERNAL ORDER ***"sv);
+        log::warn<2>("fill={}"sv, item);
       }
     }
   });
@@ -377,17 +377,17 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
-    log::info<2>("fills={}"_sv, fills);
+    log::info<2>("fills={}"sv, fills);
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
             std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
             if (symbol.compare(order.symbol) != 0)
-              log::warn(R"(Unexpected: symbol="{}"/"{}")"_sv, symbol, order.symbol);
+              log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
             auto side = item.buy ? Side::BUY : Side::SELL;
             if (side != order.side)
-              log::warn("Unexpected: side={}/{})"_sv, side, order.side);
+              log::warn("Unexpected: side={}/{})"sv, side, order.side);
             Fill fill{
                 .external_trade_id = item.fill_id,
                 .quantity = item.qty,
@@ -413,8 +413,8 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
                 handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"_sv);
-        log::warn<2>("fill={}"_sv, item);
+        log::warn<1>("*** EXTERNAL ORDER ***"sv);
+        log::warn<2>("fill={}"sv, item);
       }
     }
   });
@@ -426,7 +426,7 @@ void DropCopy::parse(const std::string_view &message) {
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
-      log::warn(R"(Unexpected: message="{}")"_sv, message);
+      log::warn(R"(Unexpected: message="{}")"sv, message);
   });
 }
 

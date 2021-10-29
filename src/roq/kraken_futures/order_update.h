@@ -42,6 +42,7 @@ class OrderUpdate final {
       const json::SendOrder &send_order,
       Accept accept,
       Reject reject) {
+    using namespace std::literals;
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
       case json::Status::UNDEFINED:
@@ -51,7 +52,7 @@ class OrderUpdate final {
       case json::Status::CANCELLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
       case json::Status::NOT_FOUND:
-        throw RuntimeErrorException("Unexpected: status={}"_sv, send_status.status);
+        throw RuntimeErrorException("Unexpected: status={}"sv, send_status.status);
         break;
       case json::Status::INVALID_ORDER_TYPE:
       case json::Status::INVALID_SIDE:
@@ -73,15 +74,14 @@ class OrderUpdate final {
         break;
       case json::Status::PLACED: {
         if (std::size(send_status.order_events) != 1)
-          throw RuntimeErrorException(
-              "Unexpected: size={}"_sv, std::size(send_status.order_events));
+          throw RuntimeErrorException("Unexpected: size={}"sv, std::size(send_status.order_events));
         auto &order_event = send_status.order_events[0];
         switch (order_event.type) {
           case json::OrderEventType::UNDEFINED:
           case json::OrderEventType::UNKNOWN:
           case json::OrderEventType::EDIT:
           case json::OrderEventType::CANCEL:
-            throw RuntimeErrorException("Unexpected: type={}"_sv, order_event.type);
+            throw RuntimeErrorException("Unexpected: type={}"sv, order_event.type);
             break;
           case json::OrderEventType::PLACE: {
             auto &order_ = order_event.order;
@@ -176,6 +176,7 @@ class OrderUpdate final {
       const json::EditOrder &edit_order,
       Accept accept,
       Reject reject) {
+    using namespace std::literals;
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
       case json::Status::UNDEFINED:
@@ -184,7 +185,7 @@ class OrderUpdate final {
       case json::Status::FILLED:
       case json::Status::CANCELLED:
       case json::Status::NO_ORDERS_TO_CANCEL:
-        throw RuntimeErrorException("Unexpected: status={}"_sv, edit_status.status);
+        throw RuntimeErrorException("Unexpected: status={}"sv, edit_status.status);
         break;
       case json::Status::NOT_FOUND:
       case json::Status::INVALID_ORDER_TYPE:
@@ -207,15 +208,14 @@ class OrderUpdate final {
         break;
       case json::Status::EDITED: {
         if (std::size(edit_status.order_events) != 1)
-          throw RuntimeErrorException(
-              "Unexpected: size={}"_sv, std::size(edit_status.order_events));
+          throw RuntimeErrorException("Unexpected: size={}"sv, std::size(edit_status.order_events));
         auto &order_event = edit_status.order_events[0];
         switch (order_event.type) {
           case json::OrderEventType::UNDEFINED:
           case json::OrderEventType::UNKNOWN:
           case json::OrderEventType::PLACE:
           case json::OrderEventType::CANCEL:
-            throw RuntimeErrorException("Unexpected: type={}"_sv, order_event.type);
+            throw RuntimeErrorException("Unexpected: type={}"sv, order_event.type);
             break;
           case json::OrderEventType::EDIT: {
             auto &new_order = order_event.new_;
@@ -256,11 +256,11 @@ class OrderUpdate final {
           }
           case json::OrderEventType::EXECUTION: {
             // XXX HANS FIX THIS
-            log::warn("order_event={}"_sv, order_event);
-            log::fatal("Unexpected"_sv);
+            log::warn("order_event={}"sv, order_event);
+            log::fatal("Unexpected"sv);
           }
           case json::OrderEventType::REJECT: {
-            auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"_sv) == 0
+            auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0
                              ? Error::MODIFY_HAS_NO_EFFECT
                              : Error::UNKNOWN;
             reject(error, order_event.reason);
@@ -278,6 +278,7 @@ class OrderUpdate final {
       const json::CancelOrder &cancel_order,
       Accept accept,
       Reject reject) {
+    using namespace std::literals;
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
       case json::Status::UNDEFINED:
@@ -285,7 +286,7 @@ class OrderUpdate final {
       case json::Status::PLACED:
       case json::Status::EDITED:
       case json::Status::FILLED:
-        throw RuntimeErrorException("Unexpected: status={}"_sv, cancel_status.status);
+        throw RuntimeErrorException("Unexpected: status={}"sv, cancel_status.status);
         break;
       case json::Status::NO_ORDERS_TO_CANCEL:
       case json::Status::INVALID_ORDER_TYPE:
@@ -309,14 +310,14 @@ class OrderUpdate final {
       case json::Status::CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
           throw RuntimeErrorException(
-              "Unexpected: size={}"_sv, std::size(cancel_status.order_events));
+              "Unexpected: size={}"sv, std::size(cancel_status.order_events));
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
           case json::OrderEventType::UNDEFINED:
           case json::OrderEventType::UNKNOWN:
           case json::OrderEventType::PLACE:
           case json::OrderEventType::EDIT:
-            throw RuntimeErrorException("Unexpected: type={}"_sv, order_event.type);
+            throw RuntimeErrorException("Unexpected: type={}"sv, order_event.type);
             break;
           case json::OrderEventType::CANCEL: {
             auto &order_ = order_event.new_;
@@ -356,8 +357,8 @@ class OrderUpdate final {
           }
           case json::OrderEventType::EXECUTION: {
             // XXX HANS FIX THIS
-            log::warn("order_event={}"_sv, order_event);
-            log::fatal("Unexpected"_sv);
+            log::warn("order_event={}"sv, order_event);
+            log::fatal("Unexpected"sv);
           }
           case json::OrderEventType::REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
@@ -367,7 +368,7 @@ class OrderUpdate final {
         break;
       }
       case json::Status::NOT_FOUND:
-        reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, ""_sv);
+        reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, ""sv);
         break;
     }
   }

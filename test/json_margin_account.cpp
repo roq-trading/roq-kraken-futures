@@ -9,6 +9,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_margin_account, simple) {
@@ -23,7 +24,7 @@ TEST(json_margin_account, simple) {
                  R"("mm":0.0)"
                  R"(})";
   auto obj = core::json::Parser::create<json::MarginAccount>(message);
-  EXPECT_EQ(obj.name, "bch"_sv);
+  EXPECT_EQ(obj.name, "bch"sv);
   EXPECT_DOUBLE_EQ(obj.balance, 20.0);
   EXPECT_DOUBLE_EQ(obj.pnl, 0.0);
   EXPECT_DOUBLE_EQ(obj.funding, 0.0);

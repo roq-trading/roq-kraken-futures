@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_edit_order, simple) {
@@ -62,16 +63,16 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(obj.result, json::Result::SUCCESS);
   EXPECT_EQ(obj.server_time, 1627648619235ms);
   EXPECT_EQ(obj.edit_status.status, json::Status::EDITED);
-  EXPECT_EQ(obj.edit_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
+  EXPECT_EQ(obj.edit_status.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"sv);
   EXPECT_EQ(obj.edit_status.received_time, 1627648619235ms);
   EXPECT_EQ(std::size(obj.edit_status.order_events), 1);
   // idx 0
   auto &event = obj.edit_status.order_events[0];
   // ... old
-  EXPECT_EQ(event.old.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
-  EXPECT_EQ(event.old.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
+  EXPECT_EQ(event.old.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"sv);
+  EXPECT_EQ(event.old.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"sv);
   EXPECT_EQ(event.old.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(event.old.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.old.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(event.old.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.old.quantity, 1.0);
   EXPECT_DOUBLE_EQ(event.old.filled, 0.0);
@@ -79,10 +80,10 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(event.old.timestamp, 1627648589044ms);
   EXPECT_EQ(event.old.last_update_timestamp, 1627648589044ms);
   // ... new
-  EXPECT_EQ(event.new_.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"_sv);
-  EXPECT_EQ(event.new_.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"_sv);
+  EXPECT_EQ(event.new_.order_id, "018eb846-5962-430e-af9f-31ee03cf1460"sv);
+  EXPECT_EQ(event.new_.cli_ord_id, "2AAF6QMAAQAAHugQDIsQ"sv);
   EXPECT_EQ(event.new_.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(event.new_.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(event.new_.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(event.new_.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(event.new_.quantity, 1.0);
   EXPECT_DOUBLE_EQ(event.new_.filled, 0.0);
@@ -104,7 +105,7 @@ TEST(json_edit_order, authentication_error) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
   EXPECT_EQ(obj.result, json::Result::ERROR);
-  EXPECT_EQ(obj.error, "authenticationError"_sv);
+  EXPECT_EQ(obj.error, "authenticationError"sv);
   EXPECT_EQ(obj.server_time, 1627705820840ms);
 }
 
@@ -142,16 +143,16 @@ TEST(json_edit_order, edit_has_no_effect) {
   EXPECT_EQ(obj.server_time, 1627876310939ms);
   // edit_status
   auto &edit_status = obj.edit_status;
-  EXPECT_EQ(edit_status.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
+  EXPECT_EQ(edit_status.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"sv);
   EXPECT_EQ(edit_status.received_time, 1627876310939ms);
   EXPECT_EQ(std::size(edit_status.order_events), 1);
   // idx 0
   auto &order_event = edit_status.order_events[0];
-  EXPECT_EQ(order_event.uid, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
-  EXPECT_EQ(order_event.order.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"_sv);
-  EXPECT_EQ(order_event.order.cli_ord_id, "egAF6gMAAQAAyEmOD8AQ"_sv);
+  EXPECT_EQ(order_event.uid, "f109eb54-a223-4503-99c5-00f053b9411e"sv);
+  EXPECT_EQ(order_event.order.order_id, "f109eb54-a223-4503-99c5-00f053b9411e"sv);
+  EXPECT_EQ(order_event.order.cli_ord_id, "egAF6gMAAQAAyEmOD8AQ"sv);
   EXPECT_EQ(order_event.order.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event.order.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(order_event.order.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(order_event.order.quantity, 1.0);
   EXPECT_DOUBLE_EQ(order_event.order.filled, 0.0);
@@ -216,19 +217,19 @@ TEST(json_edit_order, execution) {
   // edit_status
   auto &edit_status = obj.edit_status;
   EXPECT_EQ(edit_status.status, json::Status::FILLED);
-  EXPECT_EQ(edit_status.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
+  EXPECT_EQ(edit_status.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"sv);
   EXPECT_EQ(edit_status.received_time, 1627972925376ms);
   EXPECT_EQ(std::size(edit_status.order_events), 1);
   // idx 0
   auto &order_event = edit_status.order_events[0];
-  EXPECT_EQ(order_event.execution_id, "7d484ed2-0dbe-48de-9002-45f6ac5f3a90"_sv);
+  EXPECT_EQ(order_event.execution_id, "7d484ed2-0dbe-48de-9002-45f6ac5f3a90"sv);
   EXPECT_DOUBLE_EQ(order_event.price, 38621.0);
   EXPECT_DOUBLE_EQ(order_event.amount, 1.0);
   // ... order_prior_edit
-  EXPECT_EQ(order_event.order_prior_edit.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
-  EXPECT_EQ(order_event.order_prior_edit.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"_sv);
+  EXPECT_EQ(order_event.order_prior_edit.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"sv);
+  EXPECT_EQ(order_event.order_prior_edit.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"sv);
   EXPECT_EQ(order_event.order_prior_edit.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event.order_prior_edit.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order_prior_edit.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(order_event.order_prior_edit.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(order_event.order_prior_edit.quantity, 1.0);
   EXPECT_DOUBLE_EQ(order_event.order_prior_edit.filled, 0.0);
@@ -237,10 +238,10 @@ TEST(json_edit_order, execution) {
   EXPECT_EQ(order_event.order_prior_edit.timestamp, 1627972920184ms);
   EXPECT_EQ(order_event.order_prior_edit.last_update_timestamp, 1627972920184ms);
   // ... order_prior_execution
-  EXPECT_EQ(order_event.order_prior_execution.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"_sv);
-  EXPECT_EQ(order_event.order_prior_execution.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"_sv);
+  EXPECT_EQ(order_event.order_prior_execution.order_id, "4178c9d1-b033-4113-afaf-610c97631d07"sv);
+  EXPECT_EQ(order_event.order_prior_execution.cli_ord_id, "ewAF6QMAAQAAXXO1j9YQ"sv);
   EXPECT_EQ(order_event.order_prior_execution.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(order_event.order_prior_execution.symbol, "pi_xbtusd"_sv);
+  EXPECT_EQ(order_event.order_prior_execution.symbol, "pi_xbtusd"sv);
   EXPECT_EQ(order_event.order_prior_execution.side, json::Side::BUY);
   EXPECT_DOUBLE_EQ(order_event.order_prior_execution.quantity, 1.0);
   EXPECT_DOUBLE_EQ(order_event.order_prior_execution.filled, 0.0);

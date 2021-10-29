@@ -8,7 +8,7 @@
 #include "roq/kraken_futures/json/feed.h"
 #include "roq/kraken_futures/json/utils.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -154,14 +154,14 @@ bool ParserPrivate::dispatch(
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     // event
-    if (key.compare("event"_sv) == 0) {
+    if (key.compare("event"sv) == 0) {
       Event event(value);
       switch (event) {
         case Event::UNDEFINED:
           assert(false);
           [[fallthrough]];
         case Event::UNKNOWN:
-          log::warn(R"(Unknown event="{}")"_sv, event);
+          log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case Event::INFO:
           dispatch_info(handler, message, trace_info);
@@ -183,14 +183,14 @@ bool ParserPrivate::dispatch(
       }
     }
     // feed
-    if (key.compare("feed"_sv) == 0) {
+    if (key.compare("feed"sv) == 0) {
       Feed feed(value);
       switch (feed) {
         case Feed::UNDEFINED:
           assert(false);
           [[fallthrough]];
         case Feed::UNKNOWN:
-          log::warn(R"(Unknown feed="{}")"_sv, feed);
+          log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case Feed::HEARTBEAT:
           dispatch_heartbeat(handler, message, trace_info);
@@ -200,7 +200,7 @@ bool ParserPrivate::dispatch(
         case Feed::BOOK:
         case Feed::TRADE_SNAPSHOT:
         case Feed::TRADE:
-          log::fatal("Unexpected: feed={}"_sv, feed);
+          log::fatal("Unexpected: feed={}"sv, feed);
           break;
         case Feed::CHALLENGE:
           dispatch_challenge(handler, message, trace_info);

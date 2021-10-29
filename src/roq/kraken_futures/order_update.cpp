@@ -13,7 +13,7 @@
 
 #include "roq/kraken_futures/json/utils.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -176,16 +176,16 @@ void OrderUpdate::operator()(
   if (is_download) {
     if (shared_.create_order(request_id, stream_id_, trace_info, order_update)) {
     } else {
-      log::warn("*** EXTERNAL ORDER ***"_sv);
-      log::warn("order={}"_sv, order);
+      log::warn("*** EXTERNAL ORDER ***"sv);
+      log::warn("order={}"sv, order);
     }
   } else {
     if (shared_.update_order(
             request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {
             })) {
     } else {
-      log::warn("*** EXTERNAL ORDER ***"_sv);
-      log::warn("order={}"_sv, order);
+      log::warn("*** EXTERNAL ORDER ***"sv);
+      log::warn("order={}"sv, order);
     }
   }
 }

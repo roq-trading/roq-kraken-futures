@@ -18,13 +18,13 @@
 
 #include "roq/kraken_futures/json/utils.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "md"_sv;
+static const auto NAME = "md"sv;
 static const auto SUPPORTS = utils::Mask{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
@@ -60,7 +60,7 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"_sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -72,20 +72,20 @@ MarketData::MarketData(
           []() { return std::string(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .parse = create_metrics(name_, "parse"_sv),
-          .heartbeat = create_metrics(name_, "heartbeat"_sv),
-          .ticker = create_metrics(name_, "ticker"_sv),
-          .book_snapshot = create_metrics(name_, "book_snapshot"_sv),
-          .book = create_metrics(name_, "book"_sv),
-          .trade_snapshot = create_metrics(name_, "trade_snapshot"_sv),
-          .trade = create_metrics(name_, "trade"_sv),
+          .parse = create_metrics(name_, "parse"sv),
+          .heartbeat = create_metrics(name_, "heartbeat"sv),
+          .ticker = create_metrics(name_, "ticker"sv),
+          .book_snapshot = create_metrics(name_, "book_snapshot"sv),
+          .book = create_metrics(name_, "book"sv),
+          .trade_snapshot = create_metrics(name_, "trade_snapshot"sv),
+          .trade = create_metrics(name_, "trade"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"_sv),
-          .heartbeat = create_metrics(name_, "heartbeat"_sv),
+          .ping = create_metrics(name_, "ping"sv),
+          .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
       shared_(shared),
       download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
@@ -175,7 +175,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 }
 
 void MarketData::operator()(const core::web::Socket::Binary &) {
-  log::fatal("Unexpected"_sv);
+  log::fatal("Unexpected"sv);
 }
 
 void MarketData::operator()(ConnectionStatus status) {
@@ -189,7 +189,7 @@ void MarketData::operator()(ConnectionStatus status) {
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_sv, stream_status);
+    log::info("stream_status={}"sv, stream_status);
     server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
@@ -200,7 +200,7 @@ uint32_t MarketData::download(MarketDataState state) {
       assert(false);
       break;
     case MarketDataState::SUBSCRIBE:
-      subscribe("heartbeat"_sv);
+      subscribe("heartbeat"sv);
       subscribe(symbols_);
       return {};
     case MarketDataState::DONE:
@@ -214,50 +214,50 @@ uint32_t MarketData::download(MarketDataState state) {
 }
 
 void MarketData::subscribe(const roq::span<std::string> &symbols) {
-  subscribe("ticker"_sv, symbols);
-  subscribe("book"_sv, symbols);
-  subscribe("trade"_sv, symbols);
+  subscribe("ticker"sv, symbols);
+  subscribe("book"sv, symbols);
+  subscribe("trade"sv, symbols);
 }
 
 void MarketData::subscribe(const std::string_view &feed) {
-  log::info(R"(subscribe feed="{}")"_sv, feed);
+  log::info(R"(subscribe feed="{}")"sv, feed);
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("feed":"{}")"
-      R"(}})"_sv,
+      R"(}})"sv,
       feed);
-  log::info<2>(R"(request="{}")"_sv, message);
+  log::info<2>(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
 template <typename T>
 void MarketData::subscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
-  log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("feed":"{}",)"
       R"("product_ids":["{}"])"
-      R"(}})"_sv,
+      R"(}})"sv,
       feed,
-      fmt::join(product_ids, R"(",")"_sv));
-  log::info<2>(R"(request="{}")"_sv, message);
+      fmt::join(product_ids, R"(",")"sv));
+  log::info<2>(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
 template <typename T>
 void MarketData::unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
-  log::info(R"(subscribe feed="{}", len(product_ids)={})"_sv, feed, std::size(product_ids));
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
   auto message = fmt::format(
       R"({{)"
       R"("event":"unsubscribe",)"
       R"("feed":"{}",)"
       R"("product_ids":["{}"])"
-      R"(}})"_sv,
+      R"(}})"sv,
       feed,
-      fmt::join(product_ids, R"(",")"_sv));
-  log::info<2>(R"(request="{}")"_sv, message);
+      fmt::join(product_ids, R"(",")"sv));
+  log::info<2>(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
@@ -267,41 +267,41 @@ void MarketData::parse(const std::string_view &message) {
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
-      log::warn(R"(Unexpected: message="{}")"_sv, message);
+      log::warn(R"(Unexpected: message="{}")"sv, message);
   });
 }
 
 void MarketData::operator()(const server::Trace<json::Info> &event) {
   auto &[trace_info, info] = event;
-  log::info<2>("info={}"_sv, info);
+  log::info<2>("info={}"sv, info);
 }
 
 void MarketData::operator()(const server::Trace<json::Alert> &event) {
   auto &[trace_info, alert] = event;
-  log::warn<1>("alert={}"_sv, alert);
+  log::warn<1>("alert={}"sv, alert);
 }
 
 void MarketData::operator()(const server::Trace<json::Error> &event) {
   auto &[trace_info, error] = event;
-  log::warn("error={}"_sv, error);
+  log::warn("error={}"sv, error);
 }
 
 void MarketData::operator()(const server::Trace<json::Subscribed> &event) {
   auto &[trace_info, subscribed] = event;
-  log::info<2>("subscribed={}"_sv, subscribed);
+  log::info<2>("subscribed={}"sv, subscribed);
 }
 
 void MarketData::operator()(const server::Trace<json::Heartbeat> &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
-    log::info<2>("heartbeat={}"_sv, heartbeat);
+    log::info<2>("heartbeat={}"sv, heartbeat);
   });
 }
 
 void MarketData::operator()(const server::Trace<json::Ticker> &event) {
   profile_.ticker([&]() {
     auto &[trace_info, ticker] = event;
-    log::info<4>("ticker={}"_sv, ticker);
+    log::info<4>("ticker={}"sv, ticker);
     TopOfBook top_of_book{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -365,7 +365,7 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
 void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
   profile_.book_snapshot([&]() {
     auto &[trace_info, book_snapshot] = event;
-    log::info<4>("book_snapshot={}"_sv, book_snapshot);
+    log::info<4>("book_snapshot={}"sv, book_snapshot);
     auto &symbol = book_snapshot.product_id;
     latch_.erase(symbol);  // unlatch
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
@@ -383,7 +383,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
         .exchange_time_utc = book_snapshot.timestamp,
         .exchange_sequence = book_snapshot.seq,
     };
-    log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+    log::info<3>("market_by_price_update={}"sv, market_by_price_update);
     server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
   });
 }
@@ -391,7 +391,7 @@ void MarketData::operator()(const server::Trace<json::BookSnapshot> &event) {
 void MarketData::operator()(const server::Trace<json::Book> &event) {
   profile_.book([&]() {
     auto &[trace_info, book] = event;
-    log::info<4>("book={}"_sv, book);
+    log::info<4>("book={}"sv, book);
     auto &symbol = book.product_id;
     if (latch_.find(symbol) != latch_.end())
       return;  //  waiting for snapshot
@@ -416,7 +416,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
         .exchange_sequence = book.seq,
     };
     try {
-      log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+      log::info<3>("market_by_price_update={}"sv, market_by_price_update);
       server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
     } catch (market::BadState &e) {
       resubscribe(trace_info, symbol);
@@ -427,7 +427,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
 void MarketData::operator()(const server::Trace<json::TradeSnapshot> &event) {
   profile_.trade_snapshot([&]() {
     auto &[trace_info, trade_snapshot] = event;
-    log::info<4>("trade_snapshot={}"_sv, trade_snapshot);
+    log::info<4>("trade_snapshot={}"sv, trade_snapshot);
   });
 }
 
@@ -436,7 +436,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event) {
     // auto &[trace_info, trade] = event;
     auto &trace_info = event.trace_info;
     auto &trade = event.value;
-    log::info<4>("trade={}"_sv, trade);
+    log::info<4>("trade={}"sv, trade);
     core::back_emplacer trades(shared_.trades);
     trades.emplace_back([&](auto &result) { emplace(result, trade); });
     TradeSummary trade_summary{
@@ -451,7 +451,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event) {
 }
 
 void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::string_view &symbol) {
-  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"_sv, symbol);
+  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
   MarketByPriceUpdate market_by_price_update{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
@@ -462,11 +462,11 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .exchange_time_utc = {},
       .exchange_sequence = {},
   };
-  log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+  log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
   latch_.emplace(symbol);  // latch
-  unsubscribe("book"_sv, symbol);
-  subscribe("book"_sv, symbol);
+  unsubscribe("book"sv, symbol);
+  subscribe("book"sv, symbol);
 }
 
 }  // namespace kraken_futures

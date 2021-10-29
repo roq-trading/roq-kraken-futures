@@ -22,13 +22,13 @@
 #include "roq/kraken_futures/json/result.h"
 #include "roq/kraken_futures/json/send_order.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "om"_sv;
+static const auto NAME = "om"sv;
 
 static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
@@ -58,7 +58,7 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
+      name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())), master_(master),
       connection_(
           *this,
           context,
@@ -75,20 +75,20 @@ OrderEntry::OrderEntry(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .create_order = create_metrics(name_, "create_order"_sv),
-          .create_order_ack = create_metrics(name_, "create_order_ack"_sv),
-          .modify_order = create_metrics(name_, "modify_order"_sv),
-          .modify_order_ack = create_metrics(name_, "modify_order_ack"_sv),
-          .cancel_order = create_metrics(name_, "cancel_order"_sv),
-          .cancel_order_ack = create_metrics(name_, "cancel_order_ack"_sv),
-          .cancel_all_orders = create_metrics(name_, "cancel_all_orders"_sv),
-          .cancel_all_orders_ack = create_metrics(name_, "cancel_all_orders_ack"_sv),
+          .create_order = create_metrics(name_, "create_order"sv),
+          .create_order_ack = create_metrics(name_, "create_order_ack"sv),
+          .modify_order = create_metrics(name_, "modify_order"sv),
+          .modify_order_ack = create_metrics(name_, "modify_order_ack"sv),
+          .cancel_order = create_metrics(name_, "cancel_order"sv),
+          .cancel_order_ack = create_metrics(name_, "cancel_order_ack"sv),
+          .cancel_all_orders = create_metrics(name_, "cancel_all_orders"sv),
+          .cancel_all_orders_ack = create_metrics(name_, "cancel_all_orders_ack"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"_sv),
+          .ping = create_metrics(name_, "ping"sv),
       },
       security_(security), shared_(shared),
       download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
@@ -150,7 +150,7 @@ json::OrderEventOrderType compute_order_type(
       break;
   }
   throw RuntimeErrorException(
-      "Unexpected combination of order_type={}, time_in_force={}, execution_instruction={}, stop_price={}"_sv,
+      "Unexpected combination of order_type={}, time_in_force={}, execution_instruction={}, stop_price={}"sv,
       order_type,
       time_in_force,
       execution_instruction,
@@ -199,7 +199,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_sv, stream_status);
+    log::info("stream_status={}"sv, stream_status);
     server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
@@ -239,7 +239,7 @@ void OrderEntry::create_order(
       throw oms::NotReadyException();
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
-    auto path = "/api/v3/sendorder"_sv;
+    auto path = "/api/v3/sendorder"sv;
     auto order_type = compute_order_type(
         create_order.order_type,
         create_order.time_in_force,
@@ -257,7 +257,7 @@ void OrderEntry::create_order(
             "&size={}"
             "&limitPrice={}"
             "&cliOrdId={}"
-            "&reduceOnly={}"_sv,
+            "&reduceOnly={}"sv,
             order_type.as_raw_text(),
             create_order.symbol,
             side.as_raw_text(),
@@ -274,7 +274,7 @@ void OrderEntry::create_order(
             "&limitPrice={}"
             "&stopPrice={}"
             "&cliOrdId={}"
-            "&reduceOnly={}"_sv,
+            "&reduceOnly={}"sv,
             order_type.as_raw_text(),
             create_order.symbol,
             side.as_raw_text(),
@@ -291,7 +291,7 @@ void OrderEntry::create_order(
           "&side={}"
           "&size={}"
           "&cliOrdId={}"
-          "&reduceOnly={}"_sv,
+          "&reduceOnly={}"sv,
           order_type.as_raw_text(),
           create_order.symbol,
           side.as_raw_text(),
@@ -299,7 +299,7 @@ void OrderEntry::create_order(
           request_id,
           reduce_only);
     }
-    log::debug(R"(query="{}")"_sv, query);
+    log::debug(R"(query="{}")"sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{
         .method = method,
@@ -336,7 +336,7 @@ void OrderEntry::create_order_ack(
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
@@ -344,11 +344,11 @@ void OrderEntry::create_order_ack(
           switch (send_order.result) {
             case json::Result::UNDEFINED:
             case json::Result::UNKNOWN:
-              log::warn(R"(response="{}")"_sv, body);
-              log::fatal("Unexpected: send_order={}"_sv, send_order);
+              log::warn(R"(response="{}")"sv, body);
+              log::fatal("Unexpected: send_order={}"sv, send_order);
               break;
             case json::Result::ERROR: {
-              log::warn("send_order={}"_sv, send_order);
+              log::warn("send_order={}"sv, send_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
                   .origin = Origin::EXCHANGE,
@@ -374,7 +374,7 @@ void OrderEntry::create_order_ack(
                   order_id,
                   send_order,
                   [&](auto &order_update) {
-                    log::debug("order_update={}"_sv, order_update);
+                    log::debug("order_update={}"sv, order_update);
                     oms::Response response{
                         .type = RequestType::CREATE_ORDER,
                         .origin = Origin::EXCHANGE,
@@ -423,7 +423,7 @@ void OrderEntry::create_order_ack(
         case core::http::Category::CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
-          log::warn("error={}"_sv, error);
+          log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
           oms::Response response{
               .type = RequestType::CREATE_ORDER,
@@ -449,7 +449,7 @@ void OrderEntry::create_order_ack(
           response.expect(core::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::CREATE_ORDER,
           .origin = Origin::GATEWAY,
@@ -470,7 +470,7 @@ void OrderEntry::create_order_ack(
               []([[maybe_unused]] auto &order) {})) {
       } else {
         log::warn(
-            "Did not find order: user_id={}, order_id={}, version={}"_sv,
+            "Did not find order: user_id={}, order_id={}, version={}"sv,
             user_id,
             order_id,
             version);
@@ -491,16 +491,16 @@ void OrderEntry::modify_order(
       throw oms::NotReadyException();
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::POST;
-    auto path = "/api/v3/editorder"_sv;
+    auto path = "/api/v3/editorder"sv;
     // XXX HANS price has max 2 decimals, size is integer
     auto query = fmt::format(
         "?orderId={}"
         "&size={}"
-        "&limitPrice={}"_sv,
+        "&limitPrice={}"sv,
         order.external_order_id,
         modify_order.quantity,
         modify_order.price);
-    log::debug(R"(query="{}")"_sv, query);
+    log::debug(R"(query="{}")"sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{
         .method = method,
@@ -538,7 +538,7 @@ void OrderEntry::modify_order_ack(
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
@@ -546,11 +546,11 @@ void OrderEntry::modify_order_ack(
           switch (edit_order.result) {
             case json::Result::UNDEFINED:
             case json::Result::UNKNOWN:
-              log::warn(R"(response="{}")"_sv, body);
-              log::fatal("Unexpected: edit_order={}"_sv, edit_order);
+              log::warn(R"(response="{}")"sv, body);
+              log::fatal("Unexpected: edit_order={}"sv, edit_order);
               break;
             case json::Result::ERROR: {
-              log::warn("edit_order={}"_sv, edit_order);
+              log::warn("edit_order={}"sv, edit_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
                   .origin = Origin::EXCHANGE,
@@ -577,7 +577,7 @@ void OrderEntry::modify_order_ack(
                   order_id,
                   edit_order,
                   [&](auto &order_update) {
-                    log::debug("order_update={}"_sv, order_update);
+                    log::debug("order_update={}"sv, order_update);
                     oms::Response response{
                         .type = RequestType::MODIFY_ORDER,
                         .origin = Origin::EXCHANGE,
@@ -626,7 +626,7 @@ void OrderEntry::modify_order_ack(
         case core::http::Category::CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
-          log::warn("error={}"_sv, error);
+          log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
           oms::Response response{
               .type = RequestType::MODIFY_ORDER,
@@ -652,7 +652,7 @@ void OrderEntry::modify_order_ack(
           response.expect(core::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::MODIFY_ORDER,
           .origin = Origin::GATEWAY,
@@ -673,7 +673,7 @@ void OrderEntry::modify_order_ack(
               []([[maybe_unused]] auto &order) {})) {
       } else {
         log::warn(
-            "Did not find order: user_id={}, order_id={}, version={}"_sv,
+            "Did not find order: user_id={}, order_id={}, version={}"sv,
             user_id,
             order_id,
             version);
@@ -694,9 +694,9 @@ void OrderEntry::cancel_order(
       throw oms::NotReadyException();
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::POST;
-    auto path = "/api/v3/cancelorder"_sv;
-    auto query = fmt::format("?order_id={}"_sv, order.external_order_id);
-    log::debug(R"(query="{}")"_sv, query);
+    auto path = "/api/v3/cancelorder"sv;
+    auto query = fmt::format("?order_id={}"sv, order.external_order_id);
+    log::debug(R"(query="{}")"sv, query);
     auto headers = security_.create_headers(path, query);
     core::web::Request request{
         .method = method,
@@ -734,7 +734,7 @@ void OrderEntry::cancel_order_ack(
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
@@ -742,11 +742,11 @@ void OrderEntry::cancel_order_ack(
           switch (cancel_order.result) {
             case json::Result::UNDEFINED:
             case json::Result::UNKNOWN:
-              log::warn(R"(response="{}")"_sv, body);
-              log::fatal("Unexpected: cancel_order={}"_sv, cancel_order);
+              log::warn(R"(response="{}")"sv, body);
+              log::fatal("Unexpected: cancel_order={}"sv, cancel_order);
               break;
             case json::Result::ERROR: {
-              log::warn("cancel_order={}"_sv, cancel_order);
+              log::warn("cancel_order={}"sv, cancel_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
                   .origin = Origin::EXCHANGE,
@@ -773,7 +773,7 @@ void OrderEntry::cancel_order_ack(
                   order_id,
                   cancel_order,
                   [&](auto &order_update) {
-                    log::debug("order_update={}"_sv, order_update);
+                    log::debug("order_update={}"sv, order_update);
                     oms::Response response{
                         .type = RequestType::CANCEL_ORDER,
                         .origin = Origin::EXCHANGE,
@@ -822,7 +822,7 @@ void OrderEntry::cancel_order_ack(
         case core::http::Category::CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
-          log::warn("error={}"_sv, error);
+          log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
           oms::Response response{
               .type = RequestType::CANCEL_ORDER,
@@ -848,7 +848,7 @@ void OrderEntry::cancel_order_ack(
           response.expect(core::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::CANCEL_ORDER,
           .origin = Origin::GATEWAY,
@@ -869,7 +869,7 @@ void OrderEntry::cancel_order_ack(
               []([[maybe_unused]] auto &order) {})) {
       } else {
         log::warn(
-            "Did not find order: user_id={}, order_id={}, version={}"_sv,
+            "Did not find order: user_id={}, order_id={}, version={}"sv,
             user_id,
             order_id,
             version);
@@ -886,7 +886,7 @@ void OrderEntry::cancel_all_orders(
     if (!ready())
       throw oms::NotReadyException();
     auto method = core::http::Method::POST;
-    auto path = "/api/v3/cancelallorders"_sv;
+    auto path = "/api/v3/cancelallorders"sv;
     auto headers = security_.create_headers(path, {});
     core::web::Request request{
         .method = method,
@@ -912,13 +912,13 @@ void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> 
     auto &[trace_info, response] = event;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
         case core::http::Status::OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
           log::info(
-              "*** CANCELED {} ORDER(S) ***"_sv,
+              "*** CANCELED {} ORDER(S) ***"sv,
               std::size(cancel_all_orders.cancel_status.order_events));
           break;
         }
@@ -928,7 +928,7 @@ void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> 
         case core::http::Status::NOT_FOUND: {   // 404
           core::json::Buffer buffer(decode_buffer_);
           auto rest_error = core::json::Parser::create<json::RestError>(body, buffer);
-          log::warn("error={}"_sv, rest_error);
+          log::warn("error={}"sv, rest_error);
           // note! this event does not require an ack
           break;
         }
@@ -936,7 +936,7 @@ void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> 
           response.expect(core::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       // note! this event does not require an ack
     }
   });
@@ -947,8 +947,8 @@ void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> 
 void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
   auto method = core::http::Method::POST;
-  auto path = "/api/v3/cancelallordersafter"_sv;
-  auto query = fmt::format("?timeout={}"_sv, value.count());
+  auto path = "/api/v3/cancelallordersafter"sv;
+  auto query = fmt::format("?timeout={}"sv, value.count());
   auto headers = security_.create_headers(path, query);
   core::web::Request request{
       .method = method,
@@ -962,7 +962,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
       .rate_limit_weight = 1,
   };
   connection_(
-      "cancel_all_orders_after"_sv,
+      "cancel_all_orders_after"sv,
       request,
       [this]([[maybe_unused]] auto &request_id, auto &response) {
         auto trace_info = server::create_trace_info();
@@ -976,14 +976,14 @@ void OrderEntry::cancel_all_orders_after_ack(const server::Trace<core::web::Resp
     auto &[trace_info, response] = event;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
         case core::http::Status::OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders_after_ack =
               core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
-          log::debug("cancel_all_orders_after_ack={}"_sv, cancel_all_orders_after_ack);
-          log::info<2>("cancel_all_orders_after_ack={}"_sv, cancel_all_orders_after_ack);
+          log::debug("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
+          log::info<2>("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
           break;
         }
         case core::http::Status::BAD_REQUEST:   // 400
@@ -993,15 +993,15 @@ void OrderEntry::cancel_all_orders_after_ack(const server::Trace<core::web::Resp
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders_after_ack =
               core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
-          log::debug("cancel_all_orders_after_ack={}"_sv, cancel_all_orders_after_ack);
-          log::warn<2>("cancel_all_orders_after_ack={}"_sv, cancel_all_orders_after_ack);
+          log::debug("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
+          log::warn<2>("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
           break;
         }
         default:
           response.expect(core::http::Status::OK);  // throws
       }
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       // note! this event does not require an ack
     }
   });

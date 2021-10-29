@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_open_positions, simple_1) {
@@ -36,11 +37,11 @@ TEST(json_open_positions, simple_1) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenPositions>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::OPEN_POSITIONS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"_sv);
+  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   EXPECT_EQ(std::size(obj.positions), 1);
   // idx 0
   auto &position_0 = obj.positions[0];
-  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"_sv);
+  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"sv);
   EXPECT_DOUBLE_EQ(position_0.balance, 1.0);
   EXPECT_DOUBLE_EQ(position_0.pnl, 6.244534934262959e-9);
   EXPECT_DOUBLE_EQ(position_0.entry_price, 40012.5);
@@ -74,11 +75,11 @@ TEST(json_open_positions, simple_2) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenPositions>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::OPEN_POSITIONS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"_sv);
+  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   EXPECT_EQ(std::size(obj.positions), 1);
   // idx 0
   auto &position_0 = obj.positions[0];
-  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"_sv);
+  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"sv);
   EXPECT_DOUBLE_EQ(position_0.balance, 1.0);
   EXPECT_DOUBLE_EQ(position_0.pnl, -3.126955263139583e-8);
   EXPECT_DOUBLE_EQ(position_0.entry_price, 40012.5);

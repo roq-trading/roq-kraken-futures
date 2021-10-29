@@ -8,7 +8,7 @@
 #include "roq/kraken_futures/json/feed.h"
 #include "roq/kraken_futures/json/utils.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -124,14 +124,14 @@ bool ParserPublic::dispatch(
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {
     // event
-    if (key.compare("event"_sv) == 0) {
+    if (key.compare("event"sv) == 0) {
       Event event(value);
       switch (event) {
         case Event::UNDEFINED:
           assert(false);
           [[fallthrough]];
         case Event::UNKNOWN:
-          log::warn(R"(Unknown event="{}")"_sv, event);
+          log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case Event::INFO:
           dispatch_info(handler, message, trace_info);
@@ -143,7 +143,7 @@ bool ParserPublic::dispatch(
           dispatch_error(handler, message, trace_info);
           return true;
         case Event::CHALLENGE:
-          log::fatal("Unexpected: event={}"_sv, event);
+          log::fatal("Unexpected: event={}"sv, event);
           break;
         case Event::SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);
@@ -153,14 +153,14 @@ bool ParserPublic::dispatch(
       }
     }
     // feed
-    if (key.compare("feed"_sv) == 0) {
+    if (key.compare("feed"sv) == 0) {
       Feed feed(value);
       switch (feed) {
         case Feed::UNDEFINED:
           assert(false);
           [[fallthrough]];
         case Feed::UNKNOWN:
-          log::warn(R"(Unknown feed="{}")"_sv, feed);
+          log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case Feed::HEARTBEAT:
           dispatch_heartbeat(handler, message, trace_info);
@@ -188,7 +188,7 @@ bool ParserPublic::dispatch(
         case Feed::OPEN_ORDERS_VERBOSE:
         case Feed::FILLS_SNAPSHOT:
         case Feed::FILLS:
-          log::fatal("Unexpected: feed={}"_sv, feed);
+          log::fatal("Unexpected: feed={}"sv, feed);
           break;
         default:
           assert(false);

@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_trade_snapshot, simple) {
@@ -29,6 +30,6 @@ TEST(json_trade_snapshot, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::TradeSnapshot>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::TRADE_SNAPSHOT);
-  EXPECT_EQ(obj.product_id, "PI_XBTUSD"_sv);
+  EXPECT_EQ(obj.product_id, "PI_XBTUSD"sv);
   EXPECT_EQ(std::size(obj.trades), 3);
 }

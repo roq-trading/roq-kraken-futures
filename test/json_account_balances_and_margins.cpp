@@ -12,6 +12,8 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
+
 TEST(json_account_balances_and_margins, simple) {
   auto message =
       R"({)"
@@ -36,7 +38,7 @@ TEST(json_account_balances_and_margins, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::AccountBalancesAndMargins>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"_sv);
+  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   EXPECT_EQ(std::size(obj.margin_accounts), 11);
   EXPECT_EQ(obj.seq, 0);
 }

@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_fills_snapshot, simple) {
@@ -31,6 +32,6 @@ TEST(json_fills_snapshot, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::FillsSnapshot>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::FILLS_SNAPSHOT);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"_sv);
+  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   EXPECT_EQ(std::size(obj.fills), 5);
 }

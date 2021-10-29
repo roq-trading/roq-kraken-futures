@@ -6,13 +6,11 @@
 
 #include <array>
 
-#include "roq/literals.h"
-
 #include "roq/core/binascii/base64.h"
 
 #include "roq/core/crypto/sha.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -35,7 +33,7 @@ std::string Hasher::create_headers(
     std::chrono::milliseconds nonce) {
   assert(!path.empty());
   if (nonce.count()) {
-    auto nonce_ = fmt::format("{}"_sv, nonce.count());
+    auto nonce_ = fmt::format("{}"sv, nonce.count());
     sha_.clear();
     if (!query.empty()) {
       assert(query[0] == '?');
@@ -56,7 +54,7 @@ std::string Hasher::create_headers(
     return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
-        "Authent: {}\r\n"_sv,
+        "Authent: {}\r\n"sv,
         key,
         nonce_,
         authent);
@@ -79,7 +77,7 @@ std::string Hasher::create_headers(
     auto authent = core::binascii::Base64::encode(buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
-        "Authent: {}\r\n"_sv,
+        "Authent: {}\r\n"sv,
         key,
         authent);
   }

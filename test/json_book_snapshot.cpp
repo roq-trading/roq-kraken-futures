@@ -12,6 +12,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_book_snapshot, simple) {
@@ -40,7 +41,7 @@ TEST(json_book_snapshot, simple) {
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::BookSnapshot>(message, buffer_);
   EXPECT_EQ(obj.feed, json::Feed::BOOK_SNAPSHOT);
-  EXPECT_EQ(obj.product_id, "FI_LTCUSD_210924"_sv);
+  EXPECT_EQ(obj.product_id, "FI_LTCUSD_210924"sv);
   EXPECT_EQ(obj.timestamp, 1627535620727ms);
   EXPECT_EQ(obj.seq, 732887);
   // tick_size

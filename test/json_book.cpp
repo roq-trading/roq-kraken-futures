@@ -9,6 +9,7 @@
 using namespace roq;
 using namespace roq::kraken_futures;
 
+using namespace std::literals;
 using namespace std::chrono_literals;
 
 TEST(json_book, simple) {
@@ -23,7 +24,7 @@ TEST(json_book, simple) {
                  R"(})";
   auto obj = core::json::Parser::create<json::Book>(message);
   EXPECT_EQ(obj.feed, json::Feed::BOOK);
-  EXPECT_EQ(obj.product_id, "PI_XBTUSD"_sv);
+  EXPECT_EQ(obj.product_id, "PI_XBTUSD"sv);
   EXPECT_EQ(obj.side, json::Side::BUY);
   EXPECT_EQ(obj.seq, 1766422);
   EXPECT_DOUBLE_EQ(obj.price, 39826.0);

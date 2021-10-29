@@ -6,7 +6,7 @@
 
 #include "roq/kraken_futures/flags.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
@@ -63,11 +63,11 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
           create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),
       drop_copy_(create_drop_copy(*this, context_, stream_id_, security_, shared_)) {
   if (!Flags::rest_cancel_on_disconnect())
-    log::warn("Orders will *NOT* be cancelled on disconnect"_sv);
+    log::warn("Orders will *NOT* be cancelled on disconnect"sv);
 }
 
 void Gateway::operator()(const Event<Start> &event) {
-  log::info("Starting the gateway..."_sv);
+  log::info("Starting the gateway..."sv);
   rest_(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
@@ -79,7 +79,7 @@ void Gateway::operator()(const Event<Start> &event) {
 }
 
 void Gateway::operator()(const Event<Stop> &event) {
-  log::info("Stopping the gateway..."_sv);
+  log::info("Stopping the gateway..."sv);
   for (auto &market_data : market_data_)
     (*market_data)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -108,20 +108,20 @@ void Gateway::operator()(const Event<Connected> &) {
 void Gateway::operator()(const Event<Disconnected> &event) {
   const auto &[message_info, disconnected] = event;
   log::warn(
-      R"(Disconnected: source="{}", order_cancel_policy={})"_sv,
+      R"(Disconnected: source="{}", order_cancel_policy={})"sv,
       message_info.source_name,
       disconnected.order_cancel_policy);
   switch (disconnected.order_cancel_policy) {
     case OrderCancelPolicy::UNDEFINED:
       break;
     case OrderCancelPolicy::MANAGED_ORDERS:
-      log::warn("*** CANCEL MANAGED ORDERS NOT IMPLEMENTED ***"_sv);
+      log::warn("*** CANCEL MANAGED ORDERS NOT IMPLEMENTED ***"sv);
       break;
     case OrderCancelPolicy::BY_ACCOUNT:
-      log::warn("*** CANCEL ALL ACCOUNT ORDERS ***"_sv);
+      log::warn("*** CANCEL ALL ACCOUNT ORDERS ***"sv);
       for (auto &[account, order_entry] : order_entry_) {
         if (dispatcher_.can_user_trade_account(account, message_info.source)) {
-          log::warn(R"(- account="{}")"_sv, account);
+          log::warn(R"(- account="{}")"sv, account);
           CancelAllOrders cancel_all_orders{
               .account = account,
           };
@@ -236,7 +236,7 @@ void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   for (;;) {
     if (symbols.empty())
       break;
-    log::info("Create market-data (ws-public)"_sv);
+    log::info("Create market-data (ws-public)"sv);
     auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_);
     (*market_data).update_subscriptions(symbols);
     MessageInfo message_info;  // XXX something sensible
@@ -250,7 +250,7 @@ OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != order_entry_.end())
     return *(*iter).second;
-  throw RuntimeErrorException(R"(Unknown account="{}")"_sv, account);
+  throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
 }
 
 }  // namespace kraken_futures
