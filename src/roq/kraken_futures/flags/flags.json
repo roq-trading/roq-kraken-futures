@@ -63,20 +63,6 @@
       "description": "request: timeout"
     },
     {
-      "name": "rest_rate_limit_interval",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "1s",
-      "description": "rate limit: monitor interval (seconds)"
-    },
-    {
-      "name": "rest_rate_limit_max_requests",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 300,
-      "description": "rate limit: max requests (per interval)"
-    },
-    {
       "name": "rest_allow_order_request_pipeline",
       "type": "bool",
       "default": false,
