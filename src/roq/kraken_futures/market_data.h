@@ -12,7 +12,7 @@
 
 #include "roq/core/io/context.h"
 
-#include "roq/core/web/socket.h"
+#include "roq/core/web/client_socket.h"
 
 #include "roq/download.h"
 #include "roq/server.h"
@@ -25,7 +25,7 @@
 namespace roq {
 namespace kraken_futures {
 
-class MarketData final : public core::web::Socket::Handler, public json::ParserPublic::Handler {
+class MarketData final : public core::web::ClientSocket::Handler, public json::ParserPublic::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
@@ -52,13 +52,13 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   void update_subscriptions(std::vector<std::string> &symbols);
 
  protected:
-  void operator()(const core::web::Socket::Connected &) override;
-  void operator()(const core::web::Socket::Disconnected &) override;
-  void operator()(const core::web::Socket::Ready &) override;
-  void operator()(const core::web::Socket::Close &) override;
-  void operator()(const core::web::Socket::Latency &) override;
-  void operator()(const core::web::Socket::Text &) override;
-  void operator()(const core::web::Socket::Binary &) override;
+  void operator()(const core::web::ClientSocket::Connected &) override;
+  void operator()(const core::web::ClientSocket::Disconnected &) override;
+  void operator()(const core::web::ClientSocket::Ready &) override;
+  void operator()(const core::web::ClientSocket::Close &) override;
+  void operator()(const core::web::ClientSocket::Latency &) override;
+  void operator()(const core::web::ClientSocket::Text &) override;
+  void operator()(const core::web::ClientSocket::Binary &) override;
 
   void operator()(ConnectionStatus);
 
@@ -109,7 +109,7 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   const uint16_t stream_id_;
   const std::string name_;
   // web socket
-  core::web::Socket connection_;
+  core::web::ClientSocket connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics
