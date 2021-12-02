@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/tools/hasher.h"
 
@@ -31,11 +31,11 @@ std::string Hasher::create_headers(
     const std::string_view &query,
     const std::string_view &key,
     std::chrono::milliseconds nonce) {
-  assert(!path.empty());
+  assert(!std::empty(path));
   if (nonce.count()) {
     auto nonce_ = fmt::format("{}"sv, nonce.count());
     sha_.clear();
-    if (!query.empty()) {
+    if (!std::empty(query)) {
       assert(query[0] == '?');
       auto raw = query.substr(1);  // note! not including '?'
       sha_.update(raw);
@@ -44,12 +44,12 @@ std::string Hasher::create_headers(
     sha_.update(path);
     std::array<char, 32> buffer_1;
     auto length_1 = sha_.digest(buffer_1);
-    assert(length_1 == buffer_1.size());
+    assert(length_1 == std::size(buffer_1));
     hmac_.clear();
-    hmac_.update(buffer_1.data(), buffer_1.size());
+    hmac_.update(std::data(buffer_1), std::size(buffer_1));
     std::array<char, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
-    assert(length_2 == buffer_2.size());
+    assert(length_2 == std::size(buffer_2));
     auto authent = core::binascii::Base64::encode(buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
@@ -60,7 +60,7 @@ std::string Hasher::create_headers(
         authent);
   } else {
     sha_.clear();
-    if (!query.empty()) {
+    if (!std::empty(query)) {
       assert(query[0] == '?');
       auto raw = query.substr(1);  // note! not including '?'
       sha_.update(raw);
@@ -68,12 +68,12 @@ std::string Hasher::create_headers(
     sha_.update(path);
     std::array<char, 32> buffer_1;
     auto length_1 = sha_.digest(buffer_1);
-    assert(length_1 == buffer_1.size());
+    assert(length_1 == std::size(buffer_1));
     hmac_.clear();
-    hmac_.update(buffer_1.data(), buffer_1.size());
+    hmac_.update(std::data(buffer_1), std::size(buffer_1));
     std::array<char, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
-    assert(length_2 == buffer_2.size());
+    assert(length_2 == std::size(buffer_2));
     auto authent = core::binascii::Base64::encode(buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
@@ -88,12 +88,12 @@ std::string Hasher::signed_challenge(const std::string_view &original_challenge)
   sha_.update(original_challenge);
   std::array<char, 32> buffer_1;
   auto length_1 = sha_.digest(buffer_1);
-  assert(length_1 == buffer_1.size());
+  assert(length_1 == std::size(buffer_1));
   hmac_.clear();
-  hmac_.update(buffer_1.data(), buffer_1.size());
+  hmac_.update(std::data(buffer_1), std::size(buffer_1));
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
-  assert(length_2 == buffer_2.size());
+  assert(length_2 == std::size(buffer_2));
   auto result = core::binascii::Base64::encode(buffer_2, false);
   return result;
 }

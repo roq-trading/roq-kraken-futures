@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/drop_copy.h"
 
@@ -106,8 +106,8 @@ void DropCopy::operator()(metrics::Writer &writer) {
 }
 
 void DropCopy::get_challenge() {
-  assert(original_challenge_.empty());
-  assert(signed_challenge_.empty());
+  assert(std::empty(original_challenge_));
+  assert(std::empty(signed_challenge_));
   auto message = fmt::format(
       R"({{)"
       R"("event":"challenge",)"
@@ -244,8 +244,8 @@ void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"sv, challenge);
     log::info<2>("challenge={}"sv, challenge);
-    assert(original_challenge_.empty());
-    assert(signed_challenge_.empty());
+    assert(std::empty(original_challenge_));
+    assert(std::empty(signed_challenge_));
     original_challenge_ = challenge.message;
     signed_challenge_ = security_.signed_challenge(original_challenge_);
     download_.check(DropCopyState::GET_CHALLENGE);  // note!
@@ -272,7 +272,7 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
-      std::transform(currency.begin(), currency.end(), currency.begin(), ::toupper);
+      std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
       FundsUpdate funds_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
@@ -334,7 +334,7 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
     for (auto &item : fills_snapshot.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             if (symbol.compare(order.symbol) != 0)
               log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
             auto side = item.buy ? Side::BUY : Side::SELL;
@@ -382,7 +382,7 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
     for (auto &item : fills.fills) {
       if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
             auto symbol = std::string{item.instrument};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             if (symbol.compare(order.symbol) != 0)
               log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
             auto side = item.buy ? Side::BUY : Side::SELL;

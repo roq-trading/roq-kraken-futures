@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/order_update.h"
 
@@ -28,8 +28,8 @@ void OrderUpdate::operator()(
     const json::OpenOrders &open_orders, const server::TraceInfo &trace_info) {
   auto &order = open_orders.order;
   // ... just confusing
-  auto order_id = open_orders.order_id.empty() ? order.order_id : open_orders.order_id;
-  auto cli_ord_id = open_orders.cli_ord_id.empty() ? order.cli_ord_id : open_orders.cli_ord_id;
+  auto order_id = std::empty(open_orders.order_id) ? order.order_id : open_orders.order_id;
+  auto cli_ord_id = std::empty(open_orders.cli_ord_id) ? order.cli_ord_id : open_orders.cli_ord_id;
   (*this)(
       order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
 }

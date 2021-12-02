@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/config.h"
 
@@ -23,7 +23,7 @@ std::string Config::get_master_account() const {
 
 std::string Config::get_access_key(const std::string_view &account) const {
   auto iter = accounts.find(account);
-  if (iter == accounts.end()) {
+  if (iter == std::end(accounts)) {
     log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.login;
@@ -31,7 +31,7 @@ std::string Config::get_access_key(const std::string_view &account) const {
 
 std::string Config::get_access_secret(const std::string_view &account) const {
   auto iter = accounts.find(account);
-  if (iter == accounts.end()) {
+  if (iter == std::end(accounts)) {
     log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.secret;
@@ -39,7 +39,7 @@ std::string Config::get_access_secret(const std::string_view &account) const {
 
 std::string Config::get_access_password(const std::string_view &account) const {
   auto iter = accounts.find(account);
-  if (iter == accounts.end()) {
+  if (iter == std::end(accounts)) {
     log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.password;

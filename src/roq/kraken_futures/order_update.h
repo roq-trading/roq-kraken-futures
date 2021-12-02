@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #pragma once
 
@@ -86,7 +86,7 @@ class OrderUpdate final {
           case json::OrderEventType::PLACE: {
             auto &order_ = order_event.order;
             auto symbol = std::string{order_.symbol};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(send_status.status);
@@ -123,7 +123,7 @@ class OrderUpdate final {
           case json::OrderEventType::EXECUTION: {
             auto &order_ = order_event.order_prior_execution;
             auto symbol = std::string{order_.symbol};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
             auto status =
@@ -220,7 +220,7 @@ class OrderUpdate final {
           case json::OrderEventType::EDIT: {
             auto &new_order = order_event.new_;
             auto symbol = std::string{new_order.symbol};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             auto side = json::map(new_order.side);
             auto order_type = json::map(new_order.type);
             auto status = compute_order_status(edit_status.status);
@@ -322,7 +322,7 @@ class OrderUpdate final {
           case json::OrderEventType::CANCEL: {
             auto &order_ = order_event.new_;
             auto symbol = std::string{order_.symbol};
-            std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(cancel_status.status);

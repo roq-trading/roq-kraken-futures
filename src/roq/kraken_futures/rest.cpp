@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/rest.h"
 
@@ -189,7 +189,7 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
-      if (instruments.error.empty()) {
+      if (std::empty(instruments.error)) {
         server::Trace event(trace_info, instruments);
         (*this)(event);
         download_.check(state);
@@ -208,14 +208,14 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
 void Rest::operator()(const server::Trace<json::Instruments> &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
-  assert(instruments.error.empty());
+  assert(std::empty(instruments.error));
   std::vector<std::string> symbols;
-  symbols.reserve(instruments.instruments.size());
+  symbols.reserve(std::size(instruments.instruments));
   size_t counter = {};
   for (auto &item : instruments.instruments) {
     log::info<2>("item={}"sv, item);
     std::string symbol(item.symbol);  // note! we need the upper-case version
-    std::transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+    std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
     if (shared_.discard_symbol(symbol))
       continue;
     if (all_symbols_.emplace(symbol).second)  // only include new
@@ -247,8 +247,8 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
     };
     server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
   }
-  log::info("Instruments {} / {}"sv, counter, instruments.instruments.size());
-  if (!symbols.empty()) {
+  log::info("Instruments {} / {}"sv, counter, std::size(instruments.instruments));
+  if (!std::empty(symbols)) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,
     };

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken_futures/market_data.h"
 
@@ -121,19 +121,19 @@ void MarketData::operator()(metrics::Writer &writer) {
 void MarketData::update_subscriptions(std::vector<std::string> &symbols) {
   assert(&symbols != &symbols_);
   auto max_size = Flags::ws_max_subscriptions_per_stream();
-  auto offset = symbols_.size();
+  auto offset = std::size(symbols_);
   if (max_size <= offset)
     return;
-  if (symbols.empty())
+  if (std::empty(symbols))
     return;
   symbols_.reserve(max_size);
-  auto length = std::min(max_size - offset, symbols.size());
+  auto length = std::min(max_size - offset, std::size(symbols));
   assert(length > 0);
-  for (size_t i = {}; i < length; ++i) {
+  for (size_t i = 0; i < length; ++i) {
     symbols_.emplace_back(symbols.back());
     symbols.pop_back();
   }
-  assert(length == (symbols_.size() - offset));
+  assert(length == (std::size(symbols_) - offset));
   if (ready_)
     subscribe({&symbols_[offset], length});
 }
@@ -394,7 +394,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event) {
     auto &[trace_info, book] = event;
     log::info<4>("book={}"sv, book);
     auto &symbol = book.product_id;
-    if (latch_.find(symbol) != latch_.end())
+    if (latch_.find(symbol) != std::end(latch_))
       return;  //  waiting for snapshot
     MBPUpdate mbp_update{
         .price = book.price,
