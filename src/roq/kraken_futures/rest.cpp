@@ -194,9 +194,12 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
         (*this)(event);
         download_.check(state);
       } else {
-        // have seen error="Unavailable"
         log::warn("instruments={}"sv, instruments);
-        log::fatal("Unexpected"sv);
+        if (utils::compare(instruments.error, "Unavailable"sv) == 0) {
+          download_.retry(state);
+        } else {
+          log::fatal("Unexpected"sv);
+        }
       }
     } catch (core::NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
