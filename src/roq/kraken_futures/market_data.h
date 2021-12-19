@@ -17,7 +17,6 @@
 #include "roq/download.h"
 #include "roq/server.h"
 
-#include "roq/kraken_futures/market_data_state.h"
 #include "roq/kraken_futures/shared.h"
 
 #include "roq/kraken_futures/json/parser_public.h"
@@ -25,7 +24,8 @@
 namespace roq {
 namespace kraken_futures {
 
-class MarketData final : public core::web::ClientSocket::Handler, public json::ParserPublic::Handler {
+class MarketData final : public core::web::ClientSocket::Handler,
+                         public json::ParserPublic::Handler {
  public:
   struct Handler {
     virtual void operator()(const server::Trace<StreamStatus> &) = 0;
@@ -38,10 +38,12 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::P
     virtual void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) = 0;
   };
 
-  MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
+  MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &, size_t index);
 
   MarketData(MarketData &&) = delete;
   MarketData(const MarketData &) = delete;
+
+  bool ready() const { return status_ == ConnectionStatus::READY; }
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
@@ -49,7 +51,7 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::P
 
   void operator()(metrics::Writer &);
 
-  void update_subscriptions(std::vector<std::string> &symbols);
+  void subscribe(size_t start_from = 0);
 
  protected:
   void operator()(const core::web::ClientSocket::Connected &) override;
@@ -62,9 +64,7 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::P
 
   void operator()(ConnectionStatus);
 
-  uint32_t download(MarketDataState);
-
-  void subscribe(const roq::span<std::string> &symbols);
+  void subscribe(const roq::span<std::string const> &symbols);
 
   void subscribe(const std::string_view &feed);
 
@@ -108,6 +108,7 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::P
   // config
   const uint16_t stream_id_;
   const std::string name_;
+  const size_t index_;
   // web socket
   core::web::ClientSocket connection_;
   // buffers
@@ -124,12 +125,9 @@ class MarketData final : public core::web::ClientSocket::Handler, public json::P
   } latency_;
   // cache
   Shared &shared_;
-  std::vector<std::string> symbols_;
   // state
-  bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  server::Download<MarketDataState> download_;
   // experimental
   absl::flat_hash_set<std::string> latch_;
 };

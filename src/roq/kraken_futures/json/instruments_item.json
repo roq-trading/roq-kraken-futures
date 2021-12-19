@@ -13,6 +13,9 @@
 	{ "name": "fundingRateCoefficient", "type": "double" },
 	{ "name": "maxRelativeFundingRate", "type": "double" },
 	{ "name": "retailMarginLevels" },
-	{ "name": "isin", "type": "std::string_view", "comment": "undoc" }
+	{ "name": "isin", "type": "std::string_view", "comment": "undoc" },
+	{ "name": "category", "type": "std::string_view", "comment": "undoc" },
+	{ "name": "tags", "comment": "undoc" },
+	{ "name": "contractValueTradePrecision", "type": "int32_t", "comment": "undoc" }
 ]
 }
