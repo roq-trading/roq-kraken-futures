@@ -67,7 +67,7 @@ TEST(json_send_order, simple) {
   EXPECT_EQ(order_event_0.order.reduce_only, false);
   EXPECT_EQ(order_event_0.order.timestamp, 1627618780804ms);
   EXPECT_EQ(order_event_0.order.last_update_timestamp, 1627618780804ms);
-  EXPECT_DOUBLE_EQ(order_event_0.reduced_quantity, 0.0);
+  EXPECT_EQ(std::isnan(order_event_0.reduced_quantity), true);
   EXPECT_EQ(order_event_0.type, json::OrderEventType::PLACE);
   EXPECT_EQ(obj.server_time, 1627618780804ms);
 }

@@ -91,7 +91,7 @@ TEST(json_edit_order, simple) {
   EXPECT_EQ(event.new_.timestamp, 1627648589044ms);
   EXPECT_EQ(event.new_.last_update_timestamp, 1627648619124ms);
   // ...
-  EXPECT_DOUBLE_EQ(event.reduced_quantity, 0.0);
+  EXPECT_EQ(std::isnan(event.reduced_quantity), true);
   EXPECT_EQ(event.type, json::OrderEventType::EDIT);
 }
 
@@ -250,6 +250,6 @@ TEST(json_edit_order, execution) {
   EXPECT_EQ(order_event.order_prior_execution.timestamp, 1627972920184ms);
   EXPECT_EQ(order_event.order_prior_execution.last_update_timestamp, 1627972925259ms);
   // ...
-  EXPECT_DOUBLE_EQ(order_event.taker_reduced_quantity, 0.0);
+  EXPECT_EQ(std::isnan(order_event.taker_reduced_quantity), true);
   EXPECT_EQ(order_event.type, json::OrderEventType::EXECUTION);
 }
