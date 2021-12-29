@@ -232,6 +232,7 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
         .security_type = {},
         .base_currency = {},
         .quote_currency = {},
+        .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.tick_size,
         .multiplier = item.contract_size,
