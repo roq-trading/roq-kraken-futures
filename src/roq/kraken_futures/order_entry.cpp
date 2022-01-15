@@ -147,7 +147,7 @@ json::OrderEventOrderType compute_order_type(
         return json::OrderEventOrderType::STP;
       break;
   }
-  throw RuntimeErrorException(
+  throw RuntimeError(
       "Unexpected combination of order_type={}, time_in_force={}, execution_instruction={}, stop_price={}"sv,
       order_type,
       time_in_force,
@@ -234,7 +234,7 @@ void OrderEntry::create_order(
     const Event<CreateOrder> &event, const oms::Order &, const std::string_view &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, create_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/sendorder"sv;
@@ -485,7 +485,7 @@ void OrderEntry::modify_order(
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/editorder"sv;
@@ -687,7 +687,7 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] const std::string_view &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto &[message_info, cancel_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelorder"sv;
@@ -879,7 +879,7 @@ void OrderEntry::cancel_all_orders(
     const Event<CancelAllOrders> &, const std::string_view &request_id) {
   profile_.cancel_all_orders([&]() {
     if (!ready())
-      throw oms::NotReadyException();
+      throw oms::NotReady("not ready"sv);
     auto method = core::http::Method::POST;
     auto path = "/api/v3/cancelallorders"sv;
     auto headers = security_.create_headers(path, {});
