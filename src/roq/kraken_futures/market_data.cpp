@@ -174,7 +174,7 @@ void MarketData::operator()(ConnectionStatus status) {
   }
 }
 
-void MarketData::subscribe(const roq::span<std::string const> &symbols) {
+void MarketData::subscribe(const std::span<std::string const> &symbols) {
   subscribe("ticker"sv, symbols);
   subscribe("book"sv, symbols);
   subscribe("trade"sv, symbols);
@@ -193,7 +193,7 @@ void MarketData::subscribe(const std::string_view &feed) {
 }
 
 template <typename T>
-void MarketData::subscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
+void MarketData::subscribe(const std::string_view &feed, const std::span<T> &product_ids) {
   log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
   auto message = fmt::format(
       R"({{)"
@@ -208,7 +208,7 @@ void MarketData::subscribe(const std::string_view &feed, const roq::span<T> &pro
 }
 
 template <typename T>
-void MarketData::unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids) {
+void MarketData::unsubscribe(const std::string_view &feed, const std::span<T> &product_ids) {
   log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
   auto message = fmt::format(
       R"({{)"

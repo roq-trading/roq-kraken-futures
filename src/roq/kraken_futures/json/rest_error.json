@@ -9,7 +9,7 @@
 	{ "name": "message", "type": "std::string_view" },
 	{ "name": "requestId", "type": "std::string_view" },
 	{ "name": "result", "type": "std::string_view" },
-	{ "name": "errors", "type": "roq::span<RestErrorItem>" },
+	{ "name": "errors", "type": "std::span<RestErrorItem>" },
 	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
 ]
 }

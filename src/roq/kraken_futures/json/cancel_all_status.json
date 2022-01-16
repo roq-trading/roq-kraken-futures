@@ -6,6 +6,6 @@
 	{ "name": "cancelOnly", "type": "std::string_view" },
 	{ "name": "status", "type": "Status" },
 	{ "name": "cancelledOrders" },
-	{ "name": "orderEvents", "type": "roq::span<OrderEvent>" }
+	{ "name": "orderEvents", "type": "std::span<OrderEvent>" }
 ]
 }

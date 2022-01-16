@@ -4,6 +4,6 @@
 "values": [
 	{ "name": "feed", "type": "Feed" },
 	{ "name": "account", "type": "std::string_view" },
-	{ "name": "fills", "type": "roq::span<Fill>" }
+	{ "name": "fills", "type": "std::span<Fill>" }
 ]
 }

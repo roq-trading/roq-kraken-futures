@@ -6,6 +6,6 @@
 	{ "name": "cliOrdId", "type": "std::string_view", "required": false },
 	{ "name": "status", "type": "Status" },
 	{ "name": "receivedTime", "type": "std::chrono::milliseconds" },
-	{ "name": "orderEvents", "type": "roq::span<OrderEvent>" }
+	{ "name": "orderEvents", "type": "std::span<OrderEvent>" }
 ]
 }

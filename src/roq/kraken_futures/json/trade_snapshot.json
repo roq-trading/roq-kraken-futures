@@ -4,6 +4,6 @@
 "values": [
 	{ "name": "feed", "type": "Feed" },
 	{ "name": "product_id", "type": "std::string_view" },
-	{ "name": "trades", "type": "roq::span<Trade>" }
+	{ "name": "trades", "type": "std::span<Trade>" }
 ]
 }

@@ -4,6 +4,6 @@
 "values": [
 	{ "name": "event", "type": "Event" },
 	{ "name": "feed", "type": "Feed" },
-	{ "name": "product_ids", "type": "roq::span<ProductID>" }
+	{ "name": "product_ids", "type": "std::span<ProductID>" }
 ]
 }

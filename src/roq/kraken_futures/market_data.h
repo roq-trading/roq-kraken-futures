@@ -64,20 +64,20 @@ class MarketData final : public core::web::ClientSocket::Handler,
 
   void operator()(ConnectionStatus);
 
-  void subscribe(const roq::span<std::string const> &symbols);
+  void subscribe(const std::span<std::string const> &symbols);
 
   void subscribe(const std::string_view &feed);
 
   template <typename T>
-  void subscribe(const std::string_view &feed, const roq::span<T> &product_ids);
+  void subscribe(const std::string_view &feed, const std::span<T> &product_ids);
   void subscribe(const std::string_view &feed, const std::string_view &symbol) {
-    return subscribe(feed, roq::span{&symbol, 1});
+    return subscribe(feed, std::span{&symbol, 1});
   }
 
   template <typename T>
-  void unsubscribe(const std::string_view &feed, const roq::span<T> &product_ids);
+  void unsubscribe(const std::string_view &feed, const std::span<T> &product_ids);
   void unsubscribe(const std::string_view &feed, const std::string_view &symbol) {
-    return unsubscribe(feed, roq::span{&symbol, 1});
+    return unsubscribe(feed, std::span{&symbol, 1});
   }
 
   // json::ParserPublic::Handler

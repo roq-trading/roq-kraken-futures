@@ -7,7 +7,7 @@
 	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
 	{ "name": "seq", "type": "int64_t" },
 	{ "name": "tickSize", "type": "double" },
-	{ "name": "bids", "type": "roq::span<BookItem>" },
-	{ "name": "asks", "type": "roq::span<BookItem>" }
+	{ "name": "bids", "type": "std::span<BookItem>" },
+	{ "name": "asks", "type": "std::span<BookItem>" }
 ]
 }
