@@ -28,23 +28,23 @@ namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "om"sv;
+const auto NAME = "om"sv;
 
-static const auto SUPPORTS = utils::Mask{
+const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
 
-static const auto ALLOW_PIPELINING = true;
+const auto ALLOW_PIPELINING = true;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
-static auto get_quality_of_service() {
+auto get_quality_of_service() {
   return Flags::rest_allow_order_request_pipeline() ? core::web::QualityOfService::IMMEDIATE
                                                     : core::web::QualityOfService::CRITICAL;
 }

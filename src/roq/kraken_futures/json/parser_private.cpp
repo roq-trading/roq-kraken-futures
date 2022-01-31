@@ -16,7 +16,7 @@ namespace json {
 
 namespace {
 template <typename H>
-static void dispatch_info(
+void dispatch_info(
     H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -25,7 +25,7 @@ static void dispatch_info(
 }
 
 template <typename H>
-static void dispatch_alert(
+void dispatch_alert(
     H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -34,7 +34,7 @@ static void dispatch_alert(
 }
 
 template <typename H>
-static void dispatch_error(
+void dispatch_error(
     H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -43,7 +43,7 @@ static void dispatch_error(
 }
 
 template <typename H>
-static void dispatch_challenge(
+void dispatch_challenge(
     H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -52,7 +52,7 @@ static void dispatch_challenge(
 }
 
 template <typename H>
-static void dispatch_subscribed(
+void dispatch_subscribed(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -64,7 +64,7 @@ static void dispatch_subscribed(
 }
 
 template <typename H>
-static void dispatch_heartbeat(
+void dispatch_heartbeat(
     H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -73,7 +73,7 @@ static void dispatch_heartbeat(
 }
 
 template <typename H>
-static void dispatch_account_balances_and_margins(
+void dispatch_account_balances_and_margins(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -85,7 +85,7 @@ static void dispatch_account_balances_and_margins(
 }
 
 template <typename H>
-static void dispatch_open_positions(
+void dispatch_open_positions(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -97,7 +97,7 @@ static void dispatch_open_positions(
 }
 
 template <typename H>
-static void dispatch_open_orders_snapshot(
+void dispatch_open_orders_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -109,7 +109,7 @@ static void dispatch_open_orders_snapshot(
 }
 
 template <typename H>
-static void dispatch_open_orders(
+void dispatch_open_orders(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -121,7 +121,7 @@ static void dispatch_open_orders(
 }
 
 template <typename H>
-static void dispatch_fills_snapshot(
+void dispatch_fills_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
@@ -133,7 +133,7 @@ static void dispatch_fills_snapshot(
 }
 
 template <typename H>
-static void dispatch_fills(
+void dispatch_fills(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,

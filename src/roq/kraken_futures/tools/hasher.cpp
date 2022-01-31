@@ -17,7 +17,7 @@ namespace kraken_futures {
 namespace tools {
 
 namespace {
-static auto create_hmac(const std::string_view &secret) {
+auto create_hmac(const std::string_view &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }

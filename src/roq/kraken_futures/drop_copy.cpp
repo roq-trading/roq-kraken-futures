@@ -20,8 +20,8 @@ namespace roq {
 namespace kraken_futures {
 
 namespace {
-static const auto NAME = "ex"sv;
-static const auto SUPPORTS = utils::Mask{
+const auto NAME = "ex"sv;
+const auto SUPPORTS = utils::Mask{
     SupportType::ORDER,
     SupportType::TRADE,
     SupportType::POSITION,

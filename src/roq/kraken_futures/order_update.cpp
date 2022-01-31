@@ -36,7 +36,7 @@ void OrderUpdate::operator()(
 
 namespace {
 /*
-static RequestType compute_request_type(const json::Reason reason) {
+RequestType compute_request_type(const json::Reason reason) {
   switch (reason) {
     case json::Reason::UNDEFINED:
     case json::Reason::UNKNOWN:
@@ -81,7 +81,7 @@ static RequestType compute_request_type(const json::Reason reason) {
   return {};
 }
 */
-static OrderStatus compute_order_status_2(
+OrderStatus compute_order_status_2(
     json::Reason reason, bool is_cancel, double quantity, double filled) {
   switch (reason) {
     case json::Reason::UNDEFINED:
