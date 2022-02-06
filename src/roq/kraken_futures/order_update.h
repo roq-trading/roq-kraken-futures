@@ -258,6 +258,7 @@ class OrderUpdate final {
             // XXX HANS FIX THIS
             log::warn("order_event={}"sv, order_event);
             log::fatal("Unexpected"sv);
+            break;
           }
           case json::OrderEventType::REJECT: {
             auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0
@@ -309,8 +310,7 @@ class OrderUpdate final {
         break;
       case json::Status::CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
-          throw RuntimeError(
-              "Unexpected: size={}"sv, std::size(cancel_status.order_events));
+          throw RuntimeError("Unexpected: size={}"sv, std::size(cancel_status.order_events));
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
           case json::OrderEventType::UNDEFINED:
@@ -359,6 +359,7 @@ class OrderUpdate final {
             // XXX HANS FIX THIS
             log::warn("order_event={}"sv, order_event);
             log::fatal("Unexpected"sv);
+            break;
           }
           case json::OrderEventType::REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
