@@ -28,7 +28,7 @@ std::string Security::signed_challenge(const std::string_view &original_challeng
 
 std::chrono::milliseconds Security::get_nonce() {
   if (Flags::rest_use_nonce()) {
-    auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
+    auto now = std::chrono::duration_cast<decltype(nonce_)>(core::clock::GetRealTime());
     nonce_ = std::max(now, nonce_ + 1ms);  // note! can't reuse
   }
   return nonce_;

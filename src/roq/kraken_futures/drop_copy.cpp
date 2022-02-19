@@ -39,7 +39,7 @@ auto create_connection(auto &handler, auto &context) {
       .uri = Flags::ws_uri(),
       .query = {},
       .ping_frequency = Flags::ws_ping_freq(),
-      .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
+      .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
   return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
@@ -206,6 +206,7 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 uint32_t DropCopy::download(DropCopyState state) {
   switch (state) {
+    // using enum DropCopyState::type_t;  // XXX clang13
     case DropCopyState::UNDEFINED:
       assert(false);
       break;
@@ -429,8 +430,7 @@ void DropCopy::parse(const std::string_view &message) {
     auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
-    if (!result) [[unlikely]]
-      log::warn(R"(Unexpected: message="{}")"sv, message);
+    log::warn<0>::when(!result, R"(Unexpected: message="{}")"sv, message);
   });
 }
 

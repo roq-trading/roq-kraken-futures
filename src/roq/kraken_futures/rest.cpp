@@ -137,6 +137,7 @@ void Rest::operator()(const core::web::Client::Latency &latency) {
 
 uint32_t Rest::download(RestState state) {
   switch (state) {
+    // using enum RestState::type_t; // XXX clang13
     case RestState::UNDEFINED:
       assert(false);
       break;
@@ -240,9 +241,9 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
         .commission_currency = {},
         .tick_size = item.tick_size,
         .multiplier = item.contract_size,
-        .min_trade_vol = 1.0,  // XXX check
+        .min_trade_vol = 1.0,
         .max_trade_vol = NaN,
-        .trade_vol_step_size = 1.0,  // XXX check
+        .trade_vol_step_size = 1.0,
         .option_type = {},
         .strike_currency = {},
         .strike_price = NaN,

@@ -40,7 +40,7 @@ auto create_connection(auto &handler, auto &context) {
       .uri = Flags::ws_uri(),
       .query = {},
       .ping_frequency = Flags::ws_ping_freq(),
-      .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
+      .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
   return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
@@ -318,11 +318,12 @@ void MarketData::operator()(const server::Trace<json::Ticker> &event) {
         .exchange_time_utc = utils::safe_cast(ticker.time),
     };
     server::create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+    auto trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN;
     MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
-        .trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN,
+        .trading_status = trading_status,
     };
     server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
   });

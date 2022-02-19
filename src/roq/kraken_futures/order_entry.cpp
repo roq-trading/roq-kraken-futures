@@ -132,13 +132,14 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 
 namespace {
 json::OrderEventOrderType compute_order_type(
-    OrderType order_type,
-    TimeInForce time_in_force,
-    ExecutionInstruction execution_instruction,
-    double stop_price) {
+    const auto &order_type,
+    const auto &time_in_force,
+    const auto &execution_instruction,
+    const auto &stop_price) {
   if (time_in_force == TimeInForce::IOC)
     return json::OrderEventOrderType::IOC;
   switch (order_type) {
+    // using enum roq::OrderType::type_t; // XXX clang13
     case roq::OrderType::UNDEFINED:
       break;
     case roq::OrderType::MARKET:
@@ -332,13 +333,14 @@ void OrderEntry::create_order_ack(
     uint32_t order_id,
     uint32_t version) {
   profile_.create_order_ack([&]() {
-    // auto &[trace_info, response] = event;
+    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
+        // using enum core::http::Category;  // XXX clang13
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
@@ -493,7 +495,7 @@ void OrderEntry::modify_order(
     auto &[message_info, modify_order] = event;
     auto method = core::http::Method::POST;
     auto path = "/api/v3/editorder"sv;
-    // XXX HANS price has max 2 decimals, size is integer
+    // note! price has max 2 decimals, size is integer
     auto query = fmt::format(
         "?orderId={}"
         "&size={}"
@@ -533,13 +535,14 @@ void OrderEntry::modify_order_ack(
     uint32_t order_id,
     uint32_t version) {
   profile_.modify_order_ack([&]() {
-    // auto &[trace_info, response] = event;
+    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
+        // using enum core::http::Category;  // XXX clang13
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
@@ -728,13 +731,14 @@ void OrderEntry::cancel_order_ack(
     uint32_t order_id,
     uint32_t version) {
   profile_.cancel_order_ack([&]() {
-    // auto &[trace_info, response] = event;
+    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
+        // using enum core::http::Category;  // XXX clang13
         case core::http::Category::SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
@@ -912,6 +916,7 @@ void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> 
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
+        // using enum core::http::Status;  // XXX clang13
         case core::http::Status::OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
@@ -975,6 +980,7 @@ void OrderEntry::cancel_all_orders_after_ack(const server::Trace<core::web::Resp
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
+        // using enum core::http::Status;  // XXX clang13
         case core::http::Status::OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders_after_ack =
@@ -1006,6 +1012,7 @@ void OrderEntry::cancel_all_orders_after_ack(const server::Trace<core::web::Resp
 
 uint32_t OrderEntry::download(OrderEntryState state) {
   switch (state) {
+    // using enum OrderEntryState::type_t;  // XXX clang13
     case OrderEntryState::UNDEFINED:
       assert(false);
       break;
