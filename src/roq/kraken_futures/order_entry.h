@@ -8,9 +8,8 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/promise.h"
-
 #include "roq/core/buffer.h"
+#include "roq/core/download.h"
 
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
@@ -20,7 +19,6 @@
 
 #include "roq/core/web/client.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/kraken_futures/order_entry_state.h"
@@ -141,7 +139,7 @@ class OrderEntry final : public core::web::Client::Handler {
   // state
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  server::Download<OrderEntryState> download_;
+  core::Download<OrderEntryState> download_;
   // cancel all
   std::chrono::nanoseconds next_cancel_all_timer_ = {};
 };
