@@ -145,6 +145,7 @@ void OrderUpdate::operator()(
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);
   auto order_status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
+  auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   oms::OrderUpdate order_update{
       .account = account_,
       .exchange = Flags::exchange(),
@@ -170,23 +171,15 @@ void OrderUpdate::operator()(
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
       .last_liquidity = {},
+      .update_type = update_type,
   };
   // auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
-  if (is_download) {
-    if (shared_.create_order(request_id, stream_id_, trace_info, order_update)) {
-    } else {
-      log::warn("*** EXTERNAL ORDER ***"sv);
-      log::warn("order={}"sv, order);
-    }
+  if (shared_.update_order(
+          request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
-    if (shared_.update_order(
-            request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {
-            })) {
-    } else {
-      log::warn("*** EXTERNAL ORDER ***"sv);
-      log::warn("order={}"sv, order);
-    }
+    log::warn("*** EXTERNAL ORDER ***"sv);
+    log::warn("order={}"sv, order);
   }
 }
 
