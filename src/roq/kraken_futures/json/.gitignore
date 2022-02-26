@@ -26,6 +26,7 @@ info.h
 instruments.h
 instruments_item.h
 margin_account.h
+margin_account_type.h
 open_orders.h
 open_orders_snapshot.h
 open_positions.h
@@ -78,6 +79,7 @@ info.cpp
 instruments.cpp
 instruments_item.cpp
 margin_account.cpp
+margin_account_type.cpp
 open_orders.cpp
 open_orders_snapshot.cpp
 open_positions.cpp

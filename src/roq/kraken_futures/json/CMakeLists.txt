@@ -31,6 +31,7 @@ set(AUTOGEN_SCHEMAS
     instruments.json
     instruments_item.json
     margin_account.json
+    margin_account_type.json
     open_orders.json
     open_orders_snapshot.json
     open_positions.json

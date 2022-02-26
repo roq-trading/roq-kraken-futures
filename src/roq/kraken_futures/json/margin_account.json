@@ -3,6 +3,7 @@
 "type": "item",
 "values": [
 	{ "name": "name", "type": "std::string_view" },
+	{ "name": "type", "type": "MarginAccountType" },
 	{ "name": "balance", "type": "double" },
 	{ "name": "pnl", "type": "double" },
 	{ "name": "funding", "type": "double" },
