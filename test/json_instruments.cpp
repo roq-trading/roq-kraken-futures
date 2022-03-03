@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -14,7 +14,9 @@ using namespace roq::kraken_futures;
 
 using namespace std::literals;
 
-TEST(json_instruments, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_instruments_simple", "json_instruments") {
   auto message =
       R"({)"
       R"("result":"success",)"
@@ -50,6 +52,6 @@ TEST(json_instruments, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::Instruments>(message, buffer_);
-  EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(std::size(obj.instruments), 25);
+  CHECK(obj.result == json::Result::SUCCESS);
+  CHECK(std::size(obj.instruments) == 25);
 }

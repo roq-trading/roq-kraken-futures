@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/json/parser.h"
 
@@ -12,7 +12,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_trade, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_trade_simple", "json_trade") {
   auto message = R"({)"
                  R"("feed":"trade",)"
                  R"("product_id":"PI_LTCUSD",)"
@@ -25,13 +27,13 @@ TEST(json_trade, simple) {
                  R"("price":136.53)"
                  R"(})";
   auto obj = core::json::Parser::create<json::Trade>(message);
-  EXPECT_EQ(obj.feed, json::Feed::TRADE);
-  EXPECT_EQ(obj.product_id, "PI_LTCUSD"sv);
-  EXPECT_EQ(obj.uid, "bee759b2-c264-4a9e-a8a6-07b60556786d"sv);
-  EXPECT_EQ(obj.side, json::Side::BUY);
-  EXPECT_EQ(obj.type, json::TradeType::FILL);
-  EXPECT_EQ(obj.seq, 3732);
-  EXPECT_EQ(obj.time, 1627483389597ms);
-  EXPECT_DOUBLE_EQ(obj.qty, 1.0);
-  EXPECT_DOUBLE_EQ(obj.price, 136.53);
+  CHECK(obj.feed == json::Feed::TRADE);
+  CHECK(obj.product_id == "PI_LTCUSD"sv);
+  CHECK(obj.uid == "bee759b2-c264-4a9e-a8a6-07b60556786d"sv);
+  CHECK(obj.side == json::Side::BUY);
+  CHECK(obj.type == json::TradeType::FILL);
+  CHECK(obj.seq == 3732);
+  CHECK(obj.time == 1627483389597ms);
+  CHECK(obj.qty == 1.0_a);
+  CHECK(obj.price == 136.53_a);
 }

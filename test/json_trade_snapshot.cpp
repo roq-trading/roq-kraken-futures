@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_trade_snapshot, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_trade_snapshot_simple", "json_trade_snapshot") {
   auto message =
       R"({)"
       R"("feed":"trade_snapshot",)"
@@ -29,7 +31,7 @@ TEST(json_trade_snapshot, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::TradeSnapshot>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::TRADE_SNAPSHOT);
-  EXPECT_EQ(obj.product_id, "PI_XBTUSD"sv);
-  EXPECT_EQ(std::size(obj.trades), 3);
+  CHECK(obj.feed == json::Feed::TRADE_SNAPSHOT);
+  CHECK(obj.product_id == "PI_XBTUSD"sv);
+  CHECK(std::size(obj.trades) == 3);
 }

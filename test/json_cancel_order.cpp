@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_cancel_order, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_cancel_order_simple", "json_cancel_order") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("cancelStatus":{)"
@@ -47,32 +49,32 @@ TEST(json_cancel_order, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
-  EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(obj.cancel_status.status, json::Status::CANCELLED);
-  EXPECT_EQ(obj.cancel_status.order_id, "85792364-8163-4e13-b62d-695e7f802e22"sv);
-  EXPECT_EQ(obj.cancel_status.received_time, 1627707194376ms);
-  EXPECT_EQ(std::size(obj.cancel_status.order_events), 1);
+  CHECK(obj.result == json::Result::SUCCESS);
+  CHECK(obj.cancel_status.status == json::Status::CANCELLED);
+  CHECK(obj.cancel_status.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
+  CHECK(obj.cancel_status.received_time == 1627707194376ms);
+  CHECK(std::size(obj.cancel_status.order_events) == 1);
   // idx 0
   auto &event = obj.cancel_status.order_events[0];
-  EXPECT_EQ(event.uid, "85792364-8163-4e13-b62d-695e7f802e22"sv);
-  EXPECT_EQ(event.order.order_id, "85792364-8163-4e13-b62d-695e7f802e22"sv);
-  EXPECT_EQ(event.order.cli_ord_id, "DwAF6QMAAQAAxMacsJgQ"sv);
-  EXPECT_EQ(event.order.type, json::OrderEventOrderType::LMT);
-  EXPECT_EQ(event.order.symbol, "pi_xbtusd"sv);
-  EXPECT_EQ(event.order.side, json::Side::BUY);
-  EXPECT_DOUBLE_EQ(event.order.quantity, 1.0);
-  EXPECT_DOUBLE_EQ(event.order.filled, 0.0);
-  EXPECT_DOUBLE_EQ(event.order.limit_price, 41936.0);
-  EXPECT_EQ(event.order.reduce_only, false);
-  EXPECT_EQ(event.order.timestamp, 1627707184171ms);
-  EXPECT_EQ(event.order.last_update_timestamp, 1627707189310ms);
+  CHECK(event.uid == "85792364-8163-4e13-b62d-695e7f802e22"sv);
+  CHECK(event.order.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
+  CHECK(event.order.cli_ord_id == "DwAF6QMAAQAAxMacsJgQ"sv);
+  CHECK(event.order.type == json::OrderEventOrderType::LMT);
+  CHECK(event.order.symbol == "pi_xbtusd"sv);
+  CHECK(event.order.side == json::Side::BUY);
+  CHECK(event.order.quantity == 1.0_a);
+  CHECK(event.order.filled == 0.0_a);
+  CHECK(event.order.limit_price == 41936.0_a);
+  CHECK(event.order.reduce_only == false);
+  CHECK(event.order.timestamp == 1627707184171ms);
+  CHECK(event.order.last_update_timestamp == 1627707189310ms);
   // ...
-  EXPECT_EQ(event.type, json::OrderEventType::CANCEL);
+  CHECK(event.type == json::OrderEventType::CANCEL);
   // ...
-  EXPECT_EQ(obj.server_time, 1627707194376ms);
+  CHECK(obj.server_time == 1627707194376ms);
 }
 
-TEST(json_cancel_order, not_found) {
+TEST_CASE("json_cancel_order_not_found", "json_cancel_order") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("cancelStatus":{)"
@@ -85,8 +87,8 @@ TEST(json_cancel_order, not_found) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
-  EXPECT_EQ(obj.result, json::Result::SUCCESS);
-  EXPECT_EQ(obj.cancel_status.status, json::Status::NOT_FOUND);
-  EXPECT_EQ(obj.cancel_status.received_time, 1627890365900ms);
-  EXPECT_EQ(obj.server_time, 1627890365900ms);
+  CHECK(obj.result == json::Result::SUCCESS);
+  CHECK(obj.cancel_status.status == json::Status::NOT_FOUND);
+  CHECK(obj.cancel_status.received_time == 1627890365900ms);
+  CHECK(obj.server_time == 1627890365900ms);
 }

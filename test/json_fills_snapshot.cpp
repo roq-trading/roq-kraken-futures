@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_fills_snapshot, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_fills_snapshot_simple", "json_fills_snapshot") {
   auto message =
       R"({)"
       R"("feed":"fills_snapshot",)"
@@ -31,7 +33,7 @@ TEST(json_fills_snapshot, simple) {
   core::Buffer buffer(16384);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::FillsSnapshot>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::FILLS_SNAPSHOT);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
-  EXPECT_EQ(std::size(obj.fills), 5);
+  CHECK(obj.feed == json::Feed::FILLS_SNAPSHOT);
+  CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
+  CHECK(std::size(obj.fills) == 5);
 }

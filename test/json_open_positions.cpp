@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_open_positions, simple_1) {
+using namespace Catch::literals;
+
+TEST_CASE("json_open_positions_simple_1", "json_open_positions") {
   auto message = R"({)"
                  R"("feed":"open_positions",)"
                  R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"
@@ -36,23 +38,23 @@ TEST(json_open_positions, simple_1) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenPositions>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_POSITIONS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
-  EXPECT_EQ(std::size(obj.positions), 1);
+  CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
+  CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
+  CHECK(std::size(obj.positions) == 1);
   // idx 0
   auto &position_0 = obj.positions[0];
-  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"sv);
-  EXPECT_DOUBLE_EQ(position_0.balance, 1.0);
-  EXPECT_DOUBLE_EQ(position_0.pnl, 6.244534934262959e-9);
-  EXPECT_DOUBLE_EQ(position_0.entry_price, 40012.5);
-  EXPECT_DOUBLE_EQ(position_0.mark_price, 40022.5);
-  EXPECT_DOUBLE_EQ(position_0.index_price, 39766.96);
-  EXPECT_DOUBLE_EQ(position_0.liquidation_threshold, 2.522396666144259);
-  EXPECT_DOUBLE_EQ(position_0.effective_leverage, 0.00006246486479409476);
-  EXPECT_DOUBLE_EQ(position_0.return_on_equity, 0.012496094970326962);
+  CHECK(position_0.instrument == "PI_XBTUSD"sv);
+  CHECK(position_0.balance == 1.0_a);
+  CHECK(position_0.pnl == 6.244534934262959e-9_a);
+  CHECK(position_0.entry_price == 40012.5_a);
+  CHECK(position_0.mark_price == 40022.5_a);
+  CHECK(position_0.index_price == 39766.96_a);
+  CHECK(position_0.liquidation_threshold == 2.522396666144259_a);
+  CHECK(position_0.effective_leverage == 0.00006246486479409476_a);
+  CHECK(position_0.return_on_equity == 0.012496094970326962_a);
 }
 
-TEST(json_open_positions, simple_2) {
+TEST_CASE("json_open_positions_simple_2", "json_open_positions") {
   auto message = R"({)"
                  R"("feed":"open_positions",)"
                  R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"
@@ -74,19 +76,19 @@ TEST(json_open_positions, simple_2) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenPositions>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_POSITIONS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
-  EXPECT_EQ(std::size(obj.positions), 1);
+  CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
+  CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
+  CHECK(std::size(obj.positions) == 1);
   // idx 0
   auto &position_0 = obj.positions[0];
-  EXPECT_EQ(position_0.instrument, "PI_XBTUSD"sv);
-  EXPECT_DOUBLE_EQ(position_0.balance, 1.0);
-  EXPECT_DOUBLE_EQ(position_0.pnl, -3.126955263139583e-8);
-  EXPECT_DOUBLE_EQ(position_0.entry_price, 40012.5);
-  EXPECT_DOUBLE_EQ(position_0.mark_price, 39962.5);
-  EXPECT_DOUBLE_EQ(position_0.index_price, 39683.17);
-  EXPECT_DOUBLE_EQ(position_0.liquidation_threshold, 2.5248423786767753);
-  EXPECT_DOUBLE_EQ(position_0.effective_leverage, 0.00006255865689491961);
-  EXPECT_DOUBLE_EQ(position_0.return_on_equity, -0.06248047485160779);
-  EXPECT_DOUBLE_EQ(position_0.unrealized_funding, -6.4769646600617945e-9);
+  CHECK(position_0.instrument == "PI_XBTUSD"sv);
+  CHECK(position_0.balance == 1.0_a);
+  CHECK(position_0.pnl == -3.126955263139583e-8_a);
+  CHECK(position_0.entry_price == 40012.5_a);
+  CHECK(position_0.mark_price == 39962.5_a);
+  CHECK(position_0.index_price == 39683.17_a);
+  CHECK(position_0.liquidation_threshold == 2.5248423786767753_a);
+  CHECK(position_0.effective_leverage == 0.00006255865689491961_a);
+  CHECK(position_0.return_on_equity == -0.06248047485160779_a);
+  CHECK(position_0.unrealized_funding == -6.4769646600617945e-9_a);
 }

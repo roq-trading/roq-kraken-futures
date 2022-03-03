@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/json/parser.h"
 
@@ -11,7 +11,9 @@ using namespace roq::kraken_futures;
 
 using namespace std::literals;
 
-TEST(json_instruments_item, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_instruments_item_simple", "json_instruments_item") {
   auto message = R"({)"
                  R"("symbol":"pi_xbtusd",)"
                  R"("type":"futures_inverse",)"
@@ -29,12 +31,12 @@ TEST(json_instruments_item, simple) {
                  R"(])"
                  R"(})";
   auto obj = core::json::Parser::create<json::InstrumentsItem>(message);
-  EXPECT_EQ(obj.symbol, "pi_xbtusd"sv);
-  EXPECT_EQ(obj.type, "futures_inverse"sv);
-  EXPECT_EQ(obj.underlying, "rr_xbtusd"sv);
-  EXPECT_DOUBLE_EQ(obj.tick_size, 0.5);
-  EXPECT_DOUBLE_EQ(obj.contract_size, 1);
-  EXPECT_EQ(obj.tradeable, true);
-  EXPECT_DOUBLE_EQ(obj.funding_rate_coefficient, 8.0);
-  EXPECT_DOUBLE_EQ(obj.max_relative_funding_rate, 0.001);
+  CHECK(obj.symbol == "pi_xbtusd"sv);
+  CHECK(obj.type == "futures_inverse"sv);
+  CHECK(obj.underlying == "rr_xbtusd"sv);
+  CHECK(obj.tick_size == 0.5_a);
+  CHECK(obj.contract_size == 1_a);
+  CHECK(obj.tradeable == true);
+  CHECK(obj.funding_rate_coefficient == 8.0_a);
+  CHECK(obj.max_relative_funding_rate == 0.001_a);
 }

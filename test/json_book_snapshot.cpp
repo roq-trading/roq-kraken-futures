@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_book_snapshot, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_book_snapshot_simple", "json_book_snapshot") {
   auto message = R"({)"
                  R"("feed":"book_snapshot",)"
                  R"("product_id":"FI_LTCUSD_210924",)"
@@ -40,11 +42,11 @@ TEST(json_book_snapshot, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::BookSnapshot>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::BOOK_SNAPSHOT);
-  EXPECT_EQ(obj.product_id, "FI_LTCUSD_210924"sv);
-  EXPECT_EQ(obj.timestamp, 1627535620727ms);
-  EXPECT_EQ(obj.seq, 732887);
+  CHECK(obj.feed == json::Feed::BOOK_SNAPSHOT);
+  CHECK(obj.product_id == "FI_LTCUSD_210924"sv);
+  CHECK(obj.timestamp == 1627535620727ms);
+  CHECK(obj.seq == 732887);
   // tick_size
-  EXPECT_EQ(std::size(obj.bids), 5);
-  EXPECT_EQ(std::size(obj.asks), 5);
+  CHECK(std::size(obj.bids) == 5);
+  CHECK(std::size(obj.asks) == 5);
 }

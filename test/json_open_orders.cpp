@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_open_orders, new_placed_order_by_user) {
+using namespace Catch::literals;
+
+TEST_CASE("json_open_orders_new_placed_order_by_user", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -37,23 +39,23 @@ TEST(json_open_orders, new_placed_order_by_user) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order.instrument, "PI_XBTUSD"sv);
-  EXPECT_EQ(obj.order.time, 1627578394576ms);
-  EXPECT_EQ(obj.order.last_update_time, 1627578394576ms);
-  EXPECT_DOUBLE_EQ(obj.order.qty, 1.0);
-  EXPECT_DOUBLE_EQ(obj.order.filled, 0.0);
-  EXPECT_DOUBLE_EQ(obj.order.limit_price, 39547.0);
-  EXPECT_DOUBLE_EQ(obj.order.stop_price, 0.0);
-  EXPECT_EQ(obj.order.type, json::OrderType::LIMIT);
-  EXPECT_EQ(obj.order.order_id, "85d803ca-da36-4231-846a-fd3979770d67"sv);
-  EXPECT_EQ(obj.order.direction, 0);
-  EXPECT_EQ(obj.order.reduce_only, false);
-  EXPECT_EQ(obj.is_cancel, false);
-  EXPECT_EQ(obj.reason, json::Reason::NEW_PLACED_ORDER_BY_USER);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order.instrument == "PI_XBTUSD"sv);
+  CHECK(obj.order.time == 1627578394576ms);
+  CHECK(obj.order.last_update_time == 1627578394576ms);
+  CHECK(obj.order.qty == 1.0_a);
+  CHECK(obj.order.filled == 0.0_a);
+  CHECK(obj.order.limit_price == 39547.0_a);
+  CHECK(obj.order.stop_price == 0.0_a);
+  CHECK(obj.order.type == json::OrderType::LIMIT);
+  CHECK(obj.order.order_id == "85d803ca-da36-4231-846a-fd3979770d67"sv);
+  CHECK(obj.order.direction == 0);
+  CHECK(obj.order.reduce_only == false);
+  CHECK(obj.is_cancel == false);
+  CHECK(obj.reason == json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
-TEST(json_open_orders, new_placed_order_by_user_with_cli_ord_id) {
+TEST_CASE("json_open_orders_new_placed_order_by_user_with_cli_ord_id", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -76,24 +78,24 @@ TEST(json_open_orders, new_placed_order_by_user_with_cli_ord_id) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order.instrument, "PI_XBTUSD"sv);
-  EXPECT_EQ(obj.order.time, 1627647670603ms);
-  EXPECT_EQ(obj.order.last_update_time, 1627647670603ms);
-  EXPECT_DOUBLE_EQ(obj.order.qty, 1.0);
-  EXPECT_DOUBLE_EQ(obj.order.filled, 0.0);
-  EXPECT_DOUBLE_EQ(obj.order.limit_price, 39057.5);
-  EXPECT_DOUBLE_EQ(obj.order.stop_price, 0.0);
-  EXPECT_EQ(obj.order.type, json::OrderType::LIMIT);
-  EXPECT_EQ(obj.order.order_id, "6f360089-1837-4551-a8d4-f6b648b11992"sv);
-  EXPECT_EQ(obj.order.cli_ord_id, "UAAF6QMAAQAAWr5S1YoQ"sv);
-  EXPECT_EQ(obj.order.direction, 0);
-  EXPECT_EQ(obj.order.reduce_only, false);
-  EXPECT_EQ(obj.is_cancel, false);
-  EXPECT_EQ(obj.reason, json::Reason::NEW_PLACED_ORDER_BY_USER);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order.instrument == "PI_XBTUSD"sv);
+  CHECK(obj.order.time == 1627647670603ms);
+  CHECK(obj.order.last_update_time == 1627647670603ms);
+  CHECK(obj.order.qty == 1.0_a);
+  CHECK(obj.order.filled == 0.0_a);
+  CHECK(obj.order.limit_price == 39057.5_a);
+  CHECK(obj.order.stop_price == 0.0_a);
+  CHECK(obj.order.type == json::OrderType::LIMIT);
+  CHECK(obj.order.order_id == "6f360089-1837-4551-a8d4-f6b648b11992"sv);
+  CHECK(obj.order.cli_ord_id == "UAAF6QMAAQAAWr5S1YoQ"sv);
+  CHECK(obj.order.direction == 0);
+  CHECK(obj.order.reduce_only == false);
+  CHECK(obj.is_cancel == false);
+  CHECK(obj.reason == json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
-TEST(json_open_orders, edited_by_user) {
+TEST_CASE("json_open_orders_edited_by_user", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -116,23 +118,23 @@ TEST(json_open_orders, edited_by_user) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order.instrument, "PI_XBTUSD"sv);
-  EXPECT_EQ(obj.order.time, 1627906165185ms);
-  EXPECT_EQ(obj.order.last_update_time, 1627906170258ms);
-  EXPECT_DOUBLE_EQ(obj.order.qty, 1.0);
-  EXPECT_DOUBLE_EQ(obj.order.limit_price, 39726.5);
-  EXPECT_DOUBLE_EQ(obj.order.stop_price, 0.0);
-  EXPECT_DOUBLE_EQ(obj.order.type, json::OrderType::LIMIT);
-  EXPECT_EQ(obj.order.order_id, "8a9a24e8-7d90-4b3c-9838-0474d06bfd40"sv);
-  EXPECT_EQ(obj.order.cli_ord_id, "hwAF6wMAAQAAPg/OBMcQ"sv);
-  EXPECT_EQ(obj.order.direction, 0);
-  EXPECT_EQ(obj.order.reduce_only, false);
-  EXPECT_EQ(obj.is_cancel, false);
-  EXPECT_EQ(obj.reason, json::Reason::EDITED_BY_USER);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order.instrument == "PI_XBTUSD"sv);
+  CHECK(obj.order.time == 1627906165185ms);
+  CHECK(obj.order.last_update_time == 1627906170258ms);
+  CHECK(obj.order.qty == 1.0_a);
+  CHECK(obj.order.limit_price == 39726.5_a);
+  CHECK(obj.order.stop_price == 0.0_a);
+  CHECK(obj.order.type == json::OrderType::LIMIT);
+  CHECK(obj.order.order_id == "8a9a24e8-7d90-4b3c-9838-0474d06bfd40"sv);
+  CHECK(obj.order.cli_ord_id == "hwAF6wMAAQAAPg/OBMcQ"sv);
+  CHECK(obj.order.direction == 0);
+  CHECK(obj.order.reduce_only == false);
+  CHECK(obj.is_cancel == false);
+  CHECK(obj.reason == json::Reason::EDITED_BY_USER);
 }
 
-TEST(json_open_orders, cancelled_by_user) {
+TEST_CASE("json_open_orders_cancelled_by_user", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"494f7cb0-6936-495f-a0c5-663ad9b9fbdd",)"
@@ -142,13 +144,13 @@ TEST(json_open_orders, cancelled_by_user) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order_id, "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"sv);
-  EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order_id == "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"sv);
+  CHECK(obj.is_cancel == true);
+  CHECK(obj.reason == json::Reason::CANCELLED_BY_USER);
 }
 
-TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
+TEST_CASE("json_open_orders_cancelled_by_user_with_cli_ord_id", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"f18e006d-c95e-4d89-b470-4402949d5a15",)"
@@ -159,14 +161,14 @@ TEST(json_open_orders, cancelled_by_user_with_cli_ord_id) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order_id, "f18e006d-c95e-4d89-b470-4402949d5a15"sv);
-  EXPECT_EQ(obj.cli_ord_id, "QAAF6QMAAQAA7DBK5YoQ"sv);
-  EXPECT_EQ(obj.is_cancel, true);
-  EXPECT_EQ(obj.reason, json::Reason::CANCELLED_BY_USER);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order_id == "f18e006d-c95e-4d89-b470-4402949d5a15"sv);
+  CHECK(obj.cli_ord_id == "QAAF6QMAAQAA7DBK5YoQ"sv);
+  CHECK(obj.is_cancel == true);
+  CHECK(obj.reason == json::Reason::CANCELLED_BY_USER);
 }
 
-TEST(json_open_orders, full_fill) {
+TEST_CASE("json_open_orders_full_fill", "json_open_orders") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"df2fa719-23bc-4cd7-8a84-5c3c41d75757",)"
@@ -177,9 +179,9 @@ TEST(json_open_orders, full_fill) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::OPEN_ORDERS);
-  EXPECT_EQ(obj.order_id, "df2fa719-23bc-4cd7-8a84-5c3c41d75757"sv);
-  EXPECT_EQ(obj.cli_ord_id, "EwAF7gMAAQAAnNBFcdUQ"sv);
-  EXPECT_EQ(obj.is_cancel, true);  // note!
-  EXPECT_EQ(obj.reason, json::Reason::FULL_FILL);
+  CHECK(obj.feed == json::Feed::OPEN_ORDERS);
+  CHECK(obj.order_id == "df2fa719-23bc-4cd7-8a84-5c3c41d75757"sv);
+  CHECK(obj.cli_ord_id == "EwAF7gMAAQAAnNBFcdUQ"sv);
+  CHECK(obj.is_cancel == true);  // note!
+  CHECK(obj.reason == json::Reason::FULL_FILL);
 }

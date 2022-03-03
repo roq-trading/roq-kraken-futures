@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -14,7 +14,9 @@ using namespace roq::kraken_futures;
 
 using namespace std::literals;
 
-TEST(json_account_balances_and_margins, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_account_balances_and_margins_simple", "json_account_balances_and_margins") {
   auto message =
       R"({)"
       R"("feed":"account_balances_and_margins",)"
@@ -37,8 +39,8 @@ TEST(json_account_balances_and_margins, simple) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::AccountBalancesAndMargins>(message, buffer_);
-  EXPECT_EQ(obj.feed, json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
-  EXPECT_EQ(obj.account, "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
-  EXPECT_EQ(std::size(obj.margin_accounts), 11);
-  EXPECT_EQ(obj.seq, 0);
+  CHECK(obj.feed == json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
+  CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
+  CHECK(std::size(obj.margin_accounts) == 11);
+  CHECK(obj.seq == 0);
 }

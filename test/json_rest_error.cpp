@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/buffer.h"
 
@@ -15,7 +15,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_rest_error, error_400) {
+using namespace Catch::literals;
+
+TEST_CASE("json_rest_error_error_400", "json_rest_error") {
   auto message = R"({)"
                  R"("status":"BAD_REQUEST",)"
                  R"("result":"error",)"
@@ -30,17 +32,17 @@ TEST(json_rest_error, error_400) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::RestError>(message, buffer_);
-  // EXPECT_EQ(obj.status, "BAD_REQUEST"sv);
-  EXPECT_EQ(std::size(obj.errors), 1);
+  // CHECK(obj.status == "BAD_REQUEST"sv);
+  CHECK(std::size(obj.errors) == 1);
   // idx 0
   auto &error_0 = obj.errors[0];
-  EXPECT_EQ(error_0.code, 11);
-  EXPECT_EQ(error_0.message, "Argument invalid: orderType"sv);
+  CHECK(error_0.code == 11);
+  CHECK(error_0.message == "Argument invalid: orderType"sv);
   // ...
-  EXPECT_EQ(obj.server_time, 1627891587896ms);
+  CHECK(obj.server_time == 1627891587896ms);
 }
 
-TEST(json_rest_error, error_404) {
+TEST_CASE("json_rest_error_error_404", "json_rest_error") {
   auto message =
       R"({)"
       R"("timestamp":1627618268981,)"
@@ -53,9 +55,9 @@ TEST(json_rest_error, error_404) {
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::RestError>(message, buffer_);
-  EXPECT_EQ(obj.timestamp, 1627618268981ms);
-  // EXPECT_EQ(obj.status, 404);
-  EXPECT_EQ(obj.error, "Not Found"sv);
-  EXPECT_EQ(obj.message, ""sv);
-  EXPECT_EQ(obj.request_id, "7ad2fe97-69108954"sv);
+  CHECK(obj.timestamp == 1627618268981ms);
+  // CHECK(obj.status == 404);
+  CHECK(obj.error == "Not Found"sv);
+  CHECK(obj.message == ""sv);
+  CHECK(obj.request_id == "7ad2fe97-69108954"sv);
 }

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/json/parser.h"
 
@@ -12,7 +12,9 @@ using namespace roq::kraken_futures;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-TEST(json_margin_account, simple) {
+using namespace Catch::literals;
+
+TEST_CASE("json_margin_account_simple", "json_margin_account") {
   auto message = R"({)"
                  R"("name":"bch",)"
                  R"("balance":20.0,)"
@@ -24,12 +26,12 @@ TEST(json_margin_account, simple) {
                  R"("mm":0.0)"
                  R"(})";
   auto obj = core::json::Parser::create<json::MarginAccount>(message);
-  EXPECT_EQ(obj.name, "bch"sv);
-  EXPECT_DOUBLE_EQ(obj.balance, 20.0);
-  EXPECT_DOUBLE_EQ(obj.pnl, 0.0);
-  EXPECT_DOUBLE_EQ(obj.funding, 0.0);
-  EXPECT_DOUBLE_EQ(obj.pv, 0.0);
-  EXPECT_DOUBLE_EQ(obj.am, 0.0);
-  EXPECT_DOUBLE_EQ(obj.im, 0.0);
-  EXPECT_DOUBLE_EQ(obj.mm, 0.0);
+  CHECK(obj.name == "bch"sv);
+  CHECK(obj.balance == 20.0_a);
+  CHECK(obj.pnl == 0.0_a);
+  CHECK(obj.funding == 0.0_a);
+  CHECK(obj.pv == 0.0_a);
+  CHECK(obj.am == 0.0_a);
+  CHECK(obj.im == 0.0_a);
+  CHECK(obj.mm == 0.0_a);
 }
