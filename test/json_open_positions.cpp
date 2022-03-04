@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_open_positions_simple_1", "json_open_positions") {
+TEST_CASE("json_open_positions_simple_1", "[json_open_positions]") {
   auto message = R"({)"
                  R"("feed":"open_positions",)"
                  R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"
@@ -54,7 +54,7 @@ TEST_CASE("json_open_positions_simple_1", "json_open_positions") {
   CHECK(position_0.return_on_equity == 0.012496094970326962_a);
 }
 
-TEST_CASE("json_open_positions_simple_2", "json_open_positions") {
+TEST_CASE("json_open_positions_simple_2", "[json_open_positions]") {
   auto message = R"({)"
                  R"("feed":"open_positions",)"
                  R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"

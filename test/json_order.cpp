@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_order_simple", "json_order") {
+TEST_CASE("json_order_simple", "[json_order]") {
   auto message = R"({)"
                  R"("instrument":"PI_XBTUSD",)"
                  R"("time":1627577572583,)"

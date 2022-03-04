@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_rest_error_error_400", "json_rest_error") {
+TEST_CASE("json_rest_error_error_400", "[json_rest_error]") {
   auto message = R"({)"
                  R"("status":"BAD_REQUEST",)"
                  R"("result":"error",)"
@@ -42,7 +42,7 @@ TEST_CASE("json_rest_error_error_400", "json_rest_error") {
   CHECK(obj.server_time == 1627891587896ms);
 }
 
-TEST_CASE("json_rest_error_error_404", "json_rest_error") {
+TEST_CASE("json_rest_error_error_404", "[json_rest_error]") {
   auto message =
       R"({)"
       R"("timestamp":1627618268981,)"

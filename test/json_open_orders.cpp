@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_open_orders_new_placed_order_by_user", "json_open_orders") {
+TEST_CASE("json_open_orders_new_placed_order_by_user", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -55,7 +55,7 @@ TEST_CASE("json_open_orders_new_placed_order_by_user", "json_open_orders") {
   CHECK(obj.reason == json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
-TEST_CASE("json_open_orders_new_placed_order_by_user_with_cli_ord_id", "json_open_orders") {
+TEST_CASE("json_open_orders_new_placed_order_by_user_with_cli_ord_id", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -95,7 +95,7 @@ TEST_CASE("json_open_orders_new_placed_order_by_user_with_cli_ord_id", "json_ope
   CHECK(obj.reason == json::Reason::NEW_PLACED_ORDER_BY_USER);
 }
 
-TEST_CASE("json_open_orders_edited_by_user", "json_open_orders") {
+TEST_CASE("json_open_orders_edited_by_user", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order":{)"
@@ -134,7 +134,7 @@ TEST_CASE("json_open_orders_edited_by_user", "json_open_orders") {
   CHECK(obj.reason == json::Reason::EDITED_BY_USER);
 }
 
-TEST_CASE("json_open_orders_cancelled_by_user", "json_open_orders") {
+TEST_CASE("json_open_orders_cancelled_by_user", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"494f7cb0-6936-495f-a0c5-663ad9b9fbdd",)"
@@ -150,7 +150,7 @@ TEST_CASE("json_open_orders_cancelled_by_user", "json_open_orders") {
   CHECK(obj.reason == json::Reason::CANCELLED_BY_USER);
 }
 
-TEST_CASE("json_open_orders_cancelled_by_user_with_cli_ord_id", "json_open_orders") {
+TEST_CASE("json_open_orders_cancelled_by_user_with_cli_ord_id", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"f18e006d-c95e-4d89-b470-4402949d5a15",)"
@@ -168,7 +168,7 @@ TEST_CASE("json_open_orders_cancelled_by_user_with_cli_ord_id", "json_open_order
   CHECK(obj.reason == json::Reason::CANCELLED_BY_USER);
 }
 
-TEST_CASE("json_open_orders_full_fill", "json_open_orders") {
+TEST_CASE("json_open_orders_full_fill", "[json_open_orders]") {
   auto message = R"({)"
                  R"("feed":"open_orders",)"
                  R"("order_id":"df2fa719-23bc-4cd7-8a84-5c3c41d75757",)"

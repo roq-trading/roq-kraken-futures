@@ -16,7 +16,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_instruments_simple", "json_instruments") {
+TEST_CASE("json_instruments_simple", "[json_instruments]") {
   auto message =
       R"({)"
       R"("result":"success",)"

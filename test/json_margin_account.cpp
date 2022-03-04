@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_margin_account_simple", "json_margin_account") {
+TEST_CASE("json_margin_account_simple", "[json_margin_account]") {
   auto message = R"({)"
                  R"("name":"bch",)"
                  R"("balance":20.0,)"

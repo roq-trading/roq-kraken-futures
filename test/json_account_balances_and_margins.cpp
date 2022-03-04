@@ -16,7 +16,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_account_balances_and_margins_simple", "json_account_balances_and_margins") {
+TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_and_margins]") {
   auto message =
       R"({)"
       R"("feed":"account_balances_and_margins",)"

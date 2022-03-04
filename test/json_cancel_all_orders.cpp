@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_cancel_all_orders_no_orders", "json_cancel_all_orders") {
+TEST_CASE("json_cancel_all_orders_no_orders", "[json_cancel_all_orders]") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("cancelStatus":{)"
@@ -42,7 +42,7 @@ TEST_CASE("json_cancel_all_orders_no_orders", "json_cancel_all_orders") {
   CHECK(obj.server_time == 1627712298468ms);
 }
 
-TEST_CASE("json_cancel_all_orders_cancelled", "json_cancel_all_orders") {
+TEST_CASE("json_cancel_all_orders_cancelled", "[json_cancel_all_orders]") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("cancelStatus":{)"

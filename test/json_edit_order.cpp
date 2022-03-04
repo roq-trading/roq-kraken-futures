@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_edit_order_simple", "json_edit_order") {
+TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("serverTime":"2021-07-30T12:36:59.235Z",)"
@@ -97,7 +97,7 @@ TEST_CASE("json_edit_order_simple", "json_edit_order") {
   CHECK(event.type == json::OrderEventType::EDIT);
 }
 
-TEST_CASE("json_edit_order_authentication_error", "json_edit_order") {
+TEST_CASE("json_edit_order_authentication_error", "[json_edit_order]") {
   auto message = R"({)"
                  R"("result":"error",)"
                  R"("error":"authenticationError",)"
@@ -111,7 +111,7 @@ TEST_CASE("json_edit_order_authentication_error", "json_edit_order") {
   CHECK(obj.server_time == 1627705820840ms);
 }
 
-TEST_CASE("json_edit_order_edit_has_no_effect", "json_edit_order") {
+TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("serverTime":"2021-08-02T03:51:50.939Z",)"
@@ -166,7 +166,7 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "json_edit_order") {
   CHECK(order_event.type == json::OrderEventType::REJECT);
 }
 
-TEST_CASE("json_edit_order_execution", "json_edit_order") {
+TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
   auto message = R"({)"
                  R"("result":"success",)"
                  R"("serverTime":"2021-08-03T06:42:05.376Z",)"

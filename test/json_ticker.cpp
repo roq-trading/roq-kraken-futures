@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_ticker_simple", "json_ticker") {
+TEST_CASE("json_ticker_simple", "[json_ticker]") {
   auto message = R"({)"
                  R"("time":1627460663568,)"
                  R"("feed":"ticker",)"
@@ -60,7 +60,7 @@ TEST_CASE("json_ticker_simple", "json_ticker") {
   CHECK(obj.maturity_time == 1627657200000ms);
 }
 
-TEST_CASE("json_ticker_funding_rates", "json_ticker") {
+TEST_CASE("json_ticker_funding_rates", "[json_ticker]") {
   auto message = R"({)"
                  R"("time":1627462526224,)"
                  R"("feed":"ticker",)"

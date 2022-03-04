@@ -13,7 +13,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_instruments_item_simple", "json_instruments_item") {
+TEST_CASE("json_instruments_item_simple", "[json_instruments_item]") {
   auto message = R"({)"
                  R"("symbol":"pi_xbtusd",)"
                  R"("type":"futures_inverse",)"

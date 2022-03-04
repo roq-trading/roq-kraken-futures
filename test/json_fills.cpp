@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_fills_simple", "json_fills") {
+TEST_CASE("json_fills_simple", "[json_fills]") {
   auto message = R"({)"
                  R"("feed":"fills",)"
                  R"("username":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"

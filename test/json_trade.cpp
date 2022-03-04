@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 using namespace Catch::literals;
 
-TEST_CASE("json_trade_simple", "json_trade") {
+TEST_CASE("json_trade_simple", "[json_trade]") {
   auto message = R"({)"
                  R"("feed":"trade",)"
                  R"("product_id":"PI_LTCUSD",)"

@@ -16,7 +16,7 @@ using namespace Catch::literals;
 // https://support.kraken.com/hc/en-us/articles/360022839451-Generate-API-keys
 // https://support.kraken.com/hc/en-us/articles/360022635592-Generate-authentication-strings-REST-API-
 
-TEST_CASE("hasher_headers_without_nonce", "hasher") {
+TEST_CASE("hasher_headers_without_nonce", "[hasher]") {
   const auto KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
   const auto SECRET =
       "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
@@ -28,7 +28,7 @@ TEST_CASE("hasher_headers_without_nonce", "hasher") {
       "Authent: BGOdiF//YXbOtKUkyFFRqKAft7gai33YfScxFrXMdMHGUJ6wSaMA6y0p6UzfYzj5Flgvv+SFQe53h2KrEe37Ng==\r\n"sv);
 }
 
-TEST_CASE("hasher_headers_with_nonce", "hasher") {
+TEST_CASE("hasher_headers_with_nonce", "[hasher]") {
   const auto KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
   const auto SECRET =
       "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
@@ -42,7 +42,7 @@ TEST_CASE("hasher_headers_with_nonce", "hasher") {
       "Authent: DqUyz8Wh/72af7dimSXHw91IFxrAriTgVodyg2s67PU2mVStwLDQak+uIoCtfb43XONq0xVAp+vm5dqnhFAB1Q==\r\n"sv);
 }
 
-TEST_CASE("hasher_test_url_encoded", "hasher") {
+TEST_CASE("hasher_test_url_encoded", "[hasher]") {
   const auto KEY = "zO4Zjh5GO+Zy2n4QwIyWEKb/EAgxSjOdtA+W1zZvOBYU3na2pE/p/nwx"sv;
   const auto SECRET =
       "DuWQ3317vPm8tlOoylWmhfQJwGkKiR+ABuNNocaPxU2DA5H9aZAKkGO0sYBSGKirtdlkm8dL9DAp6husEABgWyOr"sv;
