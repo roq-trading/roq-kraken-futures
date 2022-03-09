@@ -5,9 +5,9 @@
 #include <chrono>
 #include <string>
 
-#include "roq/kraken_futures/config.h"
+#include "roq/kraken_futures/config.hpp"
 
-#include "roq/kraken_futures/tools/hasher.h"
+#include "roq/kraken_futures/tools/hasher.hpp"
 
 namespace roq {
 namespace kraken_futures {

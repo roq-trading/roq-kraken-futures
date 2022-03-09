@@ -1,18 +1,18 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken_futures/drop_copy.h"
+#include "roq/kraken_futures/drop_copy.hpp"
 
 #include <algorithm>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.h"
+#include "roq/core/back_emplacer.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/kraken_futures/flags.h"
-#include "roq/kraken_futures/order_update.h"
+#include "roq/kraken_futures/flags.hpp"
+#include "roq/kraken_futures/order_update.hpp"
 
 using namespace std::literals;
 

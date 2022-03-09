@@ -2,12 +2,12 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/core/buffer.h"
+#include "roq/core/buffer.hpp"
 
-#include "roq/core/json/buffer.h"
-#include "roq/core/json/parser.h"
+#include "roq/core/json/buffer.hpp"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/fills.h"
+#include "roq/kraken_futures/json/fills.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;

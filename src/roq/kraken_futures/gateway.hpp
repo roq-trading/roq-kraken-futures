@@ -8,17 +8,17 @@
 #include <string>
 #include <vector>
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/kraken_futures/config.h"
-#include "roq/kraken_futures/drop_copy.h"
-#include "roq/kraken_futures/market_data.h"
-#include "roq/kraken_futures/order_entry.h"
-#include "roq/kraken_futures/rest.h"
-#include "roq/kraken_futures/security.h"
-#include "roq/kraken_futures/shared.h"
+#include "roq/kraken_futures/config.hpp"
+#include "roq/kraken_futures/drop_copy.hpp"
+#include "roq/kraken_futures/market_data.hpp"
+#include "roq/kraken_futures/order_entry.hpp"
+#include "roq/kraken_futures/rest.hpp"
+#include "roq/kraken_futures/security.hpp"
+#include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
 namespace kraken_futures {

@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken_futures/config.h"
+#include "roq/kraken_futures/config.hpp"
 
 #include <utility>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/kraken_futures/flags.h"
+#include "roq/kraken_futures/flags.hpp"
 
 using namespace std::literals;
 

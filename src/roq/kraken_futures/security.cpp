@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken_futures/security.h"
+#include "roq/kraken_futures/security.hpp"
 
 #include <algorithm>
 
-#include "roq/core/clock.h"
+#include "roq/core/clock.hpp"
 
-#include "roq/kraken_futures/flags.h"
+#include "roq/kraken_futures/flags.hpp"
 
 using namespace std::chrono_literals;  // NOLINT
 

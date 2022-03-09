@@ -1,26 +1,26 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken_futures/order_entry.h"
+#include "roq/kraken_futures/order_entry.hpp"
 
 #include <utility>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/kraken_futures/flags.h"
-#include "roq/kraken_futures/order_update.h"
+#include "roq/kraken_futures/flags.hpp"
+#include "roq/kraken_futures/order_update.hpp"
 
-#include "roq/kraken_futures/json/cancel_all_after_ack.h"
-#include "roq/kraken_futures/json/cancel_all_orders.h"
-#include "roq/kraken_futures/json/cancel_order.h"
-#include "roq/kraken_futures/json/edit_order.h"
-#include "roq/kraken_futures/json/rest_error.h"
-#include "roq/kraken_futures/json/result.h"
-#include "roq/kraken_futures/json/send_order.h"
+#include "roq/kraken_futures/json/cancel_all_after_ack.hpp"
+#include "roq/kraken_futures/json/cancel_all_orders.hpp"
+#include "roq/kraken_futures/json/cancel_order.hpp"
+#include "roq/kraken_futures/json/edit_order.hpp"
+#include "roq/kraken_futures/json/rest_error.hpp"
+#include "roq/kraken_futures/json/result.hpp"
+#include "roq/kraken_futures/json/send_order.hpp"
 
 using namespace std::literals;
 

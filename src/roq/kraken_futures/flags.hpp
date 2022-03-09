@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "roq/kraken_futures/flags/flags.h"
+#include "roq/kraken_futures/flags/flags.hpp"
 
 namespace roq {
 namespace kraken_futures {

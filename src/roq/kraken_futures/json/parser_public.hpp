@@ -4,23 +4,23 @@
 
 #include <string_view>
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/kraken_futures/json/alert.h"
-#include "roq/kraken_futures/json/error.h"
-#include "roq/kraken_futures/json/info.h"
+#include "roq/kraken_futures/json/alert.hpp"
+#include "roq/kraken_futures/json/error.hpp"
+#include "roq/kraken_futures/json/info.hpp"
 
-#include "roq/kraken_futures/json/subscribed.h"
+#include "roq/kraken_futures/json/subscribed.hpp"
 
-#include "roq/kraken_futures/json/heartbeat.h"
+#include "roq/kraken_futures/json/heartbeat.hpp"
 
-#include "roq/kraken_futures/json/book.h"
-#include "roq/kraken_futures/json/book_snapshot.h"
-#include "roq/kraken_futures/json/ticker.h"
-#include "roq/kraken_futures/json/trade.h"
-#include "roq/kraken_futures/json/trade_snapshot.h"
+#include "roq/kraken_futures/json/book.hpp"
+#include "roq/kraken_futures/json/book_snapshot.hpp"
+#include "roq/kraken_futures/json/ticker.hpp"
+#include "roq/kraken_futures/json/trade.hpp"
+#include "roq/kraken_futures/json/trade_snapshot.hpp"
 
 namespace roq {
 namespace kraken_futures {

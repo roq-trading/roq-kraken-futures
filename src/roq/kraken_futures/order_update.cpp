@@ -1,17 +1,17 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken_futures/order_update.h"
+#include "roq/kraken_futures/order_update.hpp"
 
 #include <algorithm>
 #include <string>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/compare.h"
+#include "roq/utils/compare.hpp"
 
-#include "roq/kraken_futures/flags.h"
+#include "roq/kraken_futures/flags.hpp"
 
-#include "roq/kraken_futures/json/utils.h"
+#include "roq/kraken_futures/json/utils.hpp"
 
 using namespace std::literals;
 

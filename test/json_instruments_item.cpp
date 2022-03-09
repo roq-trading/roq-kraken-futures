@@ -2,9 +2,9 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/instruments_item.h"
+#include "roq/kraken_futures/json/instruments_item.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;

@@ -6,21 +6,21 @@
 #include <string>
 #include <string_view>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/utils/compare.h"
+#include "roq/utils/compare.hpp"
 
-#include "roq/kraken_futures/shared.h"
+#include "roq/kraken_futures/shared.hpp"
 
-#include "roq/kraken_futures/json/cancel_order.h"
-#include "roq/kraken_futures/json/edit_order.h"
-#include "roq/kraken_futures/json/open_orders.h"
-#include "roq/kraken_futures/json/open_orders_snapshot.h"
-#include "roq/kraken_futures/json/send_order.h"
+#include "roq/kraken_futures/json/cancel_order.hpp"
+#include "roq/kraken_futures/json/edit_order.hpp"
+#include "roq/kraken_futures/json/open_orders.hpp"
+#include "roq/kraken_futures/json/open_orders_snapshot.hpp"
+#include "roq/kraken_futures/json/send_order.hpp"
 
 // new
 
-#include "roq/kraken_futures/json/utils.h"
+#include "roq/kraken_futures/json/utils.hpp"
 
 namespace roq {
 namespace kraken_futures {

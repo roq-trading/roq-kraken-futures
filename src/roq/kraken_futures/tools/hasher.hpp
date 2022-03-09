@@ -6,8 +6,8 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/crypto/hmac.h"
-#include "roq/core/crypto/sha.h"
+#include "roq/core/crypto/hmac.hpp"
+#include "roq/core/crypto/sha.hpp"
 
 namespace roq {
 namespace kraken_futures {

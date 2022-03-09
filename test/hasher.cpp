@@ -2,7 +2,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/kraken_futures/tools/hasher.h"
+#include "roq/kraken_futures/tools/hasher.hpp"
 
 using namespace std::literals;
 
