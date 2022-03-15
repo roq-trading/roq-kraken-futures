@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/core/back_emplacer.hpp"
@@ -21,7 +21,7 @@ namespace kraken_futures {
 
 namespace {
 const auto NAME = "ex"sv;
-const auto SUPPORTS = utils::Mask{
+const auto SUPPORTS = Mask{
     SupportType::ORDER,
     SupportType::TRADE,
     SupportType::POSITION,
