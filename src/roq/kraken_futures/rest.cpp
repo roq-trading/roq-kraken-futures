@@ -218,7 +218,7 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));
-  std::vector<std::string> symbols;
+  std::vector<Symbol> symbols;
   symbols.reserve(std::size(instruments.instruments));
   size_t counter = {};
   for (auto &item : instruments.instruments) {

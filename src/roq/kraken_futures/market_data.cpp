@@ -180,7 +180,7 @@ void MarketData::operator()(ConnectionStatus status) {
   }
 }
 
-void MarketData::subscribe(const std::span<std::string const> &symbols) {
+void MarketData::subscribe(const std::span<Symbol const> &symbols) {
   subscribe("ticker"sv, symbols);
   subscribe("book"sv, symbols);
   subscribe("trade"sv, symbols);
