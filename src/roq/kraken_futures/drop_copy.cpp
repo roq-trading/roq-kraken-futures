@@ -367,8 +367,7 @@ void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
             };
-            create_trace_and_dispatch(
-                handler_, trace_info, trade_update, true, order.user_id);
+            create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);
@@ -415,8 +414,7 @@ void DropCopy::operator()(const Trace<json::Fills> &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
             };
-            create_trace_and_dispatch(
-                handler_, trace_info, trade_update, true, order.user_id);
+            create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {
         log::warn<1>("*** EXTERNAL ORDER ***"sv);

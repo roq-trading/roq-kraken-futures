@@ -24,8 +24,7 @@ void OrderUpdate::operator()(
     (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
 }
 
-void OrderUpdate::operator()(
-    const json::OpenOrders &open_orders, const TraceInfo &trace_info) {
+void OrderUpdate::operator()(const json::OpenOrders &open_orders, const TraceInfo &trace_info) {
   auto &order = open_orders.order;
   // ... just confusing
   auto order_id = std::empty(open_orders.order_id) ? order.order_id : open_orders.order_id;

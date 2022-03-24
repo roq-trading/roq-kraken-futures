@@ -16,8 +16,7 @@ namespace json {
 
 namespace {
 template <typename H>
-void dispatch_info(
-    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
+void dispatch_info(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Info info(root);
@@ -25,8 +24,7 @@ void dispatch_info(
 }
 
 template <typename H>
-void dispatch_alert(
-    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
+void dispatch_alert(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Alert alert(root);
@@ -34,8 +32,7 @@ void dispatch_alert(
 }
 
 template <typename H>
-void dispatch_error(
-    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
+void dispatch_error(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Error error(root);
@@ -43,8 +40,7 @@ void dispatch_error(
 }
 
 template <typename H>
-void dispatch_challenge(
-    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
+void dispatch_challenge(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Challenge challenge(root);
@@ -64,8 +60,7 @@ void dispatch_subscribed(
 }
 
 template <typename H>
-void dispatch_heartbeat(
-    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
+void dispatch_heartbeat(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Heartbeat heartbeat(root);
