@@ -33,8 +33,8 @@ class OrderUpdate final {
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(const OrderUpdate &) = delete;
 
-  void operator()(const json::OpenOrdersSnapshot &, const server::TraceInfo &);
-  void operator()(const json::OpenOrders &, const server::TraceInfo &);
+  void operator()(const json::OpenOrdersSnapshot &, const TraceInfo &);
+  void operator()(const json::OpenOrders &, const TraceInfo &);
 
   template <typename Accept, typename Reject>
   void operator()(
@@ -381,7 +381,7 @@ class OrderUpdate final {
       const std::string_view &cli_ord_id,
       const json::Reason,
       bool is_cancel,
-      const server::TraceInfo &,
+      const TraceInfo &,
       bool is_download);
 
   Side compute_side(int32_t direction) {

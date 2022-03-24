@@ -177,7 +177,7 @@ void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
       .account = security_.get_account(),
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -201,7 +201,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -227,25 +227,25 @@ uint32_t DropCopy::download(DropCopyState state) {
   return {};
 }
 
-void DropCopy::operator()(const server::Trace<json::Info> &event) {
+void DropCopy::operator()(const Trace<json::Info> &event) {
   auto &[trace_info, info] = event;
   log::debug("info={}"sv, info);
   log::info<2>("info={}"sv, info);
 }
 
-void DropCopy::operator()(const server::Trace<json::Alert> &event) {
+void DropCopy::operator()(const Trace<json::Alert> &event) {
   auto &[trace_info, alert] = event;
   log::debug("alert={}"sv, alert);
   log::warn<1>("alert={}"sv, alert);
 }
 
-void DropCopy::operator()(const server::Trace<json::Error> &event) {
+void DropCopy::operator()(const Trace<json::Error> &event) {
   auto &[trace_info, error] = event;
   log::debug("error={}"sv, error);
   log::warn("error={}"sv, error);
 }
 
-void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
+void DropCopy::operator()(const Trace<json::Challenge> &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"sv, challenge);
@@ -258,13 +258,13 @@ void DropCopy::operator()(const server::Trace<json::Challenge> &event) {
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::Subscribed> &event) {
+void DropCopy::operator()(const Trace<json::Subscribed> &event) {
   auto &[trace_info, subscribed] = event;
   log::debug("subscribed={}"sv, subscribed);
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
+void DropCopy::operator()(const Trace<json::Heartbeat> &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"sv, heartbeat);
@@ -272,7 +272,7 @@ void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &event) {
+void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins> &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
@@ -287,12 +287,12 @@ void DropCopy::operator()(const server::Trace<json::AccountBalancesAndMargins> &
           .hold = NaN,
           .external_account = account_balances_and_margins.account,
       };
-      server::create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+      create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
+void DropCopy::operator()(const Trace<json::OpenPositions> &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
@@ -310,12 +310,12 @@ void DropCopy::operator()(const server::Trace<json::OpenPositions> &event) {
           .long_quantity_begin = NaN,
           .short_quantity_begin = NaN,
       };
-      server::create_trace_and_dispatch(handler_, trace_info, position_update, true);
+      create_trace_and_dispatch(handler_, trace_info, position_update, true);
     }
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) {
+void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot> &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
@@ -323,7 +323,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrdersSnapshot> &event) 
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
+void DropCopy::operator()(const Trace<json::OpenOrders> &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
@@ -331,7 +331,7 @@ void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
+void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
   profile_.fills_snapshot([&]() {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
@@ -367,7 +367,7 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
             };
-            server::create_trace_and_dispatch(
+            create_trace_and_dispatch(
                 handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {
@@ -378,7 +378,7 @@ void DropCopy::operator()(const server::Trace<json::FillsSnapshot> &event) {
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::Fills> &event) {
+void DropCopy::operator()(const Trace<json::Fills> &event) {
   profile_.fills([&]() {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
@@ -415,7 +415,7 @@ void DropCopy::operator()(const server::Trace<json::Fills> &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
             };
-            server::create_trace_and_dispatch(
+            create_trace_and_dispatch(
                 handler_, trace_info, trade_update, true, order.user_id);
           })) {
       } else {

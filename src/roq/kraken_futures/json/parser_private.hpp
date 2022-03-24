@@ -33,31 +33,31 @@ namespace json {
 
 struct ParserPrivate final {
   struct Handler {
-    virtual void operator()(const server::Trace<Info> &) = 0;
-    virtual void operator()(const server::Trace<Alert> &) = 0;
-    virtual void operator()(const server::Trace<Error> &) = 0;
+    virtual void operator()(const Trace<Info> &) = 0;
+    virtual void operator()(const Trace<Alert> &) = 0;
+    virtual void operator()(const Trace<Error> &) = 0;
 
-    virtual void operator()(const server::Trace<Challenge> &) = 0;
+    virtual void operator()(const Trace<Challenge> &) = 0;
 
-    virtual void operator()(const server::Trace<Subscribed> &) = 0;
+    virtual void operator()(const Trace<Subscribed> &) = 0;
 
-    virtual void operator()(const server::Trace<Heartbeat> &) = 0;
+    virtual void operator()(const Trace<Heartbeat> &) = 0;
 
-    virtual void operator()(const server::Trace<AccountBalancesAndMargins> &) = 0;
-    virtual void operator()(const server::Trace<OpenPositions> &) = 0;
+    virtual void operator()(const Trace<AccountBalancesAndMargins> &) = 0;
+    virtual void operator()(const Trace<OpenPositions> &) = 0;
 
-    virtual void operator()(const server::Trace<OpenOrdersSnapshot> &) = 0;
-    virtual void operator()(const server::Trace<OpenOrders> &) = 0;
+    virtual void operator()(const Trace<OpenOrdersSnapshot> &) = 0;
+    virtual void operator()(const Trace<OpenOrders> &) = 0;
 
-    virtual void operator()(const server::Trace<FillsSnapshot> &) = 0;
-    virtual void operator()(const server::Trace<Fills> &) = 0;
+    virtual void operator()(const Trace<FillsSnapshot> &) = 0;
+    virtual void operator()(const Trace<Fills> &) = 0;
   };
 
   static bool dispatch(
       Handler &handler,
       const std::string_view &message,
       core::json::Buffer &buffer,
-      const server::TraceInfo &trace_info);
+      const TraceInfo &trace_info);
 };
 
 }  // namespace json

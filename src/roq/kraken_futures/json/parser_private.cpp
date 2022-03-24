@@ -17,38 +17,38 @@ namespace json {
 namespace {
 template <typename H>
 void dispatch_info(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Info info(root);
-  server::create_trace_and_dispatch(handler, trace_info, info);
+  create_trace_and_dispatch(handler, trace_info, info);
 }
 
 template <typename H>
 void dispatch_alert(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Alert alert(root);
-  server::create_trace_and_dispatch(handler, trace_info, alert);
+  create_trace_and_dispatch(handler, trace_info, alert);
 }
 
 template <typename H>
 void dispatch_error(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Error error(root);
-  server::create_trace_and_dispatch(handler, trace_info, error);
+  create_trace_and_dispatch(handler, trace_info, error);
 }
 
 template <typename H>
 void dispatch_challenge(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Challenge challenge(root);
-  server::create_trace_and_dispatch(handler, trace_info, challenge);
+  create_trace_and_dispatch(handler, trace_info, challenge);
 }
 
 template <typename H>
@@ -56,20 +56,20 @@ void dispatch_subscribed(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Subscribed subscribed(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, subscribed);
+  create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
 template <typename H>
 void dispatch_heartbeat(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Heartbeat heartbeat(root);
-  server::create_trace_and_dispatch(handler, trace_info, heartbeat);
+  create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
 template <typename H>
@@ -77,11 +77,11 @@ void dispatch_account_balances_and_margins(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   AccountBalancesAndMargins account_balances_and_margins(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
+  create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
 }
 
 template <typename H>
@@ -89,11 +89,11 @@ void dispatch_open_positions(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenPositions open_positions(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, open_positions);
+  create_trace_and_dispatch(handler, trace_info, open_positions);
 }
 
 template <typename H>
@@ -101,11 +101,11 @@ void dispatch_open_orders_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenOrdersSnapshot open_orders_snapshot(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
+  create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
 }
 
 template <typename H>
@@ -113,11 +113,11 @@ void dispatch_open_orders(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   OpenOrders open_orders(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, open_orders);
+  create_trace_and_dispatch(handler, trace_info, open_orders);
 }
 
 template <typename H>
@@ -125,11 +125,11 @@ void dispatch_fills_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   FillsSnapshot fills_snapshot(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, fills_snapshot);
+  create_trace_and_dispatch(handler, trace_info, fills_snapshot);
 }
 
 template <typename H>
@@ -137,11 +137,11 @@ void dispatch_fills(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Fills fills(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, fills);
+  create_trace_and_dispatch(handler, trace_info, fills);
 }
 }  // namespace
 
@@ -149,7 +149,7 @@ bool ParserPrivate::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {

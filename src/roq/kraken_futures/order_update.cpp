@@ -19,13 +19,13 @@ namespace roq {
 namespace kraken_futures {
 
 void OrderUpdate::operator()(
-    const json::OpenOrdersSnapshot &open_orders_snapshot, const server::TraceInfo &trace_info) {
+    const json::OpenOrdersSnapshot &open_orders_snapshot, const TraceInfo &trace_info) {
   for (auto &order : open_orders_snapshot.orders)
     (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
 }
 
 void OrderUpdate::operator()(
-    const json::OpenOrders &open_orders, const server::TraceInfo &trace_info) {
+    const json::OpenOrders &open_orders, const TraceInfo &trace_info) {
   auto &order = open_orders.order;
   // ... just confusing
   auto order_id = std::empty(open_orders.order_id) ? order.order_id : open_orders.order_id;
@@ -140,7 +140,7 @@ void OrderUpdate::operator()(
     const std::string_view &cli_ord_id,
     const json::Reason reason,
     bool is_cancel,
-    const server::TraceInfo &trace_info,
+    const TraceInfo &trace_info,
     bool is_download) {
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);

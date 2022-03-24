@@ -203,7 +203,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -230,7 +230,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
       .account = security_.get_account(),
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -321,7 +321,7 @@ void OrderEntry::create_order(
         [this, user_id = message_info.source, order_id = create_order.order_id](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           uint32_t version = 1;
           create_order_ack(event, user_id, order_id, version);
         });
@@ -329,7 +329,7 @@ void OrderEntry::create_order(
 }
 
 void OrderEntry::create_order_ack(
-    const server::Trace<core::web::Response> &event,
+    const Trace<core::web::Response> &event,
     uint8_t user_id,
     uint32_t order_id,
     uint32_t version) {
@@ -524,14 +524,14 @@ void OrderEntry::modify_order(
          order_id = modify_order.order_id,
          version = modify_order.version]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           modify_order_ack(event, user_id, order_id, version);
         });
   });
 }
 
 void OrderEntry::modify_order_ack(
-    const server::Trace<core::web::Response> &event,
+    const Trace<core::web::Response> &event,
     uint8_t user_id,
     uint32_t order_id,
     uint32_t version) {
@@ -720,14 +720,14 @@ void OrderEntry::cancel_order(
          order_id = cancel_order.order_id,
          version = cancel_order.version]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           cancel_order_ack(event, user_id, order_id, version);
         });
   });
 }
 
 void OrderEntry::cancel_order_ack(
-    const server::Trace<core::web::Response> &event,
+    const Trace<core::web::Response> &event,
     uint8_t user_id,
     uint32_t order_id,
     uint32_t version) {
@@ -904,13 +904,13 @@ void OrderEntry::cancel_all_orders(
     };
     connection_(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      server::Trace event(trace_info, response);
+      Trace event(trace_info, response);
       cancel_all_orders_ack(event);
     });
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response> &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {
@@ -969,12 +969,12 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
       request,
       [this]([[maybe_unused]] auto &request_id, auto &response) {
         auto trace_info = server::create_trace_info();
-        server::Trace event(trace_info, response);
+        Trace event(trace_info, response);
         cancel_all_orders_after_ack(event);
       });
 }
 
-void OrderEntry::cancel_all_orders_after_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::cancel_all_orders_after_ack(const Trace<core::web::Response> &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto &[trace_info, response] = event;
     try {

@@ -29,14 +29,14 @@ class MarketData final : public core::web::ClientSocket::Handler,
                          public json::ParserPublic::Handler {
  public:
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<TopOfBook> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<MarketStatus> &, bool is_last) = 0;
+    virtual void operator()(const Trace<TopOfBook> &, bool is_last) = 0;
     virtual void operator()(
-        const server::Trace<MarketByPriceUpdate> &, bool is_last, bool refresh) = 0;
-    virtual void operator()(const server::Trace<TradeSummary> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<StatisticsUpdate> &, bool is_last) = 0;
+        const Trace<MarketByPriceUpdate> &, bool is_last, bool refresh) = 0;
+    virtual void operator()(const Trace<TradeSummary> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StatisticsUpdate> &, bool is_last) = 0;
   };
 
   MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &, size_t index);
@@ -83,26 +83,26 @@ class MarketData final : public core::web::ClientSocket::Handler,
 
   // json::ParserPublic::Handler
 
-  void operator()(const server::Trace<json::Info> &) override;
-  void operator()(const server::Trace<json::Alert> &) override;
-  void operator()(const server::Trace<json::Error> &) override;
+  void operator()(const Trace<json::Info> &) override;
+  void operator()(const Trace<json::Alert> &) override;
+  void operator()(const Trace<json::Error> &) override;
 
-  void operator()(const server::Trace<json::Subscribed> &) override;
+  void operator()(const Trace<json::Subscribed> &) override;
 
-  void operator()(const server::Trace<json::Heartbeat> &) override;
+  void operator()(const Trace<json::Heartbeat> &) override;
 
-  void operator()(const server::Trace<json::Ticker> &) override;
-  void operator()(const server::Trace<json::BookSnapshot> &) override;
-  void operator()(const server::Trace<json::Book> &) override;
-  void operator()(const server::Trace<json::TradeSnapshot> &) override;
-  void operator()(const server::Trace<json::Trade> &) override;
+  void operator()(const Trace<json::Ticker> &) override;
+  void operator()(const Trace<json::BookSnapshot> &) override;
+  void operator()(const Trace<json::Book> &) override;
+  void operator()(const Trace<json::TradeSnapshot> &) override;
+  void operator()(const Trace<json::Trade> &) override;
 
  private:
   void parse(const std::string_view &message);
 
   void reset();
 
-  void resubscribe(const server::TraceInfo &, const std::string_view &symbol);
+  void resubscribe(const TraceInfo &, const std::string_view &symbol);
 
  private:
   Handler &handler_;

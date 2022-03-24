@@ -17,29 +17,29 @@ namespace json {
 namespace {
 template <typename H>
 void dispatch_info(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Info info(root);
-  server::create_trace_and_dispatch(handler, trace_info, info);
+  create_trace_and_dispatch(handler, trace_info, info);
 }
 
 template <typename H>
 void dispatch_alert(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Alert alert(root);
-  server::create_trace_and_dispatch(handler, trace_info, alert);
+  create_trace_and_dispatch(handler, trace_info, alert);
 }
 
 template <typename H>
 void dispatch_error(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Error error(root);
-  server::create_trace_and_dispatch(handler, trace_info, error);
+  create_trace_and_dispatch(handler, trace_info, error);
 }
 
 template <typename H>
@@ -47,29 +47,29 @@ void dispatch_subscribed(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Subscribed subscribed(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, subscribed);
+  create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
 template <typename H>
 void dispatch_heartbeat(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Heartbeat heartbeat(root);
-  server::create_trace_and_dispatch(handler, trace_info, heartbeat);
+  create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
 template <typename H>
 void dispatch_ticker(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Ticker ticker(root);
-  server::create_trace_and_dispatch(handler, trace_info, ticker);
+  create_trace_and_dispatch(handler, trace_info, ticker);
 }
 
 template <typename H>
@@ -77,20 +77,20 @@ void dispatch_book_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   BookSnapshot book_snapshot(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, book_snapshot);
+  create_trace_and_dispatch(handler, trace_info, book_snapshot);
 }
 
 template <typename H>
 void dispatch_book(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Book book(root);
-  server::create_trace_and_dispatch(handler, trace_info, book);
+  create_trace_and_dispatch(handler, trace_info, book);
 }
 
 template <typename H>
@@ -98,20 +98,20 @@ void dispatch_trade_snapshot(
     H &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   TradeSnapshot trade_snapshot(root, buffer);
-  server::create_trace_and_dispatch(handler, trace_info, trade_snapshot);
+  create_trace_and_dispatch(handler, trace_info, trade_snapshot);
 }
 
 template <typename H>
 void dispatch_trade(
-    H &handler, const std::string_view &message, const server::TraceInfo &trace_info) {
+    H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   Trade trade(root);
-  server::create_trace_and_dispatch(handler, trace_info, trade);
+  create_trace_and_dispatch(handler, trace_info, trade);
 }
 }  // namespace
 
@@ -119,7 +119,7 @@ bool ParserPublic::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::object_t>(root)) {

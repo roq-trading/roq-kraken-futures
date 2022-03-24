@@ -105,7 +105,7 @@ void Rest::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -132,7 +132,7 @@ void Rest::operator()(const core::web::Client::Latency &latency) {
       .account = {},
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -175,13 +175,13 @@ void Rest::get_instruments() {
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           get_instruments_ack(event, sequence);
         });
   });
 }
 
-void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_instruments_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.instruments_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::INSTRUMENTS;
@@ -196,7 +196,7 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
       core::json::Buffer buffer(decode_buffer_);
       auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
       if (std::empty(instruments.error)) {
-        server::Trace event(trace_info, instruments);
+        Trace event(trace_info, instruments);
         (*this)(event);
         download_.check(state);
       } else {
@@ -214,7 +214,7 @@ void Rest::get_instruments_ack(const server::Trace<core::web::Response> &event, 
   });
 }
 
-void Rest::operator()(const server::Trace<json::Instruments> &events) {
+void Rest::operator()(const Trace<json::Instruments> &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));
@@ -255,7 +255,7 @@ void Rest::operator()(const server::Trace<json::Instruments> &events) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    create_trace_and_dispatch(handler_, trace_info, reference_data, true);
   }
   log::info("Instruments {} / {}"sv, counter, std::size(instruments.instruments));
   if (!std::empty(symbols)) {
