@@ -1,11 +1,21 @@
 {
-"name": "OrderEventType",
-"type": "enum",
-"values": [
-	{ "name": "PLACE" },
-	{ "name": "EDIT" },
-	{ "name": "CANCEL" },
-	{ "name": "EXECUTION" },
-	{ "name": "REJECT" }
-]
+  "name": "OrderEventType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "PLACE"
+    },
+    {
+      "name": "EDIT"
+    },
+    {
+      "name": "CANCEL"
+    },
+    {
+      "name": "EXECUTION"
+    },
+    {
+      "name": "REJECT"
+    }
+  ]
 }

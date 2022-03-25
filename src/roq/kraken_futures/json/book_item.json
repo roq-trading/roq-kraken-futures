@@ -1,8 +1,14 @@
 {
-"name": "BookItem",
-"type": "item",
-"values": [
-	{ "name": "price", "type": "double" },
-	{ "name": "qty", "type": "double" }
-]
+  "name": "BookItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "qty",
+      "type": "double"
+    }
+  ]
 }

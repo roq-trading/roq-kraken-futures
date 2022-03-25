@@ -1,8 +1,12 @@
 {
-"name": "RestState",
-"type": "enum",
-"values": [
-	{ "name": "instruments" },
-	{ "name": "done" }
-]
+  "name": "RestState",
+  "type": "enum",
+  "values": [
+    {
+      "name": "instruments"
+    },
+    {
+      "name": "done"
+    }
+  ]
 }

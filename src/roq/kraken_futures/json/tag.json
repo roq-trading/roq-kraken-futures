@@ -1,10 +1,18 @@
 {
-"name": "Tag",
-"type": "enum",
-"values": [
-	{ "name": "month" },
-	{ "name": "quarter" },
-	{ "name": "semiannual" },
-	{ "name": "perpetual" }
-]
+  "name": "Tag",
+  "type": "enum",
+  "values": [
+    {
+      "name": "month"
+    },
+    {
+      "name": "quarter"
+    },
+    {
+      "name": "semiannual"
+    },
+    {
+      "name": "perpetual"
+    }
+  ]
 }

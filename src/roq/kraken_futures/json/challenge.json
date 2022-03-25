@@ -1,8 +1,14 @@
 {
-"name": "Challenge",
-"type": "item",
-"values": [
-	{ "name": "event", "type": "Event" },
-	{ "name": "message", "type": "std::string_view" }
-]
+  "name": "Challenge",
+  "type": "item",
+  "values": [
+    {
+      "name": "event",
+      "type": "Event"
+    },
+    {
+      "name": "message",
+      "type": "std::string_view"
+    }
+  ]
 }

@@ -1,8 +1,14 @@
 {
-"name": "Alert",
-"type": "item",
-"values": [
-	{ "name": "event", "type": "Event" },
-	{ "name": "message", "type": "std::string_view" }
-]
+  "name": "Alert",
+  "type": "item",
+  "values": [
+    {
+      "name": "event",
+      "type": "Event"
+    },
+    {
+      "name": "message",
+      "type": "std::string_view"
+    }
+  ]
 }

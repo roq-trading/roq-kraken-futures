@@ -1,8 +1,14 @@
 {
-"name": "CancelAllAfterAckStatus",
-"type": "item",
-"values": [
-	{ "name": "currentTime", "type": "std::chrono::milliseconds" },
-	{ "name": "triggerTime", "type": "std::chrono::milliseconds" }
-]
+  "name": "CancelAllAfterAckStatus",
+  "type": "item",
+  "values": [
+    {
+      "name": "currentTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "triggerTime",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

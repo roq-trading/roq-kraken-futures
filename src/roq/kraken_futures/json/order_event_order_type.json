@@ -1,11 +1,21 @@
 {
-"name": "OrderEventOrderType",
-"type": "enum",
-"values": [
-	{ "name": "lmt" },
-	{ "name": "mkt" },
-	{ "name": "stp" },
-	{ "name": "take_profit" },
-	{ "name": "ioc" }
-]
+  "name": "OrderEventOrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "lmt"
+    },
+    {
+      "name": "mkt"
+    },
+    {
+      "name": "stp"
+    },
+    {
+      "name": "take_profit"
+    },
+    {
+      "name": "ioc"
+    }
+  ]
 }

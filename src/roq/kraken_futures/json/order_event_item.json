@@ -1,17 +1,50 @@
 {
-"name": "OrderEventItem",
-"type": "item",
-"values": [
-	{ "name": "orderId", "type": "std::string_view" },
-	{ "name": "cliOrdId", "type": "std::string_view" },
-	{ "name": "type", "type": "OrderEventOrderType" },
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "side", "type": "Side" },
-	{ "name": "quantity", "type": "double" },
-	{ "name": "filled", "type": "double" },
-	{ "name": "limitPrice", "type": "double" },
-	{ "name": "reduceOnly", "type": "bool" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
-	{ "name": "lastUpdateTimestamp", "type": "std::chrono::milliseconds" }
-]
+  "name": "OrderEventItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "orderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cliOrdId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "type",
+      "type": "OrderEventOrderType"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "quantity",
+      "type": "double"
+    },
+    {
+      "name": "filled",
+      "type": "double"
+    },
+    {
+      "name": "limitPrice",
+      "type": "double"
+    },
+    {
+      "name": "reduceOnly",
+      "type": "bool"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "lastUpdateTimestamp",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

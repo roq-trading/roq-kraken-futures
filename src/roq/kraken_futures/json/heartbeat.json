@@ -1,8 +1,14 @@
 {
-"name": "Heartbeat",
-"type": "item",
-"values": [
-	{ "name": "feed", "type": "Feed" },
-	{ "name": "time", "type": "std::chrono::milliseconds" }
-]
+  "name": "Heartbeat",
+  "type": "item",
+  "values": [
+    {
+      "name": "feed",
+      "type": "Feed"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

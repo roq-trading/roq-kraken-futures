@@ -1,10 +1,22 @@
 {
-"name": "SendOrder",
-"type": "comp",
-"values": [
-	{ "name": "result", "type": "Result" },
-	{ "name": "error", "type": "std::string_view" },
-	{ "name": "sendStatus", "type": "SendStatus" },
-	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
-]
+  "name": "SendOrder",
+  "type": "comp",
+  "values": [
+    {
+      "name": "result",
+      "type": "Result"
+    },
+    {
+      "name": "error",
+      "type": "std::string_view"
+    },
+    {
+      "name": "sendStatus",
+      "type": "SendStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

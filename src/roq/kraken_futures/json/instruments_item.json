@@ -1,21 +1,68 @@
 {
-"name": "InstrumentsItem",
-"type": "item",
-"values": [
-	{ "name": "symbol", "type": "std::string_view" },
-	{ "name": "type", "type": "std::string_view", "comment": "XXX can't use enum due to space" },
-	{ "name": "underlying", "type": "std::string_view" },
-	{ "name": "lastTradingTime", "type": "std::chrono::milliseconds" },
-	{ "name": "tickSize", "type": "double" },
-	{ "name": "contractSize", "type": "double" },
-	{ "name": "tradeable", "type": "bool" },
-	{ "name": "marginLevels" },
-	{ "name": "fundingRateCoefficient", "type": "double" },
-	{ "name": "maxRelativeFundingRate", "type": "double" },
-	{ "name": "retailMarginLevels" },
-	{ "name": "isin", "type": "std::string_view", "comment": "undoc" },
-	{ "name": "category", "type": "std::string_view", "comment": "undoc" },
-	{ "name": "tags", "comment": "undoc" },
-	{ "name": "contractValueTradePrecision", "type": "int32_t", "comment": "undoc" }
-]
+  "name": "InstrumentsItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "type",
+      "type": "std::string_view",
+      "comment": "XXX can't use enum due to space"
+    },
+    {
+      "name": "underlying",
+      "type": "std::string_view"
+    },
+    {
+      "name": "lastTradingTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "tickSize",
+      "type": "double"
+    },
+    {
+      "name": "contractSize",
+      "type": "double"
+    },
+    {
+      "name": "tradeable",
+      "type": "bool"
+    },
+    {
+      "name": "marginLevels"
+    },
+    {
+      "name": "fundingRateCoefficient",
+      "type": "double"
+    },
+    {
+      "name": "maxRelativeFundingRate",
+      "type": "double"
+    },
+    {
+      "name": "retailMarginLevels"
+    },
+    {
+      "name": "isin",
+      "type": "std::string_view",
+      "comment": "undoc"
+    },
+    {
+      "name": "category",
+      "type": "std::string_view",
+      "comment": "undoc"
+    },
+    {
+      "name": "tags",
+      "comment": "undoc"
+    },
+    {
+      "name": "contractValueTradePrecision",
+      "type": "int32_t",
+      "comment": "undoc"
+    }
+  ]
 }

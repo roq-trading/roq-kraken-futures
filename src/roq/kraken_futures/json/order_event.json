@@ -1,19 +1,64 @@
 {
-"name": "OrderEvent",
-"type": "item",
-"values": [
-	{ "name": "order", "type": "OrderEventItem" },
-	{ "name": "old", "type": "OrderEventItem" },
-	{ "raw": "new", "name": "new_", "type": "OrderEventItem" },
-	{ "name": "reducedQuantity", "type": "double" },
-	{ "name": "type", "type": "OrderEventType" },
-	{ "name": "uid", "type": "std::string_view", "comment": "cancelorder" },
-	{ "name": "reason", "type": "std::string_view", "comment": "editorder" },
-	{ "name": "executionId", "type": "std::string_view", "comment": "execution" },
-	{ "name": "amount", "type": "double", "comment": "execution" },
-	{ "name": "price", "type": "double", "comment": "execution" },
-	{ "name": "orderPriorExecution", "type": "OrderEventItem" },
-	{ "name": "orderPriorEdit", "type": "OrderEventItem" },
-	{ "name": "takerReducedQuantity", "type": "double" }
-]
+  "name": "OrderEvent",
+  "type": "item",
+  "values": [
+    {
+      "name": "order",
+      "type": "OrderEventItem"
+    },
+    {
+      "name": "old",
+      "type": "OrderEventItem"
+    },
+    {
+      "raw": "new",
+      "name": "new_",
+      "type": "OrderEventItem"
+    },
+    {
+      "name": "reducedQuantity",
+      "type": "double"
+    },
+    {
+      "name": "type",
+      "type": "OrderEventType"
+    },
+    {
+      "name": "uid",
+      "type": "std::string_view",
+      "comment": "cancelorder"
+    },
+    {
+      "name": "reason",
+      "type": "std::string_view",
+      "comment": "editorder"
+    },
+    {
+      "name": "executionId",
+      "type": "std::string_view",
+      "comment": "execution"
+    },
+    {
+      "name": "amount",
+      "type": "double",
+      "comment": "execution"
+    },
+    {
+      "name": "price",
+      "type": "double",
+      "comment": "execution"
+    },
+    {
+      "name": "orderPriorExecution",
+      "type": "OrderEventItem"
+    },
+    {
+      "name": "orderPriorEdit",
+      "type": "OrderEventItem"
+    },
+    {
+      "name": "takerReducedQuantity",
+      "type": "double"
+    }
+  ]
 }

@@ -1,18 +1,55 @@
 {
-"name": "Order",
-"type": "item",
-"values": [
-	{ "name": "instrument", "type": "std::string_view" },
-	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "last_update_time", "type": "std::chrono::milliseconds" },
-	{ "name": "qty", "type": "double" },
-	{ "name": "filled", "type": "double" },
-	{ "name": "limit_price", "type": "double" },
-	{ "name": "stop_price", "type": "double" },
-	{ "name": "type", "type": "OrderType" },
-	{ "name": "order_id", "type": "std::string_view" },
-	{ "name": "cli_ord_id", "type": "std::string_view" },
-	{ "name": "direction", "type": "int32_t", "default": "-1" },
-	{ "name": "reduce_only", "type": "bool" }
-]
+  "name": "Order",
+  "type": "item",
+  "values": [
+    {
+      "name": "instrument",
+      "type": "std::string_view"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "last_update_time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "qty",
+      "type": "double"
+    },
+    {
+      "name": "filled",
+      "type": "double"
+    },
+    {
+      "name": "limit_price",
+      "type": "double"
+    },
+    {
+      "name": "stop_price",
+      "type": "double"
+    },
+    {
+      "name": "type",
+      "type": "OrderType"
+    },
+    {
+      "name": "order_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cli_ord_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "direction",
+      "type": "int32_t",
+      "default": "-1"
+    },
+    {
+      "name": "reduce_only",
+      "type": "bool"
+    }
+  ]
 }

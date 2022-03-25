@@ -1,8 +1,12 @@
 {
-"name": "OrderType",
-"type": "enum",
-"values": [
-	{ "name": "limit" },
-	{ "name": "stop" }
-]
+  "name": "OrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "limit"
+    },
+    {
+      "name": "stop"
+    }
+  ]
 }

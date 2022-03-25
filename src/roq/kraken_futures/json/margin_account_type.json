@@ -1,9 +1,15 @@
 {
-"name": "MarginAccountType",
-"type": "enum",
-"values": [
-	{ "name": "holding" },
-	{ "name": "inversed" },
-	{ "name": "vanilla" }
-]
+  "name": "MarginAccountType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "holding"
+    },
+    {
+      "name": "inversed"
+    },
+    {
+      "name": "vanilla"
+    }
+  ]
 }

@@ -1,11 +1,25 @@
 {
-"name": "CancelAllStatus",
-"type": "comp",
-"values": [
-	{ "name": "receivedTime", "type": "std::chrono::milliseconds" },
-	{ "name": "cancelOnly", "type": "std::string_view" },
-	{ "name": "status", "type": "Status" },
-	{ "name": "cancelledOrders" },
-	{ "name": "orderEvents", "type": "std::span<OrderEvent>" }
-]
+  "name": "CancelAllStatus",
+  "type": "comp",
+  "values": [
+    {
+      "name": "receivedTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "cancelOnly",
+      "type": "std::string_view"
+    },
+    {
+      "name": "status",
+      "type": "Status"
+    },
+    {
+      "name": "cancelledOrders"
+    },
+    {
+      "name": "orderEvents",
+      "type": "std::span<OrderEvent>"
+    }
+  ]
 }

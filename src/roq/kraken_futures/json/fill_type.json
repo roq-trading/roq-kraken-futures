@@ -1,14 +1,30 @@
 {
-"name": "FillType",
-"type": "enum",
-"values": [
-	{ "name": "maker" },
-	{ "name": "taker" },
-	{ "name": "liquidation" },
-	{ "name": "assignee" },
-	{ "name": "assignor" },
-	{ "name": "unwindBankrupt" },
-	{ "name": "unwindCounterparty" },
-	{ "name": "takerAfterEdit" }
-]
+  "name": "FillType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "maker"
+    },
+    {
+      "name": "taker"
+    },
+    {
+      "name": "liquidation"
+    },
+    {
+      "name": "assignee"
+    },
+    {
+      "name": "assignor"
+    },
+    {
+      "name": "unwindBankrupt"
+    },
+    {
+      "name": "unwindCounterparty"
+    },
+    {
+      "name": "takerAfterEdit"
+    }
+  ]
 }

@@ -1,18 +1,54 @@
 {
-"name": "Fill",
-"type": "item",
-"values": [
-	{ "name": "instrument", "type": "std::string_view" },
-	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "price", "type": "double" },
-	{ "name": "seq", "type": "int64_t" },
-	{ "name": "buy", "type": "bool" },
-	{ "name": "qty", "type": "double" },
-	{ "name": "order_id", "type": "std::string_view" },
-	{ "name": "cli_ord_id", "type": "std::string_view" },
-	{ "name": "fill_id", "type": "std::string_view" },
-	{ "name": "fill_type", "type": "FillType" },
-	{ "name": "fee_paid", "type": "double" },
-	{ "name": "fee_currency", "type": "std::string_view" }
-]
+  "name": "Fill",
+  "type": "item",
+  "values": [
+    {
+      "name": "instrument",
+      "type": "std::string_view"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "seq",
+      "type": "int64_t"
+    },
+    {
+      "name": "buy",
+      "type": "bool"
+    },
+    {
+      "name": "qty",
+      "type": "double"
+    },
+    {
+      "name": "order_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cli_ord_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "fill_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "fill_type",
+      "type": "FillType"
+    },
+    {
+      "name": "fee_paid",
+      "type": "double"
+    },
+    {
+      "name": "fee_currency",
+      "type": "std::string_view"
+    }
+  ]
 }

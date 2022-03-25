@@ -1,10 +1,22 @@
 {
-"name": "EditOrder",
-"type": "comp",
-"values": [
-	{ "name": "result", "type": "Result" },
-	{ "name": "error", "type": "std::string_view" },
-	{ "name": "editStatus", "type": "EditStatus" },
-	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
-]
+  "name": "EditOrder",
+  "type": "comp",
+  "values": [
+    {
+      "name": "result",
+      "type": "Result"
+    },
+    {
+      "name": "error",
+      "type": "std::string_view"
+    },
+    {
+      "name": "editStatus",
+      "type": "EditStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

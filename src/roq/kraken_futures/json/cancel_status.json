@@ -1,11 +1,26 @@
 {
-"name": "CancelStatus",
-"type": "comp",
-"values": [
-	{ "name": "order_id", "type": "std::string_view" },
-	{ "name": "cliOrdId", "type": "std::string_view" },
-	{ "name": "status", "type": "Status" },
-	{ "name": "receivedTime", "type": "std::chrono::milliseconds" },
-	{ "name": "orderEvents", "type": "std::span<OrderEvent>" }
-]
+  "name": "CancelStatus",
+  "type": "comp",
+  "values": [
+    {
+      "name": "order_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cliOrdId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "status",
+      "type": "Status"
+    },
+    {
+      "name": "receivedTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "orderEvents",
+      "type": "std::span<OrderEvent>"
+    }
+  ]
 }

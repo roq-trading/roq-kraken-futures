@@ -1,15 +1,42 @@
 {
-"name": "RestError",
-"type": "comp",
-"values": [
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
-	{ "name": "path", "type": "std::string_view" },
-	{ "name": "status", "comment": "DO NOT PARSE! sometimes int, sometimes string" }, 
-	{ "name": "error", "type": "std::string_view" },
-	{ "name": "message", "type": "std::string_view" },
-	{ "name": "requestId", "type": "std::string_view" },
-	{ "name": "result", "type": "std::string_view" },
-	{ "name": "errors", "type": "std::span<RestErrorItem>" },
-	{ "name": "serverTime", "type": "std::chrono::milliseconds" }
-]
+  "name": "RestError",
+  "type": "comp",
+  "values": [
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "path",
+      "type": "std::string_view"
+    },
+    {
+      "name": "status",
+      "comment": "DO NOT PARSE! sometimes int, sometimes string"
+    },
+    {
+      "name": "error",
+      "type": "std::string_view"
+    },
+    {
+      "name": "message",
+      "type": "std::string_view"
+    },
+    {
+      "name": "requestId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "result",
+      "type": "std::string_view"
+    },
+    {
+      "name": "errors",
+      "type": "std::span<RestErrorItem>"
+    },
+    {
+      "name": "serverTime",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

@@ -1,9 +1,18 @@
 {
-"name": "FillsSnapshot",
-"type": "comp",
-"values": [
-	{ "name": "feed", "type": "Feed" },
-	{ "name": "account", "type": "std::string_view" },
-	{ "name": "fills", "type": "std::span<Fill>" }
-]
+  "name": "FillsSnapshot",
+  "type": "comp",
+  "values": [
+    {
+      "name": "feed",
+      "type": "Feed"
+    },
+    {
+      "name": "account",
+      "type": "std::string_view"
+    },
+    {
+      "name": "fills",
+      "type": "std::span<Fill>"
+    }
+  ]
 }

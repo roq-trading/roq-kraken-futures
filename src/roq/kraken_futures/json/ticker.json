@@ -1,31 +1,107 @@
 {
-"name": "Ticker",
-"type": "item",
-"values": [
-	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "feed", "type": "Feed" },
-	{ "name": "product_id", "type": "std::string_view" },
-	{ "name": "bid", "type": "double" },
-	{ "name": "ask", "type": "double" },
-	{ "name": "bid_size", "type": "double" },
-	{ "name": "ask_size", "type": "double" },
-	{ "name": "volume", "type": "double" },
-	{ "name": "dtm", "type": "double", "comment": "XXX what is this?" },
-	{ "name": "leverage", "type": "std::string_view" },
-	{ "name": "index", "type": "double" },
-	{ "name": "premium", "type": "double" },
-	{ "name": "last", "type": "double" },
-	{ "name": "change", "type": "double" },
-	{ "name": "funding_rate", "type": "double" },
-	{ "name": "funding_rate_prediction", "type": "double" },
-	{ "name": "suspended", "type": "bool" },
-	{ "name": "tag", "type": "Tag" },
-	{ "name": "pair", "type": "std::string_view" },
-	{ "name": "openInterest", "type": "double" },
-	{ "name": "markPrice", "type": "double" },
-	{ "name": "maturityTime", "type": "std::chrono::milliseconds" },
-	{ "name": "relative_funding_rate", "type": "double" },
-	{ "name": "relative_funding_rate_prediction", "type": "double" },
-	{ "name": "next_funding_rate_time", "type": "std::chrono::milliseconds" }
-]
+  "name": "Ticker",
+  "type": "item",
+  "values": [
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "feed",
+      "type": "Feed"
+    },
+    {
+      "name": "product_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "bid",
+      "type": "double"
+    },
+    {
+      "name": "ask",
+      "type": "double"
+    },
+    {
+      "name": "bid_size",
+      "type": "double"
+    },
+    {
+      "name": "ask_size",
+      "type": "double"
+    },
+    {
+      "name": "volume",
+      "type": "double"
+    },
+    {
+      "name": "dtm",
+      "type": "double",
+      "comment": "XXX what is this?"
+    },
+    {
+      "name": "leverage",
+      "type": "std::string_view"
+    },
+    {
+      "name": "index",
+      "type": "double"
+    },
+    {
+      "name": "premium",
+      "type": "double"
+    },
+    {
+      "name": "last",
+      "type": "double"
+    },
+    {
+      "name": "change",
+      "type": "double"
+    },
+    {
+      "name": "funding_rate",
+      "type": "double"
+    },
+    {
+      "name": "funding_rate_prediction",
+      "type": "double"
+    },
+    {
+      "name": "suspended",
+      "type": "bool"
+    },
+    {
+      "name": "tag",
+      "type": "Tag"
+    },
+    {
+      "name": "pair",
+      "type": "std::string_view"
+    },
+    {
+      "name": "openInterest",
+      "type": "double"
+    },
+    {
+      "name": "markPrice",
+      "type": "double"
+    },
+    {
+      "name": "maturityTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "relative_funding_rate",
+      "type": "double"
+    },
+    {
+      "name": "relative_funding_rate_prediction",
+      "type": "double"
+    },
+    {
+      "name": "next_funding_rate_time",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
 }

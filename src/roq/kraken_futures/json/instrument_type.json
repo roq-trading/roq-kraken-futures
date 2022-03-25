@@ -1,8 +1,13 @@
 {
-"name": "InstrumentType",
-"type": "enum",
-"values": [
-	{ "name": "futures_inverse" },
-	{ "name": "spot index", "comment": "XXX this does not work" }
-]
+  "name": "InstrumentType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "futures_inverse"
+    },
+    {
+      "name": "spot index",
+      "comment": "XXX this does not work"
+    }
+  ]
 }

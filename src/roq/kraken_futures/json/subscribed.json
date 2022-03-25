@@ -1,9 +1,18 @@
 {
-"name": "Subscribed",
-"type": "comp",
-"values": [
-	{ "name": "event", "type": "Event" },
-	{ "name": "feed", "type": "Feed" },
-	{ "name": "product_ids", "type": "std::span<ProductID>" }
-]
+  "name": "Subscribed",
+  "type": "comp",
+  "values": [
+    {
+      "name": "event",
+      "type": "Event"
+    },
+    {
+      "name": "feed",
+      "type": "Feed"
+    },
+    {
+      "name": "product_ids",
+      "type": "std::span<ProductID>"
+    }
+  ]
 }
