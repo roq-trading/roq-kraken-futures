@@ -21,7 +21,7 @@ namespace kraken_futures {
 
 namespace {
 const auto NAME = "ex"sv;
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::ORDER,
     SupportType::TRADE,
     SupportType::POSITION,
@@ -195,7 +195,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
@@ -366,6 +366,7 @@ void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
                 .external_order_id = item.order_id,
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
+                .update_type = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {
@@ -413,6 +414,7 @@ void DropCopy::operator()(const Trace<json::Fills> &event) {
                 .external_order_id = item.order_id,
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
+                .update_type = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {

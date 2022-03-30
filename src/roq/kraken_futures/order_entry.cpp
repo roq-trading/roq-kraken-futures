@@ -30,7 +30,7 @@ namespace kraken_futures {
 namespace {
 const auto NAME = "om"sv;
 
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -135,7 +135,7 @@ namespace {
 json::OrderEventOrderType compute_order_type(
     const auto &order_type,
     const auto &time_in_force,
-    const auto &execution_instruction,
+    const auto &execution_instructions,
     const auto &stop_price) {
   if (time_in_force == TimeInForce::IOC)
     return json::OrderEventOrderType::IOC;
@@ -153,10 +153,10 @@ json::OrderEventOrderType compute_order_type(
       break;
   }
   throw RuntimeError(
-      "Unexpected combination of order_type={}, time_in_force={}, execution_instruction={}, stop_price={}"sv,
+      "Unexpected combination of order_type={}, time_in_force={}, execution_instructions={}, stop_price={}"sv,
       order_type,
       time_in_force,
-      execution_instruction,
+      execution_instructions,
       stop_price);
 }
 }  // namespace
@@ -197,7 +197,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
@@ -247,10 +247,11 @@ void OrderEntry::create_order(
     auto order_type = compute_order_type(
         create_order.order_type,
         create_order.time_in_force,
-        create_order.execution_instruction,
+        create_order.execution_instructions,
         create_order.stop_price);
     auto side = json::map(create_order.side);
-    auto reduce_only = create_order.execution_instruction == ExecutionInstruction::DO_NOT_INCREASE;
+    auto reduce_only =
+        create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
     std::string query;
     if (!std::isnan(create_order.price)) {
       if (std::isnan(create_order.stop_price)) {
