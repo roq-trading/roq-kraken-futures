@@ -102,6 +102,10 @@
     {
       "name": "next_funding_rate_time",
       "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "post_only",
+      "type": "bool"
     }
   ]
 }
