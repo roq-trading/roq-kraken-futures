@@ -30,7 +30,7 @@ namespace kraken_futures {
 namespace {
 const auto NAME = "om"sv;
 
-const Mask<SupportType> SUPPORTS{
+const Mask SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
