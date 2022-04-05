@@ -30,7 +30,7 @@ auto create_order_entry(
     const std::string_view &master_account) {
   R result;
   for (auto &iter : security) {
-    auto master = iter.first.compare(master_account) == 0;
+    auto master = iter.first == master_account;
     result.try_emplace(
         iter.first,
         std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared, master));
