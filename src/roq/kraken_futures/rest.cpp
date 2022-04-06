@@ -201,7 +201,7 @@ void Rest::get_instruments_ack(const Trace<core::web::Response> &event, uint32_t
         download_.check(state);
       } else {
         log::warn("instruments={}"sv, instruments);
-        if (utils::compare(instruments.error, "Unavailable"sv) == 0) {
+        if (instruments.error == "Unavailable"sv) {
           download_.retry(state);
         } else {
           log::fatal("Unexpected"sv);

@@ -124,7 +124,7 @@ OrderStatus compute_order_status_2(
     case json::Reason::EDITED_BY_USER:
       break;
   }
-  if (utils::compare(quantity, filled) == 0)
+  if (utils::is_equal(quantity, filled))
     return OrderStatus::COMPLETED;
   // note! is_cancel is also true when completed -- so wait until other options have been exhausted
   if (is_cancel)

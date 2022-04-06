@@ -436,7 +436,7 @@ class OrderUpdate final {
   }
 
   OrderStatus compute_order_status(json::Status status, double quantity, double filled) {
-    if (utils::compare(quantity, filled) == 0)
+    if (utils::is_equal(quantity, filled))
       return OrderStatus::COMPLETED;
     return compute_order_status(status);
   }
