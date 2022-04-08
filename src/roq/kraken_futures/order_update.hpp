@@ -45,45 +45,47 @@ class OrderUpdate final {
     using namespace std::literals;
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
-      case json::Status::UNDEFINED:
-      case json::Status::UNKNOWN:
-      case json::Status::EDITED:
-      case json::Status::FILLED:  // note! have only seen event type execution
-      case json::Status::CANCELLED:
-      case json::Status::NO_ORDERS_TO_CANCEL:
-      case json::Status::NOT_FOUND:
+      using enum json::Status::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
+      case EDITED:
+      case FILLED:  // note! have only seen event type execution
+      case CANCELLED:
+      case NO_ORDERS_TO_CANCEL:
+      case NOT_FOUND:
         throw RuntimeError("Unexpected: status={}"sv, send_status.status);
         break;
-      case json::Status::INVALID_ORDER_TYPE:
-      case json::Status::INVALID_SIDE:
-      case json::Status::INVALID_PRICE:
-      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
-      case json::Status::SELF_FILL:
-      case json::Status::TOO_MANY_SMALL_ORDERS:
-      case json::Status::MAX_POSITION_VIOLATION:
-      case json::Status::MARKET_SUSPENDED:
-      case json::Status::MARKET_INACTIVE:
-      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
-      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
-      case json::Status::OUTSIDE_PRICE_COLLAR:
-      case json::Status::POST_WOULD_EXECUTE:
-      case json::Status::IOC_WOULD_NOT_EXECUTE:
-      case json::Status::WOULD_CAUSE_LIQUIDATION:
-      case json::Status::WOULD_NOT_REDUCE_POSITION:
+      case INVALID_ORDER_TYPE:
+      case INVALID_SIDE:
+      case INVALID_PRICE:
+      case INSUFFICIENT_AVAILABLE_FUNDS:
+      case SELF_FILL:
+      case TOO_MANY_SMALL_ORDERS:
+      case MAX_POSITION_VIOLATION:
+      case MARKET_SUSPENDED:
+      case MARKET_INACTIVE:
+      case CLIENT_ORDER_ID_ALREADY_EXIST:
+      case CLIENT_ORDER_ID_TOO_LONG:
+      case OUTSIDE_PRICE_COLLAR:
+      case POST_WOULD_EXECUTE:
+      case IOC_WOULD_NOT_EXECUTE:
+      case WOULD_CAUSE_LIQUIDATION:
+      case WOULD_NOT_REDUCE_POSITION:
         reject(Error::UNKNOWN, send_status.status.as_text());
         break;
-      case json::Status::PLACED: {
+      case PLACED: {
         if (std::size(send_status.order_events) != 1)
           throw RuntimeError("Unexpected: size={}"sv, std::size(send_status.order_events));
         auto &order_event = send_status.order_events[0];
         switch (order_event.type) {
-          case json::OrderEventType::UNDEFINED:
-          case json::OrderEventType::UNKNOWN:
-          case json::OrderEventType::EDIT:
-          case json::OrderEventType::CANCEL:
+          using enum json::OrderEventType::type_t;
+          case UNDEFINED:
+          case UNKNOWN:
+          case EDIT:
+          case CANCEL:
             throw RuntimeError("Unexpected: type={}"sv, order_event.type);
             break;
-          case json::OrderEventType::PLACE: {
+          case PLACE: {
             auto &order_ = order_event.order;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
@@ -120,7 +122,7 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
-          case json::OrderEventType::EXECUTION: {
+          case EXECUTION: {
             auto &order_ = order_event.order_prior_execution;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
@@ -160,7 +162,7 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
-          case json::OrderEventType::REJECT: {
+          case REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
             break;
           }
@@ -179,45 +181,47 @@ class OrderUpdate final {
     using namespace std::literals;
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
-      case json::Status::UNDEFINED:
-      case json::Status::UNKNOWN:
-      case json::Status::PLACED:
-      case json::Status::FILLED:
-      case json::Status::CANCELLED:
-      case json::Status::NO_ORDERS_TO_CANCEL:
+      using enum json::Status::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
+      case PLACED:
+      case FILLED:
+      case CANCELLED:
+      case NO_ORDERS_TO_CANCEL:
         throw RuntimeError("Unexpected: status={}"sv, edit_status.status);
         break;
-      case json::Status::NOT_FOUND:
-      case json::Status::INVALID_ORDER_TYPE:
-      case json::Status::INVALID_SIDE:
-      case json::Status::INVALID_PRICE:
-      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
-      case json::Status::SELF_FILL:
-      case json::Status::TOO_MANY_SMALL_ORDERS:
-      case json::Status::MAX_POSITION_VIOLATION:
-      case json::Status::MARKET_SUSPENDED:
-      case json::Status::MARKET_INACTIVE:
-      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
-      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
-      case json::Status::OUTSIDE_PRICE_COLLAR:
-      case json::Status::POST_WOULD_EXECUTE:
-      case json::Status::IOC_WOULD_NOT_EXECUTE:
-      case json::Status::WOULD_CAUSE_LIQUIDATION:
-      case json::Status::WOULD_NOT_REDUCE_POSITION:
+      case NOT_FOUND:
+      case INVALID_ORDER_TYPE:
+      case INVALID_SIDE:
+      case INVALID_PRICE:
+      case INSUFFICIENT_AVAILABLE_FUNDS:
+      case SELF_FILL:
+      case TOO_MANY_SMALL_ORDERS:
+      case MAX_POSITION_VIOLATION:
+      case MARKET_SUSPENDED:
+      case MARKET_INACTIVE:
+      case CLIENT_ORDER_ID_ALREADY_EXIST:
+      case CLIENT_ORDER_ID_TOO_LONG:
+      case OUTSIDE_PRICE_COLLAR:
+      case POST_WOULD_EXECUTE:
+      case IOC_WOULD_NOT_EXECUTE:
+      case WOULD_CAUSE_LIQUIDATION:
+      case WOULD_NOT_REDUCE_POSITION:
         reject(Error::UNKNOWN, edit_status.status.as_text());
         break;
-      case json::Status::EDITED: {
+      case EDITED: {
         if (std::size(edit_status.order_events) != 1)
           throw RuntimeError("Unexpected: size={}"sv, std::size(edit_status.order_events));
         auto &order_event = edit_status.order_events[0];
         switch (order_event.type) {
-          case json::OrderEventType::UNDEFINED:
-          case json::OrderEventType::UNKNOWN:
-          case json::OrderEventType::PLACE:
-          case json::OrderEventType::CANCEL:
+          using enum json::OrderEventType::type_t;
+          case UNDEFINED:
+          case UNKNOWN:
+          case PLACE:
+          case CANCEL:
             throw RuntimeError("Unexpected: type={}"sv, order_event.type);
             break;
-          case json::OrderEventType::EDIT: {
+          case EDIT: {
             auto &new_order = order_event.new_;
             auto symbol = std::string{new_order.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
@@ -254,13 +258,13 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
-          case json::OrderEventType::EXECUTION: {
+          case EXECUTION: {
             // XXX HANS FIX THIS
             log::warn("order_event={}"sv, order_event);
             log::fatal("Unexpected"sv);
             break;
           }
-          case json::OrderEventType::REJECT: {
+          case REJECT: {
             auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0
                              ? Error::MODIFY_HAS_NO_EFFECT
                              : Error::UNKNOWN;
@@ -282,44 +286,46 @@ class OrderUpdate final {
     using namespace std::literals;
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
-      case json::Status::UNDEFINED:
-      case json::Status::UNKNOWN:
-      case json::Status::PLACED:
-      case json::Status::EDITED:
-      case json::Status::FILLED:
+      using enum json::Status::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
+      case PLACED:
+      case EDITED:
+      case FILLED:
         throw RuntimeError("Unexpected: status={}"sv, cancel_status.status);
         break;
-      case json::Status::NO_ORDERS_TO_CANCEL:
-      case json::Status::INVALID_ORDER_TYPE:
-      case json::Status::INVALID_SIDE:
-      case json::Status::INVALID_PRICE:
-      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
-      case json::Status::SELF_FILL:
-      case json::Status::TOO_MANY_SMALL_ORDERS:
-      case json::Status::MAX_POSITION_VIOLATION:
-      case json::Status::MARKET_SUSPENDED:
-      case json::Status::MARKET_INACTIVE:
-      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
-      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
-      case json::Status::OUTSIDE_PRICE_COLLAR:
-      case json::Status::POST_WOULD_EXECUTE:
-      case json::Status::IOC_WOULD_NOT_EXECUTE:
-      case json::Status::WOULD_CAUSE_LIQUIDATION:
-      case json::Status::WOULD_NOT_REDUCE_POSITION:
+      case NO_ORDERS_TO_CANCEL:
+      case INVALID_ORDER_TYPE:
+      case INVALID_SIDE:
+      case INVALID_PRICE:
+      case INSUFFICIENT_AVAILABLE_FUNDS:
+      case SELF_FILL:
+      case TOO_MANY_SMALL_ORDERS:
+      case MAX_POSITION_VIOLATION:
+      case MARKET_SUSPENDED:
+      case MARKET_INACTIVE:
+      case CLIENT_ORDER_ID_ALREADY_EXIST:
+      case CLIENT_ORDER_ID_TOO_LONG:
+      case OUTSIDE_PRICE_COLLAR:
+      case POST_WOULD_EXECUTE:
+      case IOC_WOULD_NOT_EXECUTE:
+      case WOULD_CAUSE_LIQUIDATION:
+      case WOULD_NOT_REDUCE_POSITION:
         reject(Error::UNKNOWN, cancel_status.status.as_text());
         break;
-      case json::Status::CANCELLED: {
+      case CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
           throw RuntimeError("Unexpected: size={}"sv, std::size(cancel_status.order_events));
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
-          case json::OrderEventType::UNDEFINED:
-          case json::OrderEventType::UNKNOWN:
-          case json::OrderEventType::PLACE:
-          case json::OrderEventType::EDIT:
+          using enum json::OrderEventType::type_t;
+          case UNDEFINED:
+          case UNKNOWN:
+          case PLACE:
+          case EDIT:
             throw RuntimeError("Unexpected: type={}"sv, order_event.type);
             break;
-          case json::OrderEventType::CANCEL: {
+          case CANCEL: {
             auto &order_ = order_event.new_;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
@@ -355,20 +361,20 @@ class OrderUpdate final {
             accept(std::as_const(order_update));
             break;
           }
-          case json::OrderEventType::EXECUTION: {
+          case EXECUTION: {
             // XXX HANS FIX THIS
             log::warn("order_event={}"sv, order_event);
             log::fatal("Unexpected"sv);
             break;
           }
-          case json::OrderEventType::REJECT: {
+          case REJECT: {
             reject(Error::UNKNOWN, order_event.reason);
             break;
           }
         }
         break;
       }
-      case json::Status::NOT_FOUND:
+      case NOT_FOUND:
         reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, ""sv);
         break;
     }
@@ -400,36 +406,37 @@ class OrderUpdate final {
 
   OrderStatus compute_order_status(json::Status status) {
     switch (status) {
-      case json::Status::UNDEFINED:
-      case json::Status::UNKNOWN:
+      using enum json::Status::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
         break;
-      case json::Status::PLACED:
+      case PLACED:
         return OrderStatus::WORKING;
-      case json::Status::EDITED:
+      case EDITED:
         return OrderStatus::WORKING;
-      case json::Status::FILLED:
+      case FILLED:
         return OrderStatus::COMPLETED;
-      case json::Status::CANCELLED:
+      case CANCELLED:
         return OrderStatus::CANCELED;
-      case json::Status::NO_ORDERS_TO_CANCEL:
-      case json::Status::NOT_FOUND:
+      case NO_ORDERS_TO_CANCEL:
+      case NOT_FOUND:
         break;
-      case json::Status::INVALID_ORDER_TYPE:
-      case json::Status::INVALID_SIDE:
-      case json::Status::INVALID_PRICE:
-      case json::Status::INSUFFICIENT_AVAILABLE_FUNDS:
-      case json::Status::SELF_FILL:
-      case json::Status::TOO_MANY_SMALL_ORDERS:
-      case json::Status::MAX_POSITION_VIOLATION:
-      case json::Status::MARKET_SUSPENDED:
-      case json::Status::MARKET_INACTIVE:
-      case json::Status::CLIENT_ORDER_ID_ALREADY_EXIST:
-      case json::Status::CLIENT_ORDER_ID_TOO_LONG:
-      case json::Status::OUTSIDE_PRICE_COLLAR:
-      case json::Status::POST_WOULD_EXECUTE:
-      case json::Status::IOC_WOULD_NOT_EXECUTE:
-      case json::Status::WOULD_CAUSE_LIQUIDATION:
-      case json::Status::WOULD_NOT_REDUCE_POSITION:
+      case INVALID_ORDER_TYPE:
+      case INVALID_SIDE:
+      case INVALID_PRICE:
+      case INSUFFICIENT_AVAILABLE_FUNDS:
+      case SELF_FILL:
+      case TOO_MANY_SMALL_ORDERS:
+      case MAX_POSITION_VIOLATION:
+      case MARKET_SUSPENDED:
+      case MARKET_INACTIVE:
+      case CLIENT_ORDER_ID_ALREADY_EXIST:
+      case CLIENT_ORDER_ID_TOO_LONG:
+      case OUTSIDE_PRICE_COLLAR:
+      case POST_WOULD_EXECUTE:
+      case IOC_WOULD_NOT_EXECUTE:
+      case WOULD_CAUSE_LIQUIDATION:
+      case WOULD_NOT_REDUCE_POSITION:
         return OrderStatus::REJECTED;
     }
     return {};

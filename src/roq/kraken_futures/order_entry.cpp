@@ -140,12 +140,12 @@ json::OrderEventOrderType compute_order_type(
   if (time_in_force == TimeInForce::IOC)
     return json::OrderEventOrderType::IOC;
   switch (order_type) {
-    // using enum roq::OrderType::type_t; // XXX clang13
-    case roq::OrderType::UNDEFINED:
+    using enum roq::OrderType;
+    case UNDEFINED:
       break;
-    case roq::OrderType::MARKET:
+    case MARKET:
       return json::OrderEventOrderType::MKT;
-    case roq::OrderType::LIMIT:
+    case LIMIT:
       if (std::isnan(stop_price))
         return json::OrderEventOrderType::LMT;
       else
@@ -339,17 +339,18 @@ void OrderEntry::create_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        // using enum core::http::Category;  // XXX clang13
-        case core::http::Category::SUCCESS: {
+        using enum core::http::Category;
+        case SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
           switch (send_order.result) {
-            case json::Result::UNDEFINED:
-            case json::Result::UNKNOWN:
+            using enum json::Result::type_t;
+            case UNDEFINED:
+            case UNKNOWN:
               log::warn(R"(response="{}")"sv, body);
               log::fatal("Unexpected: send_order={}"sv, send_order);
               break;
-            case json::Result::ERROR: {
+            case ERROR: {
               log::warn("send_order={}"sv, send_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
@@ -370,7 +371,7 @@ void OrderEntry::create_order_ack(
                   response,
                   []([[maybe_unused]] auto &order) {});
             } break;
-            case json::Result::SUCCESS: {
+            case SUCCESS: {
               auto request_id = send_order.send_status.cli_ord_id;
               OrderUpdate{shared_, stream_id_, security_.get_account()}(
                   order_id,
@@ -422,7 +423,7 @@ void OrderEntry::create_order_ack(
           }
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {
+        case CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
@@ -538,17 +539,18 @@ void OrderEntry::modify_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        // using enum core::http::Category;  // XXX clang13
-        case core::http::Category::SUCCESS: {
+        using enum core::http::Category;
+        case SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
           switch (edit_order.result) {
-            case json::Result::UNDEFINED:
-            case json::Result::UNKNOWN:
+            using enum json::Result::type_t;
+            case UNDEFINED:
+            case UNKNOWN:
               log::warn(R"(response="{}")"sv, body);
               log::fatal("Unexpected: edit_order={}"sv, edit_order);
               break;
-            case json::Result::ERROR: {
+            case ERROR: {
               log::warn("edit_order={}"sv, edit_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
@@ -570,7 +572,7 @@ void OrderEntry::modify_order_ack(
                   []([[maybe_unused]] auto &order) {});
               break;
             }
-            case json::Result::SUCCESS: {
+            case SUCCESS: {
               auto request_id = edit_order.edit_status.cli_ord_id;
               OrderUpdate{shared_, stream_id_, security_.get_account()}(
                   order_id,
@@ -622,7 +624,7 @@ void OrderEntry::modify_order_ack(
           }
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {
+        case CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
@@ -731,17 +733,18 @@ void OrderEntry::cancel_order_ack(
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (category) {
-        // using enum core::http::Category;  // XXX clang13
-        case core::http::Category::SUCCESS: {
+        using enum core::http::Category;
+        case SUCCESS: {
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
           switch (cancel_order.result) {
-            case json::Result::UNDEFINED:
-            case json::Result::UNKNOWN:
+            using enum json::Result::type_t;
+            case UNDEFINED:
+            case UNKNOWN:
               log::warn(R"(response="{}")"sv, body);
               log::fatal("Unexpected: cancel_order={}"sv, cancel_order);
               break;
-            case json::Result::ERROR: {
+            case ERROR: {
               log::warn("cancel_order={}"sv, cancel_order);
               oms::Response response{
                   .type = RequestType::CREATE_ORDER,
@@ -763,7 +766,7 @@ void OrderEntry::cancel_order_ack(
                   []([[maybe_unused]] auto &order) {});
               break;
             }
-            case json::Result::SUCCESS: {
+            case SUCCESS: {
               auto request_id = cancel_order.cancel_status.cli_ord_id;
               OrderUpdate{shared_, stream_id_, security_.get_account()}(
                   order_id,
@@ -815,7 +818,7 @@ void OrderEntry::cancel_order_ack(
           }
           break;
         }
-        case core::http::Category::CLIENT_ERROR: {
+        case CLIENT_ERROR: {
           core::json::Buffer buffer(decode_buffer_);
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
@@ -909,8 +912,8 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response> &event) 
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
-        // using enum core::http::Status;  // XXX clang13
-        case core::http::Status::OK: {  // 200
+        using enum core::http::Status;
+        case OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
           log::info(
@@ -918,10 +921,10 @@ void OrderEntry::cancel_all_orders_ack(const Trace<core::web::Response> &event) 
               std::size(cancel_all_orders.cancel_status.order_events));
           break;
         }
-        case core::http::Status::BAD_REQUEST:   // 400
-        case core::http::Status::UNAUTHORIZED:  // 401
-        case core::http::Status::FORBIDDEN:     // 403
-        case core::http::Status::NOT_FOUND: {   // 404
+        case BAD_REQUEST:   // 400
+        case UNAUTHORIZED:  // 401
+        case FORBIDDEN:     // 403
+        case NOT_FOUND: {   // 404
           core::json::Buffer buffer(decode_buffer_);
           auto rest_error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, rest_error);
@@ -973,8 +976,8 @@ void OrderEntry::cancel_all_orders_after_ack(const Trace<core::web::Response> &e
       auto [status, category, body] = response.result();
       log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       switch (status) {
-        // using enum core::http::Status;  // XXX clang13
-        case core::http::Status::OK: {  // 200
+        using enum core::http::Status;
+        case OK: {  // 200
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders_after_ack =
               core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
@@ -982,10 +985,10 @@ void OrderEntry::cancel_all_orders_after_ack(const Trace<core::web::Response> &e
           log::info<2>("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
           break;
         }
-        case core::http::Status::BAD_REQUEST:   // 400
-        case core::http::Status::UNAUTHORIZED:  // 401
-        case core::http::Status::FORBIDDEN:     // 403
-        case core::http::Status::NOT_FOUND: {   // 404
+        case BAD_REQUEST:   // 400
+        case UNAUTHORIZED:  // 401
+        case FORBIDDEN:     // 403
+        case NOT_FOUND: {   // 404
           core::json::Buffer buffer(decode_buffer_);
           auto cancel_all_orders_after_ack =
               core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
@@ -1005,11 +1008,11 @@ void OrderEntry::cancel_all_orders_after_ack(const Trace<core::web::Response> &e
 
 uint32_t OrderEntry::download(OrderEntryState state) {
   switch (state) {
-    // using enum OrderEntryState::type_t;  // XXX clang13
-    case OrderEntryState::UNDEFINED:
+    using enum OrderEntryState;
+    case UNDEFINED:
       assert(false);
       break;
-    case OrderEntryState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       return {};
   }

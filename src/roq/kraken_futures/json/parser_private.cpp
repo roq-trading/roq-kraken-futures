@@ -152,25 +152,26 @@ bool ParserPrivate::dispatch(
     if (key.compare("event"sv) == 0) {
       Event event(value);
       switch (event) {
-        case Event::UNDEFINED:
+        using enum Event::type_t;
+        case UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case Event::UNKNOWN:
+        case UNKNOWN:
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
-        case Event::INFO:
+        case INFO:
           dispatch_info(handler, message, trace_info);
           return true;
-        case Event::ALERT:
+        case ALERT:
           dispatch_alert(handler, message, trace_info);
           return true;
-        case Event::ERROR:
+        case ERROR:
           dispatch_error(handler, message, trace_info);
           return true;
-        case Event::CHALLENGE:
+        case CHALLENGE:
           dispatch_challenge(handler, message, trace_info);
           return true;
-        case Event::SUBSCRIBED:
+        case SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);
           return true;
         default:
@@ -181,44 +182,45 @@ bool ParserPrivate::dispatch(
     if (key.compare("feed"sv) == 0) {
       Feed feed(value);
       switch (feed) {
-        case Feed::UNDEFINED:
+        using enum Feed::type_t;
+        case UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case Feed::UNKNOWN:
+        case UNKNOWN:
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
-        case Feed::HEARTBEAT:
+        case HEARTBEAT:
           dispatch_heartbeat(handler, message, trace_info);
           return true;
-        case Feed::TICKER:
-        case Feed::BOOK_SNAPSHOT:
-        case Feed::BOOK:
-        case Feed::TRADE_SNAPSHOT:
-        case Feed::TRADE:
+        case TICKER:
+        case BOOK_SNAPSHOT:
+        case BOOK:
+        case TRADE_SNAPSHOT:
+        case TRADE:
           log::fatal("Unexpected: feed={}"sv, feed);
           break;
-        case Feed::CHALLENGE:
+        case CHALLENGE:
           dispatch_challenge(handler, message, trace_info);
           return true;
-        case Feed::ACCOUNT_BALANCES_AND_MARGINS:
+        case ACCOUNT_BALANCES_AND_MARGINS:
           dispatch_account_balances_and_margins(handler, message, buffer, trace_info);
           return true;
-        case Feed::OPEN_POSITIONS:
+        case OPEN_POSITIONS:
           dispatch_open_positions(handler, message, buffer, trace_info);
           return true;
-        case Feed::OPEN_ORDERS_SNAPSHOT:
+        case OPEN_ORDERS_SNAPSHOT:
           dispatch_open_orders_snapshot(handler, message, buffer, trace_info);
           return true;
-        case Feed::OPEN_ORDERS:
+        case OPEN_ORDERS:
           dispatch_open_orders(handler, message, buffer, trace_info);
           return true;
-        case Feed::OPEN_ORDERS_VERBOSE:
+        case OPEN_ORDERS_VERBOSE:
           // XXX
           break;
-        case Feed::FILLS_SNAPSHOT:
+        case FILLS_SNAPSHOT:
           dispatch_fills_snapshot(handler, message, buffer, trace_info);
           return true;
-        case Feed::FILLS:
+        case FILLS:
           dispatch_fills(handler, message, buffer, trace_info);
           return true;
           break;

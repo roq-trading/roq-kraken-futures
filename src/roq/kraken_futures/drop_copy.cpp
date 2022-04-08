@@ -207,17 +207,17 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 uint32_t DropCopy::download(DropCopyState state) {
   switch (state) {
-    // using enum DropCopyState::type_t;  // XXX clang13
-    case DropCopyState::UNDEFINED:
+    using enum DropCopyState;
+    case UNDEFINED:
       assert(false);
       break;
-    case DropCopyState::GET_CHALLENGE:
+    case GET_CHALLENGE:
       get_challenge();
       return 1;
-    case DropCopyState::SUBSCRIBE:
+    case SUBSCRIBE:
       subscribe();
       return {};
-    case DropCopyState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;

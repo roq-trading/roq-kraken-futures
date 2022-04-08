@@ -37,44 +37,45 @@ namespace {
 /*
 RequestType compute_request_type(const json::Reason reason) {
   switch (reason) {
-    case json::Reason::UNDEFINED:
-    case json::Reason::UNKNOWN:
+    using enum json::Reason::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::Reason::NEW_PLACED_ORDER_BY_USER:
+    case NEW_PLACED_ORDER_BY_USER:
       return RequestType::CREATE_ORDER;
-    case json::Reason::LIQUIDATION:
+    case LIQUIDATION:
       break;
-    case json::Reason::STOP_ORDER_TRIGGERED:
+    case STOP_ORDER_TRIGGERED:
       break;
-    case json::Reason::LIMIT_ORDER_FROM_STOP:
+    case LIMIT_ORDER_FROM_STOP:
       break;
-    case json::Reason::PARTIAL_FILL:
+    case PARTIAL_FILL:
       break;
-    case json::Reason::FULL_FILL:
+    case FULL_FILL:
       break;
-    case json::Reason::CANCELLED_BY_USER:
+    case CANCELLED_BY_USER:
       return RequestType::CANCEL_ORDER;
-    case json::Reason::CONTRACT_EXPIRED:
+    case CONTRACT_EXPIRED:
       break;
-    case json::Reason::NOT_ENOUGH_MARGIN:
+    case NOT_ENOUGH_MARGIN:
       break;
-    case json::Reason::MARKET_INACTIVE:
+    case MARKET_INACTIVE:
       break;
-    case json::Reason::CANCELLED_BY_ADMIN:
+    case CANCELLED_BY_ADMIN:
       break;
-    case json::Reason::DEAD_MAN_SWITCH:
+    case DEAD_MAN_SWITCH:
       break;
-    case json::Reason::IOC_ORDER_FAILED_BECAUSE_IT_WOULD_NOT:
+    case IOC_ORDER_FAILED_BECAUSE_IT_WOULD_NOT:
       break;
-    case json::Reason::POST_ORDER_FAILED_BECAUSE_IT_WOULD_FILLED:
+    case POST_ORDER_FAILED_BECAUSE_IT_WOULD_FILLED:
       break;
-    case json::Reason::WOULD_EXECUTE_SELF:
+    case WOULD_EXECUTE_SELF:
       break;
-    case json::Reason::WOULD_NOT_REDUCE_POSITION:
+    case WOULD_NOT_REDUCE_POSITION:
       break;
-    case json::Reason::ORDER_FOR_EDIT_NOT_FOUND:
+    case ORDER_FOR_EDIT_NOT_FOUND:
       break;
-    case json::Reason::EDITED_BY_USER:
+    case EDITED_BY_USER:
       return RequestType::MODIFY_ORDER;
   }
   return {};
@@ -83,45 +84,46 @@ RequestType compute_request_type(const json::Reason reason) {
 OrderStatus compute_order_status_2(
     json::Reason reason, bool is_cancel, double quantity, double filled) {
   switch (reason) {
-    case json::Reason::UNDEFINED:
-    case json::Reason::UNKNOWN:
+    using enum json::Reason::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::Reason::NEW_PLACED_ORDER_BY_USER:
+    case NEW_PLACED_ORDER_BY_USER:
       return OrderStatus::WORKING;  // note! is this correct also for market/stop orders?
-    case json::Reason::LIQUIDATION:
+    case LIQUIDATION:
       break;
-    case json::Reason::STOP_ORDER_TRIGGERED:
+    case STOP_ORDER_TRIGGERED:
       // XXX is this a market order?
       break;
-    case json::Reason::LIMIT_ORDER_FROM_STOP:
+    case LIMIT_ORDER_FROM_STOP:
       return OrderStatus::WORKING;
-    case json::Reason::PARTIAL_FILL:
+    case PARTIAL_FILL:
       return OrderStatus::WORKING;
-    case json::Reason::FULL_FILL:
+    case FULL_FILL:
       return OrderStatus::COMPLETED;
-    case json::Reason::CANCELLED_BY_USER:
+    case CANCELLED_BY_USER:
       return OrderStatus::CANCELED;
-    case json::Reason::CONTRACT_EXPIRED:
+    case CONTRACT_EXPIRED:
       return OrderStatus::CANCELED;
-    case json::Reason::NOT_ENOUGH_MARGIN:
+    case NOT_ENOUGH_MARGIN:
       return OrderStatus::CANCELED;
-    case json::Reason::MARKET_INACTIVE:
+    case MARKET_INACTIVE:
       break;
-    case json::Reason::CANCELLED_BY_ADMIN:
+    case CANCELLED_BY_ADMIN:
       return OrderStatus::CANCELED;
-    case json::Reason::DEAD_MAN_SWITCH:
+    case DEAD_MAN_SWITCH:
       return OrderStatus::CANCELED;  // note! what is this?
-    case json::Reason::IOC_ORDER_FAILED_BECAUSE_IT_WOULD_NOT:
+    case IOC_ORDER_FAILED_BECAUSE_IT_WOULD_NOT:
       return OrderStatus::CANCELED;
-    case json::Reason::POST_ORDER_FAILED_BECAUSE_IT_WOULD_FILLED:
+    case POST_ORDER_FAILED_BECAUSE_IT_WOULD_FILLED:
       return OrderStatus::CANCELED;
-    case json::Reason::WOULD_EXECUTE_SELF:
+    case WOULD_EXECUTE_SELF:
       return OrderStatus::CANCELED;
-    case json::Reason::WOULD_NOT_REDUCE_POSITION:
+    case WOULD_NOT_REDUCE_POSITION:
       return OrderStatus::CANCELED;
-    case json::Reason::ORDER_FOR_EDIT_NOT_FOUND:
+    case ORDER_FOR_EDIT_NOT_FOUND:
       break;
-    case json::Reason::EDITED_BY_USER:
+    case EDITED_BY_USER:
       break;
   }
   if (utils::is_equal(quantity, filled))

@@ -45,24 +45,25 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
 
 inline roq::Liquidity map(json::FillType value) {
   switch (value) {
-    case json::FillType::UNDEFINED:
-    case json::FillType::UNKNOWN:
+    using enum json::FillType::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
       break;
-    case json::FillType::MAKER:
+    case MAKER:
       return Liquidity::MAKER;
-    case json::FillType::TAKER:
+    case TAKER:
       return Liquidity::TAKER;
-    case json::FillType::LIQUIDATION:
+    case LIQUIDATION:
       break;
-    case json::FillType::ASSIGNEE:
+    case ASSIGNEE:
       break;
-    case json::FillType::ASSIGNOR:
+    case ASSIGNOR:
       break;
-    case json::FillType::UNWIND_BANKRUPT:
+    case UNWIND_BANKRUPT:
       break;
-    case json::FillType::UNWIND_COUNTERPARTY:
+    case UNWIND_COUNTERPARTY:
       break;
-    case json::FillType::TAKER_AFTER_EDIT:
+    case TAKER_AFTER_EDIT:
       break;
   }
   return {};
@@ -70,19 +71,20 @@ inline roq::Liquidity map(json::FillType value) {
 
 inline roq::OrderType map(json::OrderEventOrderType value) {
   switch (value) {
-    case json::OrderEventOrderType::UNDEFINED:
+    using enum json::OrderEventOrderType::type_t;
+    case UNDEFINED:
       break;
-    case json::OrderEventOrderType::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::OrderEventOrderType::LMT:
+    case LMT:
       return roq::OrderType::LIMIT;
-    case json::OrderEventOrderType::MKT:
+    case MKT:
       return roq::OrderType::MARKET;
-    case json::OrderEventOrderType::STP:
+    case STP:
       break;
-    case json::OrderEventOrderType::TAKE_PROFIT:
+    case TAKE_PROFIT:
       break;
-    case json::OrderEventOrderType::IOC:
+    case IOC:
       return roq::OrderType::LIMIT;
   }
   return {};
@@ -90,13 +92,14 @@ inline roq::OrderType map(json::OrderEventOrderType value) {
 
 inline roq::OrderType map(json::OrderType value) {
   switch (value) {
-    case json::OrderType::UNDEFINED:
+    using enum json::OrderType::type_t;
+    case UNDEFINED:
       break;
-    case json::OrderType::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::OrderType::LIMIT:
+    case LIMIT:
       return roq::OrderType::LIMIT;
-    case json::OrderType::STOP:
+    case STOP:
       return roq::OrderType::LIMIT;  // XXX could also be market ???
   }
   return {};
@@ -104,13 +107,14 @@ inline roq::OrderType map(json::OrderType value) {
 
 inline roq::Side map(json::Side value) {
   switch (value) {
-    case json::Side::UNDEFINED:
+    using enum json::Side::type_t;
+    case UNDEFINED:
       break;
-    case json::Side::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::Side::BUY:
+    case BUY:
       return roq::Side::BUY;
-    case json::Side::SELL:
+    case SELL:
       return roq::Side::SELL;
   }
   return {};
@@ -118,11 +122,12 @@ inline roq::Side map(json::Side value) {
 
 inline json::Side map(roq::Side value) {
   switch (value) {
-    case roq::Side::UNDEFINED:
+    using enum roq::Side;
+    case UNDEFINED:
       break;
-    case roq::Side::BUY:
+    case BUY:
       return json::Side::BUY;
-    case roq::Side::SELL:
+    case SELL:
       return json::Side::SELL;
   }
   return {};

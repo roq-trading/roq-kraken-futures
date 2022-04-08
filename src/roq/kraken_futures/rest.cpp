@@ -138,14 +138,14 @@ void Rest::operator()(const core::web::Client::Latency &latency) {
 
 uint32_t Rest::download(RestState state) {
   switch (state) {
-    // using enum RestState::type_t; // XXX clang13
-    case RestState::UNDEFINED:
+    using enum RestState;
+    case UNDEFINED:
       assert(false);
       break;
-    case RestState::INSTRUMENTS:
+    case INSTRUMENTS:
       get_instruments();
       return 1;
-    case RestState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       return {};
   }

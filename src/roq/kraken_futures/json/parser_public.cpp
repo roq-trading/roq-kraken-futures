@@ -120,25 +120,26 @@ bool ParserPublic::dispatch(
     if (key.compare("event"sv) == 0) {
       Event event(value);
       switch (event) {
-        case Event::UNDEFINED:
+        using enum Event::type_t;
+        case UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case Event::UNKNOWN:
+        case UNKNOWN:
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
-        case Event::INFO:
+        case INFO:
           dispatch_info(handler, message, trace_info);
           return true;
-        case Event::ALERT:
+        case ALERT:
           dispatch_alert(handler, message, trace_info);
           return true;
-        case Event::ERROR:
+        case ERROR:
           dispatch_error(handler, message, trace_info);
           return true;
-        case Event::CHALLENGE:
+        case CHALLENGE:
           log::fatal("Unexpected: event={}"sv, event);
           break;
-        case Event::SUBSCRIBED:
+        case SUBSCRIBED:
           dispatch_subscribed(handler, message, buffer, trace_info);
           return true;
         default:
@@ -149,38 +150,39 @@ bool ParserPublic::dispatch(
     if (key.compare("feed"sv) == 0) {
       Feed feed(value);
       switch (feed) {
-        case Feed::UNDEFINED:
+        using enum Feed::type_t;
+        case UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case Feed::UNKNOWN:
+        case UNKNOWN:
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
-        case Feed::HEARTBEAT:
+        case HEARTBEAT:
           dispatch_heartbeat(handler, message, trace_info);
           return true;
-        case Feed::TICKER:
+        case TICKER:
           dispatch_ticker(handler, message, trace_info);
           return true;
-        case Feed::BOOK_SNAPSHOT:
+        case BOOK_SNAPSHOT:
           dispatch_book_snapshot(handler, message, buffer, trace_info);
           return true;
-        case Feed::BOOK:
+        case BOOK:
           dispatch_book(handler, message, trace_info);
           return true;
-        case Feed::TRADE_SNAPSHOT:
+        case TRADE_SNAPSHOT:
           dispatch_trade_snapshot(handler, message, buffer, trace_info);
           return true;
-        case Feed::TRADE:
+        case TRADE:
           dispatch_trade(handler, message, trace_info);
           return true;
-        case Feed::CHALLENGE:
-        case Feed::ACCOUNT_BALANCES_AND_MARGINS:
-        case Feed::OPEN_POSITIONS:
-        case Feed::OPEN_ORDERS_SNAPSHOT:
-        case Feed::OPEN_ORDERS:
-        case Feed::OPEN_ORDERS_VERBOSE:
-        case Feed::FILLS_SNAPSHOT:
-        case Feed::FILLS:
+        case CHALLENGE:
+        case ACCOUNT_BALANCES_AND_MARGINS:
+        case OPEN_POSITIONS:
+        case OPEN_ORDERS_SNAPSHOT:
+        case OPEN_ORDERS:
+        case OPEN_ORDERS_VERBOSE:
+        case FILLS_SNAPSHOT:
+        case FILLS:
           log::fatal("Unexpected: feed={}"sv, feed);
           break;
         default:
