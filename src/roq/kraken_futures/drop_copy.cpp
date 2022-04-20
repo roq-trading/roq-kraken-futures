@@ -431,7 +431,8 @@ void DropCopy::parse(const std::string_view &message) {
     auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
-    log::warn<0>::when(!result, R"(Unexpected: message="{}")"sv, message);
+    if (!result)
+      log::warn(R"(Unexpected: message="{}")"sv, message);
   });
 }
 
