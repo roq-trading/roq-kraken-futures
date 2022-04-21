@@ -283,6 +283,7 @@ void MarketData::operator()(const Trace<json::Ticker> &event) {
         },
         .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = utils::safe_cast(ticker.time),
+        .exchange_sequence = {},
     };
     create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     // note! using *relative* funding rate to be compatible with other exchanges
