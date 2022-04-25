@@ -172,7 +172,7 @@ void DropCopy::operator()(const core::web::ClientSocket::Close &) {
 
 void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -192,7 +192,7 @@ void DropCopy::operator()(const core::web::ClientSocket::Binary &) {
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -229,25 +229,25 @@ uint32_t DropCopy::download(DropCopyState state) {
   return {};
 }
 
-void DropCopy::operator()(const Trace<json::Info> &event) {
+void DropCopy::operator()(const Trace<json::Info const> &event) {
   auto &[trace_info, info] = event;
   log::debug("info={}"sv, info);
   log::info<2>("info={}"sv, info);
 }
 
-void DropCopy::operator()(const Trace<json::Alert> &event) {
+void DropCopy::operator()(const Trace<json::Alert const> &event) {
   auto &[trace_info, alert] = event;
   log::debug("alert={}"sv, alert);
   log::warn<1>("alert={}"sv, alert);
 }
 
-void DropCopy::operator()(const Trace<json::Error> &event) {
+void DropCopy::operator()(const Trace<json::Error const> &event) {
   auto &[trace_info, error] = event;
   log::debug("error={}"sv, error);
   log::warn("error={}"sv, error);
 }
 
-void DropCopy::operator()(const Trace<json::Challenge> &event) {
+void DropCopy::operator()(const Trace<json::Challenge const> &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"sv, challenge);
@@ -260,13 +260,13 @@ void DropCopy::operator()(const Trace<json::Challenge> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::Subscribed> &event) {
+void DropCopy::operator()(const Trace<json::Subscribed const> &event) {
   auto &[trace_info, subscribed] = event;
   log::debug("subscribed={}"sv, subscribed);
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void DropCopy::operator()(const Trace<json::Heartbeat> &event) {
+void DropCopy::operator()(const Trace<json::Heartbeat const> &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"sv, heartbeat);
@@ -274,14 +274,14 @@ void DropCopy::operator()(const Trace<json::Heartbeat> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins> &event) {
+void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins const> &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
       std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
-      FundsUpdate funds_update{
+      const FundsUpdate funds_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .currency = currency,
@@ -294,14 +294,14 @@ void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenPositions> &event) {
+void DropCopy::operator()(const Trace<json::OpenPositions const> &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
     for (auto &item : open_positions.positions) {
       auto long_quantity = std::max(0.0, item.balance);
       auto short_quantity = std::max(0.0, -item.balance);
-      PositionUpdate position_update{
+      const PositionUpdate position_update{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .exchange = Flags::exchange(),
@@ -317,7 +317,7 @@ void DropCopy::operator()(const Trace<json::OpenPositions> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot> &event) {
+void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot const> &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
@@ -325,7 +325,7 @@ void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenOrders> &event) {
+void DropCopy::operator()(const Trace<json::OpenOrders const> &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
@@ -333,7 +333,7 @@ void DropCopy::operator()(const Trace<json::OpenOrders> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
+void DropCopy::operator()(const Trace<json::FillsSnapshot const> &event) {
   profile_.fills_snapshot([&]() {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
@@ -354,7 +354,7 @@ void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
                 .price = item.price,
                 .liquidity = json::map(item.fill_type),
             };
-            TradeUpdate trade_update{
+            const TradeUpdate trade_update{
                 .stream_id = stream_id_,
                 .account = order.account,
                 .order_id = order.order_id,
@@ -380,7 +380,7 @@ void DropCopy::operator()(const Trace<json::FillsSnapshot> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::Fills> &event) {
+void DropCopy::operator()(const Trace<json::Fills const> &event) {
   profile_.fills([&]() {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
@@ -402,7 +402,7 @@ void DropCopy::operator()(const Trace<json::Fills> &event) {
                 .price = item.price,
                 .liquidity = json::map(item.fill_type),
             };
-            TradeUpdate trade_update{
+            const TradeUpdate trade_update{
                 .stream_id = stream_id_,
                 .account = order.account,
                 .order_id = order.order_id,

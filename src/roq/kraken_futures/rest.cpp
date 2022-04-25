@@ -96,7 +96,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -129,7 +129,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
   auto trace_info = server::create_trace_info();
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -183,7 +183,7 @@ void Rest::get_instruments() {
   });
 }
 
-void Rest::get_instruments_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_instruments_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
   profile_.instruments_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::INSTRUMENTS;
@@ -196,7 +196,7 @@ void Rest::get_instruments_ack(const Trace<core::web::Response> &event, uint32_t
       }
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
-      auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
+      const auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
       if (std::empty(instruments.error)) {
         Trace event(trace_info, instruments);
         (*this)(event);
@@ -216,7 +216,7 @@ void Rest::get_instruments_ack(const Trace<core::web::Response> &event, uint32_t
   });
 }
 
-void Rest::operator()(const Trace<json::Instruments> &events) {
+void Rest::operator()(const Trace<json::Instruments const> &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));
@@ -232,7 +232,7 @@ void Rest::operator()(const Trace<json::Instruments> &events) {
     if (all_symbols_.emplace(symbol).second)  // only include new
       symbols.emplace_back(symbol);
     ++counter;
-    ReferenceData reference_data{
+    const ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,

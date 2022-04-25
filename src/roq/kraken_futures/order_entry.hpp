@@ -31,8 +31,8 @@ namespace kraken_futures {
 class OrderEntry final : public core::web::Client::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<StreamStatus const> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
   };
 
   OrderEntry(
@@ -74,7 +74,10 @@ class OrderEntry final : public core::web::Client::Handler {
   void create_order(
       const Event<CreateOrder> &, const oms::Order &, const std::string_view &request_id);
   void create_order_ack(
-      const Trace<core::web::Response> &, uint8_t user_id, uint32_t order_id, uint32_t version);
+      const Trace<core::web::Response const> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
   void modify_order(
       const Event<ModifyOrder> &,
@@ -82,7 +85,10 @@ class OrderEntry final : public core::web::Client::Handler {
       const std::string_view &request_id,
       const std::string_view &previous_request_id);
   void modify_order_ack(
-      const Trace<core::web::Response> &, uint8_t user_id, uint32_t order_id, uint32_t version);
+      const Trace<core::web::Response const> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
   void cancel_order(
       const Event<CancelOrder> &,
@@ -90,13 +96,16 @@ class OrderEntry final : public core::web::Client::Handler {
       const std::string_view &request_id,
       const std::string_view &previous_request_id);
   void cancel_order_ack(
-      const Trace<core::web::Response> &, uint8_t user_id, uint32_t order_id, uint32_t version);
+      const Trace<core::web::Response const> &,
+      uint8_t user_id,
+      uint32_t order_id,
+      uint32_t version);
 
   void cancel_all_orders(const Event<CancelAllOrders> &, const std::string_view &request_id);
-  void cancel_all_orders_ack(const Trace<core::web::Response> &);
+  void cancel_all_orders_ack(const Trace<core::web::Response const> &);
 
   void cancel_all_orders_after(std::chrono::nanoseconds timeout);
-  void cancel_all_orders_after_ack(const Trace<core::web::Response> &);
+  void cancel_all_orders_after_ack(const Trace<core::web::Response const> &);
 
   uint32_t download(OrderEntryState);
 

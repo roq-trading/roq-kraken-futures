@@ -19,7 +19,7 @@ template <typename H>
 void dispatch_info(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Info info(root);
+  const Info info(root);
   create_trace_and_dispatch(handler, trace_info, info);
 }
 
@@ -27,7 +27,7 @@ template <typename H>
 void dispatch_alert(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Alert alert(root);
+  const Alert alert(root);
   create_trace_and_dispatch(handler, trace_info, alert);
 }
 
@@ -35,7 +35,7 @@ template <typename H>
 void dispatch_error(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Error error(root);
+  const Error error(root);
   create_trace_and_dispatch(handler, trace_info, error);
 }
 
@@ -43,7 +43,7 @@ template <typename H>
 void dispatch_challenge(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Challenge challenge(root);
+  const Challenge challenge(root);
   create_trace_and_dispatch(handler, trace_info, challenge);
 }
 
@@ -55,7 +55,7 @@ void dispatch_subscribed(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Subscribed subscribed(root, buffer);
+  const Subscribed subscribed(root, buffer);
   create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
@@ -63,7 +63,7 @@ template <typename H>
 void dispatch_heartbeat(H &handler, const std::string_view &message, const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Heartbeat heartbeat(root);
+  const Heartbeat heartbeat(root);
   create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
@@ -75,7 +75,7 @@ void dispatch_account_balances_and_margins(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  AccountBalancesAndMargins account_balances_and_margins(root, buffer);
+  const AccountBalancesAndMargins account_balances_and_margins(root, buffer);
   create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
 }
 
@@ -87,7 +87,7 @@ void dispatch_open_positions(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  OpenPositions open_positions(root, buffer);
+  const OpenPositions open_positions(root, buffer);
   create_trace_and_dispatch(handler, trace_info, open_positions);
 }
 
@@ -99,7 +99,7 @@ void dispatch_open_orders_snapshot(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  OpenOrdersSnapshot open_orders_snapshot(root, buffer);
+  const OpenOrdersSnapshot open_orders_snapshot(root, buffer);
   create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
 }
 
@@ -111,7 +111,7 @@ void dispatch_open_orders(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  OpenOrders open_orders(root, buffer);
+  const OpenOrders open_orders(root, buffer);
   create_trace_and_dispatch(handler, trace_info, open_orders);
 }
 
@@ -123,7 +123,7 @@ void dispatch_fills_snapshot(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  FillsSnapshot fills_snapshot(root, buffer);
+  const FillsSnapshot fills_snapshot(root, buffer);
   create_trace_and_dispatch(handler, trace_info, fills_snapshot);
 }
 
@@ -135,7 +135,7 @@ void dispatch_fills(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  Fills fills(root, buffer);
+  const Fills fills(root, buffer);
   create_trace_and_dispatch(handler, trace_info, fills);
 }
 }  // namespace
