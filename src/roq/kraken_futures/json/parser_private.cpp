@@ -147,7 +147,7 @@ bool ParserPrivate::dispatch(
     const TraceInfo &trace_info) {
   core::json::Parser parser(message);
   auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::object_t>(root)) {
+  for (auto [key, value] : std::get<core::json::Object>(root)) {
     // event
     if (key.compare("event"sv) == 0) {
       Event event(value);
