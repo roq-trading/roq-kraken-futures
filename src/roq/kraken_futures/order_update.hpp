@@ -27,21 +27,17 @@ namespace kraken_futures {
 
 class OrderUpdate final {
  public:
-  explicit OrderUpdate(Shared &shared, uint16_t stream_id, const std::string_view &account)
+  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account)
       : shared_(shared), stream_id_(stream_id), account_(account) {}
 
   OrderUpdate(OrderUpdate &&) = delete;
-  OrderUpdate(const OrderUpdate &) = delete;
+  OrderUpdate(OrderUpdate const &) = delete;
 
-  void operator()(const json::OpenOrdersSnapshot &, const TraceInfo &);
-  void operator()(const json::OpenOrders &, const TraceInfo &);
+  void operator()(json::OpenOrdersSnapshot const &, TraceInfo const &);
+  void operator()(json::OpenOrders const &, TraceInfo const &);
 
   template <typename Accept, typename Reject>
-  void operator()(
-      [[maybe_unused]] uint32_t order_id,
-      const json::SendOrder &send_order,
-      Accept accept,
-      Reject reject) {
+  void operator()([[maybe_unused]] uint32_t order_id, json::SendOrder const &send_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
@@ -128,8 +124,7 @@ class OrderUpdate final {
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
-            auto status =
-                compute_order_status(send_status.status, order_.quantity, order_event.amount);
+            auto status = compute_order_status(send_status.status, order_.quantity, order_event.amount);
             auto traded_quantity = order_event.amount;
             auto remaining_quantity = order_.quantity - traded_quantity;
             // XXX HANS should we use reduced_quantity to log a warning ???
@@ -173,11 +168,7 @@ class OrderUpdate final {
   }
 
   template <typename Accept, typename Reject>
-  void operator()(
-      [[maybe_unused]] uint32_t order_id,
-      const json::EditOrder &edit_order,
-      Accept accept,
-      Reject reject) {
+  void operator()([[maybe_unused]] uint32_t order_id, json::EditOrder const &edit_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
@@ -265,9 +256,8 @@ class OrderUpdate final {
             break;
           }
           case REJECT: {
-            auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0
-                             ? Error::MODIFY_HAS_NO_EFFECT
-                             : Error::UNKNOWN;
+            auto error =
+                order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0 ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
             reject(error, order_event.reason);
             break;
           }
@@ -279,10 +269,7 @@ class OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      [[maybe_unused]] uint32_t order_id,
-      const json::CancelOrder &cancel_order,
-      Accept accept,
-      Reject reject) {
+      [[maybe_unused]] uint32_t order_id, json::CancelOrder const &cancel_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
@@ -382,12 +369,12 @@ class OrderUpdate final {
 
  protected:
   void operator()(
-      const json::Order &,
-      const std::string_view &order_id,
-      const std::string_view &cli_ord_id,
+      json::Order const &,
+      std::string_view const &order_id,
+      std::string_view const &cli_ord_id,
       const json::Reason,
       bool is_cancel,
-      const TraceInfo &,
+      TraceInfo const &,
       bool is_download);
 
   Side compute_side(int32_t direction) {

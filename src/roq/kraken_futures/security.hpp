@@ -14,17 +14,17 @@ namespace kraken_futures {
 
 class Security final {
  public:
-  Security(const Config &, const std::string_view &account);
+  Security(Config const &, std::string_view const &account);
 
   Security(Security &&) = delete;
-  Security(const Security &) = delete;
+  Security(Security const &) = delete;
 
   std::string_view get_account() const { return account_; }
   std::string_view get_key() const { return key_; }
 
-  std::string create_headers(const std::string_view &path, const std::string_view &body);
+  std::string create_headers(std::string_view const &path, std::string_view const &body);
 
-  std::string signed_challenge(const std::string_view &original_challenge);
+  std::string signed_challenge(std::string_view const &original_challenge);
 
  protected:
   std::chrono::milliseconds get_nonce();

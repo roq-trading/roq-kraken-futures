@@ -17,25 +17,24 @@ using namespace std::literals;
 using namespace Catch::literals;
 
 TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_and_margins]") {
-  auto message =
-      R"({)"
-      R"("feed":"account_balances_and_margins",)"
-      R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"
-      R"("margin_accounts":[)"
-      R"({"name":"bch","balance":20.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"xrp","balance":3000.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"eth","balance":10.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"ltc","balance":20.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"xbt","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-xrp:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-eth:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-xbt:usd","balance":0.4,"pnl":0.0,"funding":0.0,"pv":0.4,"am":0.4,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-ltc:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-xrp:xbt","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
-      R"({"name":"f-bch:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0})"
-      R"(],)"
-      R"("seq":0)"
-      R"(})";
+  auto message = R"({)"
+                 R"("feed":"account_balances_and_margins",)"
+                 R"("account":"bdb7a134-386a-45c0-b8e5-76a75537df4c",)"
+                 R"("margin_accounts":[)"
+                 R"({"name":"bch","balance":20.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"xrp","balance":3000.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"eth","balance":10.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"ltc","balance":20.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"xbt","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-xrp:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-eth:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-xbt:usd","balance":0.4,"pnl":0.0,"funding":0.0,"pv":0.4,"am":0.4,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-ltc:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-xrp:xbt","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0},)"
+                 R"({"name":"f-bch:usd","balance":0.0,"pnl":0.0,"funding":0.0,"pv":0.0,"am":0.0,"im":0.0,"mm":0.0})"
+                 R"(],)"
+                 R"("seq":0)"
+                 R"(})";
   core::Buffer buffer(8192);
   core::json::Buffer buffer_(buffer);
   auto obj = core::json::Parser::create<json::AccountBalancesAndMargins>(message, buffer_);

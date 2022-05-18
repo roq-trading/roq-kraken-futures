@@ -13,16 +13,15 @@ using namespace std::chrono_literals;  // NOLINT
 namespace roq {
 namespace kraken_futures {
 
-Security::Security(const Config &config, const std::string_view &account)
-    : account_(account), key_(config.get_access_key(account)),
-      hasher_(config.get_access_secret(account)) {
+Security::Security(Config const &config, std::string_view const &account)
+    : account_(account), key_(config.get_access_key(account)), hasher_(config.get_access_secret(account)) {
 }
 
-std::string Security::create_headers(const std::string_view &path, const std::string_view &query) {
+std::string Security::create_headers(std::string_view const &path, std::string_view const &query) {
   return hasher_.create_headers(path, query, key_, get_nonce());
 }
 
-std::string Security::signed_challenge(const std::string_view &original_challenge) {
+std::string Security::signed_challenge(std::string_view const &original_challenge) {
   return hasher_.signed_challenge(original_challenge);
 }
 

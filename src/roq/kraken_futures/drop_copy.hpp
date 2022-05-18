@@ -27,36 +27,35 @@
 namespace roq {
 namespace kraken_futures {
 
-class DropCopy final : public core::web::ClientSocket::Handler,
-                       public json::ParserPrivate::Handler {
+class DropCopy final : public core::web::ClientSocket::Handler, public json::ParserPrivate::Handler {
  public:
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus const> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
-    virtual void operator()(const Trace<TradeUpdate const> &, bool is_last, uint8_t user_id) = 0;
-    virtual void operator()(const Trace<FundsUpdate const> &, bool is_last) = 0;
-    virtual void operator()(const Trace<PositionUpdate const> &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus const> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<TradeUpdate const> const &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<FundsUpdate const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<PositionUpdate const> const &, bool is_last) = 0;
   };
 
   DropCopy(Handler &, core::io::Context &, uint16_t stream_id, Security &, Shared &);
 
   DropCopy(DropCopy &&) = delete;
-  DropCopy(const DropCopy &) = delete;
+  DropCopy(DropCopy const &) = delete;
 
-  void operator()(const Event<Start> &);
-  void operator()(const Event<Stop> &);
-  void operator()(const Event<Timer> &);
+  void operator()(Event<Start> const &);
+  void operator()(Event<Stop> const &);
+  void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
 
  protected:
-  void operator()(const core::web::ClientSocket::Connected &) override;
-  void operator()(const core::web::ClientSocket::Disconnected &) override;
-  void operator()(const core::web::ClientSocket::Ready &) override;
-  void operator()(const core::web::ClientSocket::Close &) override;
-  void operator()(const core::web::ClientSocket::Latency &) override;
-  void operator()(const core::web::ClientSocket::Text &) override;
-  void operator()(const core::web::ClientSocket::Binary &) override;
+  void operator()(core::web::ClientSocket::Connected const &) override;
+  void operator()(core::web::ClientSocket::Disconnected const &) override;
+  void operator()(core::web::ClientSocket::Ready const &) override;
+  void operator()(core::web::ClientSocket::Close const &) override;
+  void operator()(core::web::ClientSocket::Latency const &) override;
+  void operator()(core::web::ClientSocket::Text const &) override;
+  void operator()(core::web::ClientSocket::Binary const &) override;
 
   void operator()(ConnectionStatus);
 
@@ -65,31 +64,31 @@ class DropCopy final : public core::web::ClientSocket::Handler,
   void get_challenge();
 
   void subscribe();
-  void subscribe(const std::string_view &feed);
+  void subscribe(std::string_view const &feed);
 
   // json::ParserPrivate::Handler
 
-  void operator()(const Trace<json::Info const> &) override;
-  void operator()(const Trace<json::Alert const> &) override;
-  void operator()(const Trace<json::Error const> &) override;
+  void operator()(Trace<json::Info const> const &) override;
+  void operator()(Trace<json::Alert const> const &) override;
+  void operator()(Trace<json::Error const> const &) override;
 
-  void operator()(const Trace<json::Challenge const> &) override;
+  void operator()(Trace<json::Challenge const> const &) override;
 
-  void operator()(const Trace<json::Subscribed const> &) override;
+  void operator()(Trace<json::Subscribed const> const &) override;
 
-  void operator()(const Trace<json::Heartbeat const> &) override;
+  void operator()(Trace<json::Heartbeat const> const &) override;
 
-  void operator()(const Trace<json::AccountBalancesAndMargins const> &) override;
-  void operator()(const Trace<json::OpenPositions const> &) override;
+  void operator()(Trace<json::AccountBalancesAndMargins const> const &) override;
+  void operator()(Trace<json::OpenPositions const> const &) override;
 
-  void operator()(const Trace<json::OpenOrdersSnapshot const> &) override;
-  void operator()(const Trace<json::OpenOrders const> &) override;
+  void operator()(Trace<json::OpenOrdersSnapshot const> const &) override;
+  void operator()(Trace<json::OpenOrders const> const &) override;
 
-  void operator()(const Trace<json::FillsSnapshot const> &) override;
-  void operator()(const Trace<json::Fills const> &) override;
+  void operator()(Trace<json::FillsSnapshot const> const &) override;
+  void operator()(Trace<json::Fills const> const &) override;
 
  private:
-  void parse(const std::string_view &message);
+  void parse(std::string_view const &message);
 
   void reset();
 
@@ -108,8 +107,8 @@ class DropCopy final : public core::web::ClientSocket::Handler,
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins,
-        open_positions, open_orders_snapshot, open_orders, fills_snapshot, fills;
+    core::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins, open_positions,
+        open_orders_snapshot, open_orders, fills_snapshot, fills;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

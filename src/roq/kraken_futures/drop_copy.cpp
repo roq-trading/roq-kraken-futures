@@ -20,7 +20,7 @@ namespace roq {
 namespace kraken_futures {
 
 namespace {
-const auto NAME = "ex"sv;
+auto const NAME = "ex"sv;
 const Mask SUPPORTS{
     SupportType::ORDER,
     SupportType::TRADE,
@@ -29,7 +29,7 @@ const Mask SUPPORTS{
 };
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+  explicit create_metrics(std::string_view const &group, std::string_view const &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
@@ -47,12 +47,7 @@ auto create_connection(auto &handler, auto &context) {
 }
 }  // namespace
 
-DropCopy::DropCopy(
-    Handler &handler,
-    core::io::Context &context,
-    uint16_t stream_id,
-    Security &security,
-    Shared &shared)
+DropCopy::DropCopy(Handler &handler, core::io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
     : handler_(handler), stream_id_(stream_id),
       name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
@@ -78,15 +73,15 @@ DropCopy::DropCopy(
       download_(Flags::ws_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
-void DropCopy::operator()(const Event<Start> &) {
+void DropCopy::operator()(Event<Start> const &) {
   connection_.start();
 }
 
-void DropCopy::operator()(const Event<Stop> &) {
+void DropCopy::operator()(Event<Stop> const &) {
   connection_.stop();
 }
 
-void DropCopy::operator()(const Event<Timer> &event) {
+void DropCopy::operator()(Event<Timer> const &event) {
   connection_.refresh(event.value.now);
 }
 
@@ -130,7 +125,7 @@ void DropCopy::subscribe() {
   subscribe("fills"sv);
 }
 
-void DropCopy::subscribe(const std::string_view &feed) {
+void DropCopy::subscribe(std::string_view const &feed) {
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
@@ -148,11 +143,11 @@ void DropCopy::subscribe(const std::string_view &feed) {
   connection_.send_text(message);
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Connected &) {
+void DropCopy::operator()(core::web::ClientSocket::Connected const &) {
   // note! wait for upgrade
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Disconnected &) {
+void DropCopy::operator()(core::web::ClientSocket::Disconnected const &) {
   ++counter_.disconnect;
   ready_ = false;
   next_heartbeat_ = {};
@@ -162,15 +157,15 @@ void DropCopy::operator()(const core::web::ClientSocket::Disconnected &) {
   signed_challenge_.clear();
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Ready &) {
+void DropCopy::operator()(core::web::ClientSocket::Ready const &) {
   (*this)(ConnectionStatus::DOWNLOADING);
   download_.begin();
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Close &) {
+void DropCopy::operator()(core::web::ClientSocket::Close const &) {
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
+void DropCopy::operator()(core::web::ClientSocket::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -181,11 +176,11 @@ void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Text &text) {
+void DropCopy::operator()(core::web::ClientSocket::Text const &text) {
   parse(text.payload);
 }
 
-void DropCopy::operator()(const core::web::ClientSocket::Binary &) {
+void DropCopy::operator()(core::web::ClientSocket::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
@@ -229,25 +224,25 @@ uint32_t DropCopy::download(DropCopyState state) {
   return {};
 }
 
-void DropCopy::operator()(const Trace<json::Info const> &event) {
+void DropCopy::operator()(Trace<json::Info const> const &event) {
   auto &[trace_info, info] = event;
   log::debug("info={}"sv, info);
   log::info<2>("info={}"sv, info);
 }
 
-void DropCopy::operator()(const Trace<json::Alert const> &event) {
+void DropCopy::operator()(Trace<json::Alert const> const &event) {
   auto &[trace_info, alert] = event;
   log::debug("alert={}"sv, alert);
   log::warn<1>("alert={}"sv, alert);
 }
 
-void DropCopy::operator()(const Trace<json::Error const> &event) {
+void DropCopy::operator()(Trace<json::Error const> const &event) {
   auto &[trace_info, error] = event;
   log::debug("error={}"sv, error);
   log::warn("error={}"sv, error);
 }
 
-void DropCopy::operator()(const Trace<json::Challenge const> &event) {
+void DropCopy::operator()(Trace<json::Challenge const> const &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"sv, challenge);
@@ -260,13 +255,13 @@ void DropCopy::operator()(const Trace<json::Challenge const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::Subscribed const> &event) {
+void DropCopy::operator()(Trace<json::Subscribed const> const &event) {
   auto &[trace_info, subscribed] = event;
   log::debug("subscribed={}"sv, subscribed);
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void DropCopy::operator()(const Trace<json::Heartbeat const> &event) {
+void DropCopy::operator()(Trace<json::Heartbeat const> const &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"sv, heartbeat);
@@ -274,7 +269,7 @@ void DropCopy::operator()(const Trace<json::Heartbeat const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins const> &event) {
+void DropCopy::operator()(Trace<json::AccountBalancesAndMargins const> const &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
@@ -294,7 +289,7 @@ void DropCopy::operator()(const Trace<json::AccountBalancesAndMargins const> &ev
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenPositions const> &event) {
+void DropCopy::operator()(Trace<json::OpenPositions const> const &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
@@ -317,7 +312,7 @@ void DropCopy::operator()(const Trace<json::OpenPositions const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot const> &event) {
+void DropCopy::operator()(Trace<json::OpenOrdersSnapshot const> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
@@ -325,7 +320,7 @@ void DropCopy::operator()(const Trace<json::OpenOrdersSnapshot const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::OpenOrders const> &event) {
+void DropCopy::operator()(Trace<json::OpenOrders const> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
@@ -333,7 +328,7 @@ void DropCopy::operator()(const Trace<json::OpenOrders const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::FillsSnapshot const> &event) {
+void DropCopy::operator()(Trace<json::FillsSnapshot const> const &event) {
   profile_.fills_snapshot([&]() {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
@@ -380,7 +375,7 @@ void DropCopy::operator()(const Trace<json::FillsSnapshot const> &event) {
   });
 }
 
-void DropCopy::operator()(const Trace<json::Fills const> &event) {
+void DropCopy::operator()(Trace<json::Fills const> const &event) {
   profile_.fills([&]() {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;
@@ -428,7 +423,7 @@ void DropCopy::operator()(const Trace<json::Fills const> &event) {
   });
 }
 
-void DropCopy::parse(const std::string_view &message) {
+void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);

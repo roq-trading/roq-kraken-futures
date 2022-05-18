@@ -16,19 +16,19 @@ namespace kraken_futures {
 namespace tools {
 
 namespace {
-auto create_hmac(const std::string_view &secret) {
+auto create_hmac(std::string_view const &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }
 }  // namespace
 
-Hasher::Hasher(const std::string_view &secret) : hmac_(create_hmac(secret)) {
+Hasher::Hasher(std::string_view const &secret) : hmac_(create_hmac(secret)) {
 }
 
 std::string Hasher::create_headers(
-    const std::string_view &path,
-    const std::string_view &query,
-    const std::string_view &key,
+    std::string_view const &path,
+    std::string_view const &query,
+    std::string_view const &key,
     std::chrono::milliseconds nonce) {
   assert(!std::empty(path));
   if (nonce.count()) {
@@ -82,7 +82,7 @@ std::string Hasher::create_headers(
   }
 }
 
-std::string Hasher::signed_challenge(const std::string_view &original_challenge) {
+std::string Hasher::signed_challenge(std::string_view const &original_challenge) {
   sha_.clear();
   sha_.update(original_challenge);
   std::array<char, 32> buffer_1;

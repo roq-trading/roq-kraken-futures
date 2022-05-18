@@ -17,9 +17,8 @@ using namespace Catch::literals;
 // https://support.kraken.com/hc/en-us/articles/360022635592-Generate-authentication-strings-REST-API-
 
 TEST_CASE("hasher_headers_without_nonce", "[hasher]") {
-  const auto KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
-  const auto SECRET =
-      "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
+  auto const KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
+  auto const SECRET = "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
   tools::Hasher hasher(SECRET);
   auto result = hasher.create_headers("/api/v3/orderbook"sv, "?symbol=fi_xbtusd_180615"sv, KEY, {});
   CHECK(
@@ -29,12 +28,10 @@ TEST_CASE("hasher_headers_without_nonce", "[hasher]") {
 }
 
 TEST_CASE("hasher_headers_with_nonce", "[hasher]") {
-  const auto KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
-  const auto SECRET =
-      "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
+  auto const KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
+  auto const SECRET = "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
   tools::Hasher hasher(SECRET);
-  auto result = hasher.create_headers(
-      "/api/v3/orderbook"sv, "?symbol=fi_xbtusd_180615"sv, KEY, 1415957147987ms);
+  auto result = hasher.create_headers("/api/v3/orderbook"sv, "?symbol=fi_xbtusd_180615"sv, KEY, 1415957147987ms);
   CHECK(
       result ==
       "APIKey: rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf\r\n"
@@ -43,11 +40,10 @@ TEST_CASE("hasher_headers_with_nonce", "[hasher]") {
 }
 
 TEST_CASE("hasher_test_url_encoded", "[hasher]") {
-  const auto KEY = "zO4Zjh5GO+Zy2n4QwIyWEKb/EAgxSjOdtA+W1zZvOBYU3na2pE/p/nwx"sv;
-  const auto SECRET =
-      "DuWQ3317vPm8tlOoylWmhfQJwGkKiR+ABuNNocaPxU2DA5H9aZAKkGO0sYBSGKirtdlkm8dL9DAp6husEABgWyOr"sv;
-  const auto PATH = "/api/v3/sendorder"sv;
-  const auto QUERY =
+  auto const KEY = "zO4Zjh5GO+Zy2n4QwIyWEKb/EAgxSjOdtA+W1zZvOBYU3na2pE/p/nwx"sv;
+  auto const SECRET = "DuWQ3317vPm8tlOoylWmhfQJwGkKiR+ABuNNocaPxU2DA5H9aZAKkGO0sYBSGKirtdlkm8dL9DAp6husEABgWyOr"sv;
+  auto const PATH = "/api/v3/sendorder"sv;
+  auto const QUERY =
       R"(?orderType=lmt&symbol=PI_XBTUSD&side=buy&size=1&limitPrice=44587.5&cliOrdId=123%2B%2F%3D&reduceOnly=false)"sv;
   tools::Hasher hasher(SECRET);
   auto result = hasher.create_headers(PATH, QUERY, KEY, 1629361663947ms);

@@ -18,19 +18,17 @@ using namespace std::literals;
 namespace roq {
 namespace kraken_futures {
 
-void OrderUpdate::operator()(
-    const json::OpenOrdersSnapshot &open_orders_snapshot, const TraceInfo &trace_info) {
+void OrderUpdate::operator()(json::OpenOrdersSnapshot const &open_orders_snapshot, TraceInfo const &trace_info) {
   for (auto &order : open_orders_snapshot.orders)
     (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
 }
 
-void OrderUpdate::operator()(const json::OpenOrders &open_orders, const TraceInfo &trace_info) {
+void OrderUpdate::operator()(json::OpenOrders const &open_orders, TraceInfo const &trace_info) {
   auto &order = open_orders.order;
   // ... just confusing
   auto order_id = std::empty(open_orders.order_id) ? order.order_id : open_orders.order_id;
   auto cli_ord_id = std::empty(open_orders.cli_ord_id) ? order.cli_ord_id : open_orders.cli_ord_id;
-  (*this)(
-      order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
+  (*this)(order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
 }
 
 namespace {
@@ -81,8 +79,7 @@ RequestType compute_request_type(const json::Reason reason) {
   return {};
 }
 */
-OrderStatus compute_order_status_2(
-    json::Reason reason, bool is_cancel, double quantity, double filled) {
+OrderStatus compute_order_status_2(json::Reason reason, bool is_cancel, double quantity, double filled) {
   switch (reason) {
     using enum json::Reason::type_t;
     case UNDEFINED:
@@ -136,12 +133,12 @@ OrderStatus compute_order_status_2(
 }  // namespace
 
 void OrderUpdate::operator()(
-    const json::Order &order,
-    [[maybe_unused]] const std::string_view &order_id,
-    const std::string_view &cli_ord_id,
+    json::Order const &order,
+    [[maybe_unused]] std::string_view const &order_id,
+    std::string_view const &cli_ord_id,
     const json::Reason reason,
     bool is_cancel,
-    const TraceInfo &trace_info,
+    TraceInfo const &trace_info,
     bool is_download) {
   auto side = compute_side(order.direction);
   auto order_type = json::map(order.type);
@@ -176,8 +173,7 @@ void OrderUpdate::operator()(
   };
   // auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
-  if (shared_.update_order(
-          request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order={}"sv, order);
