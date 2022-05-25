@@ -223,11 +223,7 @@ void Rest::operator()(Trace<json::Instruments const> const &events) {
     log::info<2>("item={}"sv, item);
     std::string symbol(item.symbol);  // note! we need the upper-case version
     std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-    if (shared_.discard_symbol(symbol))
-      continue;
-    if (all_symbols_.emplace(symbol).second)  // only include new
-      symbols.emplace_back(symbol);
-    ++counter;
+    auto discard = shared_.discard_symbol(symbol);
     const ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -252,8 +248,14 @@ void Rest::operator()(Trace<json::Instruments const> const &events) {
         .settlement_date = {},
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
+        .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    if (discard)
+      continue;
+    if (all_symbols_.emplace(symbol).second)  // only include new
+      symbols.emplace_back(symbol);
+    ++counter;
   }
   log::info("Instruments {} / {}"sv, counter, std::size(instruments.instruments));
   if (!std::empty(symbols)) {
