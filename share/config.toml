@@ -1,4 +1,9 @@
-symbols = "BTCUSD.*"
+symbols = [
+  "^FI_ETHUSD_[0-9]{6}$",  # futures
+  "^FI_XBTUSD_[0-9]{6}$",  # futures
+  "^PF_ETHUSD$",           # swaps
+  "^PF_XBTUSD$"            # swaps
+]
 
 [accounts]
 
