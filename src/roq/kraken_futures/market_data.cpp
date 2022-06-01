@@ -39,7 +39,7 @@ auto create_connection(auto &handler, auto &context) {
   core::web::ClientSocket::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
-      .disconnect_on_idle_timeout = {},
+      .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .query = {},
@@ -272,6 +272,7 @@ void MarketData::operator()(Trace<json::Ticker const> const &event) {
   profile_.ticker([&]() {
     auto &[trace_info, ticker] = event;
     log::info<4>("ticker={}"sv, ticker);
+    connection_.touch(trace_info.source_receive_time);
     const TopOfBook top_of_book{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -338,6 +339,7 @@ void MarketData::operator()(Trace<json::BookSnapshot const> const &event) {
   profile_.book_snapshot([&]() {
     auto &[trace_info, book_snapshot] = event;
     log::info<4>("book_snapshot={}"sv, book_snapshot);
+    connection_.touch(trace_info.source_receive_time);
     auto &symbol = book_snapshot.product_id;
     latch_.erase(symbol);  // unlatch
     core::back_emplacer bids(shared_.bids), asks(shared_.asks);
@@ -367,6 +369,7 @@ void MarketData::operator()(Trace<json::Book const> const &event) {
   profile_.book([&]() {
     auto &[trace_info, book] = event;
     log::info<4>("book={}"sv, book);
+    connection_.touch(trace_info.source_receive_time);
     auto &symbol = book.product_id;
     if (latch_.find(symbol) != std::end(latch_))
       return;  //  waiting for snapshot
@@ -406,6 +409,7 @@ void MarketData::operator()(Trace<json::TradeSnapshot const> const &event) {
   profile_.trade_snapshot([&]() {
     auto &[trace_info, trade_snapshot] = event;
     log::info<4>("trade_snapshot={}"sv, trade_snapshot);
+    connection_.touch(trace_info.source_receive_time);
   });
 }
 
@@ -415,6 +419,7 @@ void MarketData::operator()(Trace<json::Trade const> const &event) {
     auto &trace_info = event.trace_info;
     auto &trade = event.value;
     log::info<4>("trade={}"sv, trade);
+    connection_.touch(trace_info.source_receive_time);
     core::back_emplacer trades(shared_.trades);
     trades.emplace_back([&](auto &result) { emplace(result, trade); });
     const TradeSummary trade_summary{
