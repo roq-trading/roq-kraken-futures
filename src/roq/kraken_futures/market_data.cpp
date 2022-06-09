@@ -378,8 +378,9 @@ void MarketData::operator()(Trace<json::Book const> const &event) {
         .price = book.price,
         .quantity = book.qty,
         .implied_quantity = NaN,
-        .price_level = {},
         .number_of_orders = {},
+        .update_action = {},
+        .price_level = {},
     };
     auto bid = book.side == json::Side::BUY;
     auto ask = book.side == json::Side::SELL;
