@@ -17,7 +17,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/core/web/client.hpp"
+#include "roq/web/rest/client.hpp"
 
 #include "roq/server.hpp"
 
@@ -28,7 +28,7 @@
 namespace roq {
 namespace kraken_futures {
 
-class OrderEntry final : public core::web::Client::Handler {
+class OrderEntry final : public web::rest::Client::Handler {
  public:
   struct Handler {
     virtual void operator()(Trace<StreamStatus const> const &) = 0;
@@ -63,34 +63,34 @@ class OrderEntry final : public core::web::Client::Handler {
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
  protected:
-  void operator()(core::web::Client::Connected const &) override;
-  void operator()(core::web::Client::Disconnected const &) override;
-  void operator()(core::web::Client::Latency const &) override;
+  void operator()(web::rest::Client::Connected const &) override;
+  void operator()(web::rest::Client::Disconnected const &) override;
+  void operator()(web::rest::Client::Latency const &) override;
 
   void operator()(ConnectionStatus);
 
   void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
-  void create_order_ack(Trace<core::web::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void create_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void modify_order(
       Event<ModifyOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void modify_order_ack(Trace<core::web::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void modify_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void cancel_order(
       Event<CancelOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void cancel_order_ack(Trace<core::web::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void cancel_order_ack(Trace<web::rest::Response const> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
-  void cancel_all_orders_ack(Trace<core::web::Response const> const &);
+  void cancel_all_orders_ack(Trace<web::rest::Response const> const &);
 
   void cancel_all_orders_after(std::chrono::nanoseconds timeout);
-  void cancel_all_orders_after_ack(Trace<core::web::Response const> const &);
+  void cancel_all_orders_after_ack(Trace<web::rest::Response const> const &);
 
   uint32_t download(OrderEntryState);
 
@@ -101,7 +101,7 @@ class OrderEntry final : public core::web::Client::Handler {
   const std::string name_;
   bool const master_;
   // connection
-  core::web::Client connection_;
+  std::unique_ptr<web::rest::Client> connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics

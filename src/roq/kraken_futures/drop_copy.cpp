@@ -11,6 +11,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/socket/client_factory.hpp"
+
 #include "roq/kraken_futures/flags.hpp"
 #include "roq/kraken_futures/order_update.hpp"
 
@@ -35,7 +37,7 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_uri();
-  core::web::ClientSocket::Config config{
+  web::socket::Client::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = {},
@@ -46,7 +48,7 @@ auto create_connection(auto &handler, auto &context) {
       .read_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
-  return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
+  return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
 }  // namespace
 
@@ -77,15 +79,15 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, S
 }
 
 void DropCopy::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void DropCopy::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void DropCopy::operator()(Event<Timer> const &event) {
-  connection_.refresh(event.value.now);
+  (*connection_).refresh(event.value.now);
 }
 
 void DropCopy::operator()(metrics::Writer &writer) {
@@ -118,7 +120,7 @@ void DropCopy::get_challenge() {
       security_.get_key());
   log::debug(R"(request="{}")"sv, message);
   log::info<2>(R"(request="{}")"sv, message);
-  connection_.send_text(message);
+  (*connection_).send_text(message);
 }
 
 void DropCopy::subscribe() {
@@ -143,14 +145,14 @@ void DropCopy::subscribe(std::string_view const &feed) {
       signed_challenge_);
   log::debug(R"(request="{}")"sv, message);
   log::info<2>(R"(request="{}")"sv, message);
-  connection_.send_text(message);
+  (*connection_).send_text(message);
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Connected const &) {
+void DropCopy::operator()(web::socket::Client::Connected const &) {
   // note! wait for upgrade
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Disconnected const &) {
+void DropCopy::operator()(web::socket::Client::Disconnected const &) {
   ++counter_.disconnect;
   ready_ = false;
   next_heartbeat_ = {};
@@ -160,15 +162,15 @@ void DropCopy::operator()(core::web::ClientSocket::Disconnected const &) {
   signed_challenge_.clear();
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Ready const &) {
+void DropCopy::operator()(web::socket::Client::Ready const &) {
   (*this)(ConnectionStatus::DOWNLOADING);
   download_.begin();
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Close const &) {
+void DropCopy::operator()(web::socket::Client::Close const &) {
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Latency const &latency) {
+void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -179,11 +181,11 @@ void DropCopy::operator()(core::web::ClientSocket::Latency const &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Text const &text) {
+void DropCopy::operator()(web::socket::Client::Text const &text) {
   parse(text.payload);
 }
 
-void DropCopy::operator()(core::web::ClientSocket::Binary const &) {
+void DropCopy::operator()(web::socket::Client::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
