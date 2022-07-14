@@ -428,7 +428,7 @@ void OrderEntry::create_order_ack(
         default:
           response.expect(web::http::Status::OK);  // throws
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::CREATE_ORDER,
@@ -603,7 +603,7 @@ void OrderEntry::modify_order_ack(
         default:
           response.expect(web::http::Status::OK);  // throws
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::MODIFY_ORDER,
@@ -771,7 +771,7 @@ void OrderEntry::cancel_order_ack(
         default:
           response.expect(web::http::Status::OK);  // throws
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       oms::Response response{
           .type = RequestType::CANCEL_ORDER,
@@ -847,7 +847,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response const> const &e
         default:
           response.expect(web::http::Status::OK);  // throws
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       // note! this event does not require an ack
     }
@@ -907,7 +907,7 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response const> co
         default:
           response.expect(web::http::Status::OK);  // throws
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       // note! this event does not require an ack
     }

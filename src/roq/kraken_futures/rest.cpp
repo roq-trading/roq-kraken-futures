@@ -207,7 +207,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response const> const &event, ui
           log::fatal("Unexpected"sv);
         }
       }
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
