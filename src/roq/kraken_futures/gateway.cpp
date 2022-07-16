@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "roq/io/engine/libevent/context_factory.hpp"
+#include "roq/io/engine/context_factory.hpp"
 
 #include "roq/kraken_futures/flags.hpp"
 
@@ -50,7 +50,7 @@ auto create_drop_copy(Gateway &gateway, io::Context &context, uint16_t &stream_i
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
-      security_(create_security<decltype(security_)>(config)), context_(io::engine::libevent::ContextFactory::create()),
+      security_(create_security<decltype(security_)>(config)), context_(io::engine::ContextFactory::create_libevent()),
       shared_(dispatcher), rest_(*this, *context_, ++stream_id_, shared_),
       order_entry_(create_order_entry<decltype(order_entry_)>(
           *this, *context_, stream_id_, security_, shared_, master_account_)),
