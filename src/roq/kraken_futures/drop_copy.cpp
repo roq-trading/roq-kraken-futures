@@ -369,6 +369,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot const> const &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
                 .update_type = {},
+                .user = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {
@@ -417,6 +418,7 @@ void DropCopy::operator()(Trace<json::Fills const> const &event) {
                 .fills = {&fill, 1},
                 .routing_id = order.routing_id,
                 .update_type = {},
+                .user = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, true, order.user_id);
           })) {
