@@ -67,6 +67,18 @@
     {
       "name": "postOnly",
       "type": "bool"
+    },
+    {
+      "name": "impactMidSize",
+      "type": "double"
+    },
+    {
+      "name": "maxPositionSize",
+      "type": "double"
+    },
+    {
+      "name": "openingDate",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }
