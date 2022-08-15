@@ -22,8 +22,10 @@ WS_URI="wss://${ENV}$URI/ws/v3"
 $PREFIX ./roq-kraken-futures \
 	--name "$NAME" \
 	--config_file "$CONFIG_FILE" \
-	--client_listen_address "$CWD/$NAME.sock" \
-	--metrics_listen_address "$CWD/${NAME}_metrics.sock" \
+  --event_log_dir "$HOME/var/lib/roq/data" \                                                                            
+  --event_log_symlink \                                                                                                 
+  --client_listen_address "$HOME/run/$NAME.sock" \                                                                      
+  --metrics_listen_address "$HOME/run/${NAME}_metrics.sock" \
 	--rest_uri "$REST_URI" \
 	--ws_uri "$WS_URI" \
 	$@
