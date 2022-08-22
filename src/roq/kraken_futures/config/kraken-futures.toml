@@ -7,11 +7,11 @@ symbols = [
 
 [accounts]
 
-  [accounts.A1]
-  master = true
-  login = "GqF8l3B-ufLb_2z8X9cyV4KRXgIIc4ns"
-  secret = "WKltV1MSWfHOze6f8TlmUWxFcBeQuoNy"
-  symbols = [ "BTC.*", "ETH.*" ]
+#  [accounts.A1]
+#  master = true
+#  login = "GqF8l3B-ufLb_2z8X9cyV4KRXgIIc4ns"
+#  secret = "WKltV1MSWfHOze6f8TlmUWxFcBeQuoNy"
+#  symbols = [ "BTC.*", "ETH.*" ]
 
 [users]
 

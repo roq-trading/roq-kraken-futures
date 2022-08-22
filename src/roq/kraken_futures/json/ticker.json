@@ -106,6 +106,10 @@
     {
       "name": "post_only",
       "type": "bool"
+    },
+    {
+      "name": "volumeQuote",
+      "type": "int32_t"
     }
   ]
 }
