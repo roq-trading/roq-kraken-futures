@@ -30,11 +30,11 @@ namespace kraken_futures {
 class DropCopy final : public web::socket::Client::Handler, public json::ParserPrivate::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
-    virtual void operator()(Trace<TradeUpdate const> const &, bool is_last, uint8_t user_id) = 0;
-    virtual void operator()(Trace<FundsUpdate const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<PositionUpdate const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
+    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
   };
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &);
@@ -68,24 +68,24 @@ class DropCopy final : public web::socket::Client::Handler, public json::ParserP
 
   // json::ParserPrivate::Handler
 
-  void operator()(Trace<json::Info const> const &) override;
-  void operator()(Trace<json::Alert const> const &) override;
-  void operator()(Trace<json::Error const> const &) override;
+  void operator()(Trace<json::Info> const &) override;
+  void operator()(Trace<json::Alert> const &) override;
+  void operator()(Trace<json::Error> const &) override;
 
-  void operator()(Trace<json::Challenge const> const &) override;
+  void operator()(Trace<json::Challenge> const &) override;
 
-  void operator()(Trace<json::Subscribed const> const &) override;
+  void operator()(Trace<json::Subscribed> const &) override;
 
-  void operator()(Trace<json::Heartbeat const> const &) override;
+  void operator()(Trace<json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::AccountBalancesAndMargins const> const &) override;
-  void operator()(Trace<json::OpenPositions const> const &) override;
+  void operator()(Trace<json::AccountBalancesAndMargins> const &) override;
+  void operator()(Trace<json::OpenPositions> const &) override;
 
-  void operator()(Trace<json::OpenOrdersSnapshot const> const &) override;
-  void operator()(Trace<json::OpenOrders const> const &) override;
+  void operator()(Trace<json::OpenOrdersSnapshot> const &) override;
+  void operator()(Trace<json::OpenOrders> const &) override;
 
-  void operator()(Trace<json::FillsSnapshot const> const &) override;
-  void operator()(Trace<json::Fills const> const &) override;
+  void operator()(Trace<json::FillsSnapshot> const &) override;
+  void operator()(Trace<json::Fills> const &) override;
 
  private:
   void parse(std::string_view const &message);

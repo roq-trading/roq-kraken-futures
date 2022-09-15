@@ -28,19 +28,19 @@ namespace json {
 
 struct ParserPublic final {
   struct Handler {
-    virtual void operator()(Trace<Info const> const &) = 0;
-    virtual void operator()(Trace<Alert const> const &) = 0;
-    virtual void operator()(Trace<Error const> const &) = 0;
+    virtual void operator()(Trace<Info> const &) = 0;
+    virtual void operator()(Trace<Alert> const &) = 0;
+    virtual void operator()(Trace<Error> const &) = 0;
 
-    virtual void operator()(Trace<Subscribed const> const &) = 0;
+    virtual void operator()(Trace<Subscribed> const &) = 0;
 
-    virtual void operator()(Trace<Heartbeat const> const &) = 0;
+    virtual void operator()(Trace<Heartbeat> const &) = 0;
 
-    virtual void operator()(Trace<Ticker const> const &) = 0;
-    virtual void operator()(Trace<BookSnapshot const> const &) = 0;
-    virtual void operator()(Trace<Book const> const &) = 0;
-    virtual void operator()(Trace<TradeSnapshot const> const &) = 0;
-    virtual void operator()(Trace<Trade const> const &) = 0;
+    virtual void operator()(Trace<Ticker> const &) = 0;
+    virtual void operator()(Trace<BookSnapshot> const &) = 0;
+    virtual void operator()(Trace<Book> const &) = 0;
+    virtual void operator()(Trace<TradeSnapshot> const &) = 0;
+    virtual void operator()(Trace<Trade> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::json::Buffer &, TraceInfo const &);

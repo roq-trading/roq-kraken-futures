@@ -229,25 +229,25 @@ uint32_t DropCopy::download(DropCopyState state) {
   return {};
 }
 
-void DropCopy::operator()(Trace<json::Info const> const &event) {
+void DropCopy::operator()(Trace<json::Info> const &event) {
   auto &[trace_info, info] = event;
   log::debug("info={}"sv, info);
   log::info<2>("info={}"sv, info);
 }
 
-void DropCopy::operator()(Trace<json::Alert const> const &event) {
+void DropCopy::operator()(Trace<json::Alert> const &event) {
   auto &[trace_info, alert] = event;
   log::debug("alert={}"sv, alert);
   log::warn<1>("alert={}"sv, alert);
 }
 
-void DropCopy::operator()(Trace<json::Error const> const &event) {
+void DropCopy::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::debug("error={}"sv, error);
   log::warn("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::Challenge const> const &event) {
+void DropCopy::operator()(Trace<json::Challenge> const &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::debug("challenge={}"sv, challenge);
@@ -260,13 +260,13 @@ void DropCopy::operator()(Trace<json::Challenge const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Subscribed const> const &event) {
+void DropCopy::operator()(Trace<json::Subscribed> const &event) {
   auto &[trace_info, subscribed] = event;
   log::debug("subscribed={}"sv, subscribed);
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void DropCopy::operator()(Trace<json::Heartbeat const> const &event) {
+void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::debug("heartbeat={}"sv, heartbeat);
@@ -274,7 +274,7 @@ void DropCopy::operator()(Trace<json::Heartbeat const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::AccountBalancesAndMargins const> const &event) {
+void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
@@ -294,7 +294,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins const> const &ev
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenPositions const> const &event) {
+void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
@@ -317,7 +317,7 @@ void DropCopy::operator()(Trace<json::OpenPositions const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenOrdersSnapshot const> const &event) {
+void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
@@ -325,7 +325,7 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenOrders const> const &event) {
+void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
@@ -333,7 +333,7 @@ void DropCopy::operator()(Trace<json::OpenOrders const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::FillsSnapshot const> const &event) {
+void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
   profile_.fills_snapshot([&]() {
     // auto &[trace_info, fills_snapshot] = event;
     auto &trace_info = event.trace_info;
@@ -381,7 +381,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot const> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Fills const> const &event) {
+void DropCopy::operator()(Trace<json::Fills> const &event) {
   profile_.fills([&]() {
     // auto &[trace_info, fills] = event;
     auto &trace_info = event.trace_info;

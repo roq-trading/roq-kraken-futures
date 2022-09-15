@@ -244,34 +244,34 @@ void MarketData::parse(std::string_view const &message) {
   });
 }
 
-void MarketData::operator()(Trace<json::Info const> const &event) {
+void MarketData::operator()(Trace<json::Info> const &event) {
   auto &[trace_info, info] = event;
   log::info<2>("info={}"sv, info);
 }
 
-void MarketData::operator()(Trace<json::Alert const> const &event) {
+void MarketData::operator()(Trace<json::Alert> const &event) {
   auto &[trace_info, alert] = event;
   log::warn<1>("alert={}"sv, alert);
 }
 
-void MarketData::operator()(Trace<json::Error const> const &event) {
+void MarketData::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::warn("error={}"sv, error);
 }
 
-void MarketData::operator()(Trace<json::Subscribed const> const &event) {
+void MarketData::operator()(Trace<json::Subscribed> const &event) {
   auto &[trace_info, subscribed] = event;
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void MarketData::operator()(Trace<json::Heartbeat const> const &event) {
+void MarketData::operator()(Trace<json::Heartbeat> const &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::info<2>("heartbeat={}"sv, heartbeat);
   });
 }
 
-void MarketData::operator()(Trace<json::Ticker const> const &event) {
+void MarketData::operator()(Trace<json::Ticker> const &event) {
   profile_.ticker([&]() {
     auto &[trace_info, ticker] = event;
     log::info<4>("ticker={}"sv, ticker);
@@ -338,7 +338,7 @@ void MarketData::operator()(Trace<json::Ticker const> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::BookSnapshot const> const &event) {
+void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
   profile_.book_snapshot([&]() {
     auto &[trace_info, book_snapshot] = event;
     log::info<4>("book_snapshot={}"sv, book_snapshot);
@@ -368,7 +368,7 @@ void MarketData::operator()(Trace<json::BookSnapshot const> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Book const> const &event) {
+void MarketData::operator()(Trace<json::Book> const &event) {
   profile_.book([&]() {
     auto &[trace_info, book] = event;
     log::info<4>("book={}"sv, book);
@@ -409,7 +409,7 @@ void MarketData::operator()(Trace<json::Book const> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::TradeSnapshot const> const &event) {
+void MarketData::operator()(Trace<json::TradeSnapshot> const &event) {
   profile_.trade_snapshot([&]() {
     auto &[trace_info, trade_snapshot] = event;
     log::info<4>("trade_snapshot={}"sv, trade_snapshot);
@@ -417,7 +417,7 @@ void MarketData::operator()(Trace<json::TradeSnapshot const> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::Trade const> const &event) {
+void MarketData::operator()(Trace<json::Trade> const &event) {
   profile_.trade([&]() {
     // auto &[trace_info, trade] = event;
     auto &trace_info = event.trace_info;

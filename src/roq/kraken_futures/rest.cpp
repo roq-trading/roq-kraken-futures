@@ -181,7 +181,7 @@ void Rest::get_instruments() {
   });
 }
 
-void Rest::get_instruments_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
+void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   profile_.instruments_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::INSTRUMENTS;
@@ -214,7 +214,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response const> const &event, ui
   });
 }
 
-void Rest::operator()(Trace<json::Instruments const> const &events) {
+void Rest::operator()(Trace<json::Instruments> const &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));

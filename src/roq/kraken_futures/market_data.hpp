@@ -28,13 +28,13 @@ namespace kraken_futures {
 class MarketData final : public web::socket::Client::Handler, public json::ParserPublic::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
-    virtual void operator()(Trace<MarketStatus const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<TopOfBook const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketByPriceUpdate const> const &, bool is_last, bool refresh) = 0;
-    virtual void operator()(Trace<TradeSummary const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<StatisticsUpdate const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
+    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last, bool refresh) = 0;
+    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
   };
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
@@ -81,19 +81,19 @@ class MarketData final : public web::socket::Client::Handler, public json::Parse
 
   // json::ParserPublic::Handler
 
-  void operator()(Trace<json::Info const> const &) override;
-  void operator()(Trace<json::Alert const> const &) override;
-  void operator()(Trace<json::Error const> const &) override;
+  void operator()(Trace<json::Info> const &) override;
+  void operator()(Trace<json::Alert> const &) override;
+  void operator()(Trace<json::Error> const &) override;
 
-  void operator()(Trace<json::Subscribed const> const &) override;
+  void operator()(Trace<json::Subscribed> const &) override;
 
-  void operator()(Trace<json::Heartbeat const> const &) override;
+  void operator()(Trace<json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::Ticker const> const &) override;
-  void operator()(Trace<json::BookSnapshot const> const &) override;
-  void operator()(Trace<json::Book const> const &) override;
-  void operator()(Trace<json::TradeSnapshot const> const &) override;
-  void operator()(Trace<json::Trade const> const &) override;
+  void operator()(Trace<json::Ticker> const &) override;
+  void operator()(Trace<json::BookSnapshot> const &) override;
+  void operator()(Trace<json::Book> const &) override;
+  void operator()(Trace<json::TradeSnapshot> const &) override;
+  void operator()(Trace<json::Trade> const &) override;
 
  private:
   void parse(std::string_view const &message);
