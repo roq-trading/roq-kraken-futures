@@ -53,7 +53,7 @@ auto create_connection(auto &handler, auto &context) {
 }
 
 template <typename T>
-void emplace(MBPUpdate &result, const T &value) {
+void emplace(MBPUpdate &result, T const &value) {
   new (&result) MBPUpdate{
       .price = value.price,
       .quantity = value.qty,
@@ -65,12 +65,14 @@ void emplace(MBPUpdate &result, const T &value) {
 }
 
 template <typename T>
-void emplace(Trade &result, const T &value) {
+void emplace(Trade &result, T const &value) {
   new (&result) Trade{
       .side = json::map(value.side),
       .price = value.price,
       .quantity = value.qty,
       .trade_id = value.uid,
+      .taker_order_id = {},
+      .maker_order_id = {},
   };
 }
 }  // namespace
@@ -432,6 +434,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
         .symbol = trade.product_id,
         .trades = trades,
         .exchange_time_utc = trade.time,
+        .exchange_sequence = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
   });
