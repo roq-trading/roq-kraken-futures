@@ -29,6 +29,8 @@ using namespace std::literals;
 namespace roq {
 namespace kraken_futures {
 
+// === CONSTANTS ===
+
 namespace {
 auto const NAME = "om"sv;
 
@@ -38,11 +40,14 @@ const Mask SUPPORTS{
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
+}  // namespace
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(std::string_view const &group, std::string_view const &function)
-      : core::metrics::Factory(server::Flags::name(), group, function) {}
-};
+// === HELPERS ===
+
+namespace {
+auto create_name(auto stream_id, auto const &account) {
+  return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
+}
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
@@ -62,15 +67,23 @@ auto create_connection(auto &handler, auto &context) {
   return web::rest::ClientFactory::create(handler, context, config);
 }
 
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(auto const &group, auto const &function)
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
+};
+
+// following is used from several places
+
 auto get_quality_of_service() {
   return Flags::rest_allow_order_request_pipeline() ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 OrderEntry::OrderEntry(
     Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared, bool master)
-    : handler_(handler), stream_id_(stream_id),
-      name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())), master_(master),
+    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_, security.get_account())), master_(master),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -324,7 +337,6 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
 void OrderEntry::create_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
-    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
@@ -498,7 +510,6 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
-    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
@@ -666,7 +677,6 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
-    // auto &[trace_info, response] = event; // XXX clang13
     auto &trace_info = event.trace_info;
     auto &response = event.value;
     try {
