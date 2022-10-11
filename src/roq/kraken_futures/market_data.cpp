@@ -28,7 +28,7 @@ namespace kraken_futures {
 namespace {
 auto const NAME = "md"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,
@@ -228,7 +228,7 @@ void MarketData::unsubscribe(std::string_view const &feed, std::span<T> const &p
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto trace_info = server::create_trace_info();
-    core::json::Buffer buffer(decode_buffer_);
+    core::json::Buffer buffer{decode_buffer_};
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
@@ -346,7 +346,7 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
           .price_level = {},
       };
     };
-    core::back_emplacer bids(shared_.bids), asks(shared_.asks);
+    core::back_emplacer bids{shared_.bids}, asks{shared_.asks};
     for (const auto &bid : book_snapshot.bids)
       bids.emplace_back([&](auto &result) { create_mbp_update(result, bid); });
     for (const auto &ask : book_snapshot.asks)
@@ -435,7 +435,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
           .maker_order_id = {},
       };
     };
-    core::back_emplacer trades(shared_.trades);
+    core::back_emplacer trades{shared_.trades};
     trades.emplace_back([&](auto &result) { create_trade(result, trade); });
     const TradeSummary trade_summary{
         .stream_id = stream_id_,

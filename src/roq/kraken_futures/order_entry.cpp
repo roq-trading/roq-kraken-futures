@@ -34,7 +34,7 @@ namespace kraken_futures {
 namespace {
 auto const NAME = "om"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
@@ -158,12 +158,12 @@ json::OrderEventOrderType compute_order_type(
         return json::OrderEventOrderType::STP;
       break;
   }
-  throw RuntimeError(
+  throw RuntimeError{
       "Unexpected combination of order_type={}, time_in_force={}, execution_instructions={}, stop_price={}"sv,
       order_type,
       time_in_force,
       execution_instructions,
-      stop_price);
+      stop_price};
 }
 }  // namespace
 
@@ -246,10 +246,8 @@ void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
 void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
-    auto method = web::http::Method::POST;
-    auto path = "/api/v3/sendorder"sv;
     auto order_type = compute_order_type(
         create_order.order_type,
         create_order.time_in_force,
@@ -310,9 +308,10 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
           reduce_only);
     }
     log::debug(R"(query="{}")"sv, query);
+    auto path = "/api/v3/sendorder"sv;
     auto headers = security_.create_headers(path, query);
     web::rest::Request request{
-        .method = method,
+        .method = web::http::Method::POST,
         .path = path,
         .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
@@ -327,7 +326,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         [this, user_id = message_info.source, order_id = create_order.order_id](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           uint32_t version = 1;
           create_order_ack(event, user_id, order_id, version);
         });
@@ -345,7 +344,7 @@ void OrderEntry::create_order_ack(
       switch (category) {
         using enum web::http::Category;
         case SUCCESS: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto send_order = core::json::Parser::create<json::SendOrder>(body, buffer);
           switch (send_order.result) {
             using enum json::Result::type_t;
@@ -418,7 +417,7 @@ void OrderEntry::create_order_ack(
           break;
         }
         case CLIENT_ERROR: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
@@ -467,14 +466,12 @@ void OrderEntry::create_order_ack(
 void OrderEntry::modify_order(
     Event<ModifyOrder> const &event,
     oms::Order const &order,
-    [[maybe_unused]] std::string_view const &request_id,
+    std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, modify_order] = event;
-    auto method = web::http::Method::POST;
-    auto path = "/api/v3/editorder"sv;
     // note! price has max 2 decimals, size is integer
     auto query = fmt::format(
         "?orderId={}"
@@ -484,9 +481,10 @@ void OrderEntry::modify_order(
         modify_order.quantity,
         modify_order.price);
     log::debug(R"(query="{}")"sv, query);
+    auto path = "/api/v3/editorder"sv;
     auto headers = security_.create_headers(path, query);
     web::rest::Request request{
-        .method = method,
+        .method = web::http::Method::POST,
         .path = path,
         .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
@@ -501,7 +499,7 @@ void OrderEntry::modify_order(
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           modify_order_ack(event, user_id, order_id, version);
         });
   });
@@ -518,7 +516,7 @@ void OrderEntry::modify_order_ack(
       switch (category) {
         using enum web::http::Category;
         case SUCCESS: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto edit_order = core::json::Parser::create<json::EditOrder>(body, buffer);
           switch (edit_order.result) {
             using enum json::Result::type_t;
@@ -592,7 +590,7 @@ void OrderEntry::modify_order_ack(
           break;
         }
         case CLIENT_ERROR: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
@@ -641,19 +639,18 @@ void OrderEntry::modify_order_ack(
 void OrderEntry::cancel_order(
     Event<CancelOrder> const &event,
     oms::Order const &order,
-    [[maybe_unused]] std::string_view const &request_id,
+    std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
+      throw oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
-    auto method = web::http::Method::POST;
-    auto path = "/api/v3/cancelorder"sv;
     auto query = fmt::format("?order_id={}"sv, order.external_order_id);
     log::debug(R"(query="{}")"sv, query);
+    auto path = "/api/v3/cancelorder"sv;
     auto headers = security_.create_headers(path, query);
     web::rest::Request request{
-        .method = method,
+        .method = web::http::Method::POST,
         .path = path,
         .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
@@ -668,7 +665,7 @@ void OrderEntry::cancel_order(
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
+          Trace event{trace_info, response};
           cancel_order_ack(event, user_id, order_id, version);
         });
   });
@@ -685,7 +682,7 @@ void OrderEntry::cancel_order_ack(
       switch (category) {
         using enum web::http::Category;
         case SUCCESS: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto cancel_order = core::json::Parser::create<json::CancelOrder>(body, buffer);
           switch (cancel_order.result) {
             using enum json::Result::type_t;
@@ -759,7 +756,7 @@ void OrderEntry::cancel_order_ack(
           break;
         }
         case CLIENT_ERROR: {
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, error);
           auto text = std::size(error.errors) > 0 ? error.errors[0].message : error.message;
@@ -808,12 +805,11 @@ void OrderEntry::cancel_order_ack(
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
     if (!ready())
-      throw oms::NotReady("not ready"sv);
-    auto method = web::http::Method::POST;
+      throw oms::NotReady{"not ready"sv};
     auto path = "/api/v3/cancelallorders"sv;
     auto headers = security_.create_headers(path, {});
     web::rest::Request request{
-        .method = method,
+        .method = web::http::Method::POST,
         .path = path,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
@@ -824,7 +820,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_v
     };
     (*connection_)(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       cancel_all_orders_ack(event);
     });
   });
@@ -839,7 +835,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
       switch (status) {
         using enum web::http::Status;
         case OK: {  // 200
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto cancel_all_orders = core::json::Parser::create<json::CancelAllOrders>(body, buffer);
           log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
           break;
@@ -848,7 +844,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
         case UNAUTHORIZED:  // 401
         case FORBIDDEN:     // 403
         case NOT_FOUND: {   // 404
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto rest_error = core::json::Parser::create<json::RestError>(body, buffer);
           log::warn("error={}"sv, rest_error);
           // note! this event does not require an ack
@@ -868,12 +864,11 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
 
 void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
-  auto method = web::http::Method::POST;
-  auto path = "/api/v3/cancelallordersafter"sv;
   auto query = fmt::format("?timeout={}"sv, value.count());
+  auto path = "/api/v3/cancelallordersafter"sv;
   auto headers = security_.create_headers(path, query);
   web::rest::Request request{
-      .method = method,
+      .method = web::http::Method::POST,
       .path = path,
       .query = query,
       .accept = web::http::Accept::APPLICATION_JSON,
@@ -884,7 +879,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   };
   (*connection_)("cancel_all_orders_after"sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
     auto trace_info = server::create_trace_info();
-    Trace event(trace_info, response);
+    Trace event{trace_info, response};
     cancel_all_orders_after_ack(event);
   });
 }
@@ -898,7 +893,7 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &e
       switch (status) {
         using enum web::http::Status;
         case OK: {  // 200
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto cancel_all_orders_after_ack = core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
           log::debug("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
           log::info<2>("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
@@ -908,7 +903,7 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &e
         case UNAUTHORIZED:  // 401
         case FORBIDDEN:     // 403
         case NOT_FOUND: {   // 404
-          core::json::Buffer buffer(decode_buffer_);
+          core::json::Buffer buffer{decode_buffer_};
           auto cancel_all_orders_after_ack = core::json::Parser::create<json::CancelAllAfterAck>(body, buffer);
           log::debug("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);
           log::warn<2>("cancel_all_orders_after_ack={}"sv, cancel_all_orders_after_ack);

@@ -172,11 +172,9 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_instruments() {
   profile_.instruments([&]() {
-    auto method = web::http::Method::GET;
-    auto path = "/api/v3/instruments"sv;
     web::rest::Request request{
-        .method = method,
-        .path = path,
+        .method = web::http::Method::GET,
+        .path = "/api/v3/instruments"sv,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -187,7 +185,7 @@ void Rest::get_instruments() {
     auto sequence = download_.sequence();
     (*connection_)("instruments"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       get_instruments_ack(event, sequence);
     });
   });
@@ -205,10 +203,10 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
         return;
       }
       response.expect(web::http::Status::OK);
-      core::json::Buffer buffer(decode_buffer_);
+      core::json::Buffer buffer{decode_buffer_};
       const auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
       if (std::empty(instruments.error)) {
-        Trace event(trace_info, instruments);
+        Trace event{trace_info, instruments};
         (*this)(event);
         download_.check(state);
       } else {
@@ -235,7 +233,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
   size_t counter = {};
   for (auto &item : instruments.instruments) {
     log::info<2>("item={}"sv, item);
-    std::string symbol(item.symbol);  // note! we need the upper-case version
+    std::string symbol{item.symbol};  // note! we need the upper-case version
     std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
     auto discard = shared_.discard_symbol(symbol);
     const ReferenceData reference_data{

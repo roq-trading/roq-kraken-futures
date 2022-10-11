@@ -7,8 +7,6 @@
 #include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.hpp"
-
 #include "roq/core/metrics/factory.hpp"
 
 #include "roq/web/socket/client_factory.hpp"
@@ -26,7 +24,7 @@ namespace kraken_futures {
 namespace {
 auto const NAME = "ex"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::ORDER,
     SupportType::TRADE,
     SupportType::POSITION,
@@ -443,7 +441,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto trace_info = server::create_trace_info();
-    core::json::Buffer buffer(decode_buffer_);
+    core::json::Buffer buffer{decode_buffer_};
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (!result)
       log::warn(R"(Unexpected: message="{}")"sv, message);

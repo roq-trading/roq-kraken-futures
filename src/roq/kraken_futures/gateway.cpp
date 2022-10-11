@@ -11,40 +11,43 @@ using namespace std::literals;
 namespace roq {
 namespace kraken_futures {
 
+// === HELPERS ===
+
 namespace {
 template <typename R>
-auto create_security(Config const &config) {
+auto create_security(auto const &config) {
   R result;
-  for (auto &[_, iter] : config.accounts)
-    result.try_emplace(iter.name, std::make_unique<Security>(config, iter.name));
+  for (auto &[_, account] : config.accounts)
+    result.try_emplace(account.name, std::make_unique<Security>(config, account.name));
   return result;
 }
 
-template <typename R, typename T>
+template <typename R>
 auto create_order_entry(
-    Gateway &gateway,
-    io::Context &context,
-    uint16_t &stream_id,
-    T &security,
-    Shared &shared,
-    std::string_view const &master_account) {
+    auto &gateway,
+    auto &context,
+    auto &stream_id,
+    auto &security_by_account,
+    auto &shared,
+    auto const &master_account) {
   R result;
-  for (auto &iter : security) {
-    auto master = iter.first == master_account;
-    result.try_emplace(
-        iter.first, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared, master));
+  for (auto &[account, security] : security_by_account) {
+    auto master = static_cast<std::string_view>(account) == master_account;
+    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *security, shared, master));
   }
   return result;
 }
 
-template <typename R, typename T>
-auto create_drop_copy(Gateway &gateway, io::Context &context, uint16_t &stream_id, T &security, Shared &shared) {
+template <typename R>
+auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
   R result;
-  for (auto &iter : security)
-    result.try_emplace(iter.first, std::make_unique<DropCopy>(gateway, context, ++stream_id, *iter.second, shared));
+  for (auto &[account, security] : security_by_account)
+    result.try_emplace(account, std::make_unique<DropCopy>(gateway, context, ++stream_id, *security, shared));
   return result;
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
@@ -116,7 +119,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
           CancelAllOrders cancel_all_orders{
               .account = account,
           };
-          Event event(message_info, cancel_all_orders);
+          Event event{message_info, cancel_all_orders};
           (*order_entry)(event, {});
         }
       }
@@ -234,7 +237,7 @@ OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
   auto iter = order_entry_.find(account);
   if (iter != std::end(order_entry_))
     return *(*iter).second;
-  throw RuntimeError(R"(Unknown account="{}")"sv, account);
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
 }
 
 }  // namespace kraken_futures

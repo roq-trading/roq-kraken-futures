@@ -15,12 +15,16 @@ namespace roq {
 namespace kraken_futures {
 namespace tools {
 
+// === HELPERS ===
+
 namespace {
-auto create_hmac(std::string_view const &secret) {
+auto create_hmac(auto const &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Hasher::Hasher(std::string_view const &secret) : hmac_(create_hmac(secret)) {
 }
