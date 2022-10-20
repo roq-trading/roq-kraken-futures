@@ -109,7 +109,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    const StreamStatus stream_status{
+    StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -142,7 +142,7 @@ void Rest::operator()(web::rest::Client::Disconnected const &) {
 
 void Rest::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
-  const ExternalLatency external_latency{
+  ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -182,12 +182,12 @@ void Rest::get_instruments() {
         .body = {},
         .quality_of_service = {},
     };
-    auto sequence = download_.sequence();
-    (*connection_)("instruments"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event{trace_info, response};
       get_instruments_ack(event, sequence);
-    });
+    };
+    (*connection_)("instruments"sv, request, callback);
   });
 }
 
@@ -204,7 +204,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       }
       response.expect(web::http::Status::OK);
       core::json::Buffer buffer{decode_buffer_};
-      const auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
+      auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
       if (std::empty(instruments.error)) {
         Trace event{trace_info, instruments};
         (*this)(event);
@@ -236,7 +236,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     std::string symbol{item.symbol};  // note! we need the upper-case version
     std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
     auto discard = shared_.discard_symbol(symbol);
-    const ReferenceData reference_data{
+    ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,

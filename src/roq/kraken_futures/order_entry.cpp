@@ -199,7 +199,7 @@ uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &event, std::string
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    const StreamStatus stream_status{
+    StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -232,7 +232,7 @@ void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
 
 void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
-  const ExternalLatency external_latency{
+  ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -320,16 +320,14 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         .body = {},
         .quality_of_service = get_quality_of_service(),
     };
-    (*connection_)(
-        request_id,
-        request,
-        [this, user_id = message_info.source, order_id = create_order.order_id](
-            [[maybe_unused]] auto &request_id, auto &response) {
-          auto trace_info = server::create_trace_info();
-          Trace event{trace_info, response};
-          uint32_t version = 1;
-          create_order_ack(event, user_id, order_id, version);
-        });
+    auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](
+                        [[maybe_unused]] auto &request_id, auto &response) {
+      auto trace_info = server::create_trace_info();
+      Trace event{trace_info, response};
+      auto version = uint32_t{1};
+      create_order_ack(event, user_id, order_id, version);
+    };
+    (*connection_)(request_id, request, callback);
   });
 }
 
@@ -493,15 +491,14 @@ void OrderEntry::modify_order(
         .body = {},
         .quality_of_service = get_quality_of_service(),
     };
-    (*connection_)(
-        request_id,
-        request,
+    auto callback =
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           Trace event{trace_info, response};
           modify_order_ack(event, user_id, order_id, version);
-        });
+        };
+    (*connection_)(request_id, request, callback);
   });
 }
 
@@ -659,15 +656,14 @@ void OrderEntry::cancel_order(
         .body = {},
         .quality_of_service = get_quality_of_service(),
     };
-    (*connection_)(
-        request_id,
-        request,
+    auto callback =
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
             [[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           Trace event{trace_info, response};
           cancel_order_ack(event, user_id, order_id, version);
-        });
+        };
+    (*connection_)(request_id, request, callback);
   });
 }
 
@@ -818,11 +814,12 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_v
         .body = {},
         .quality_of_service = get_quality_of_service(),
     };
-    (*connection_)(request_id, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event{trace_info, response};
       cancel_all_orders_ack(event);
-    });
+    };
+    (*connection_)(request_id, request, callback);
   });
 }
 
@@ -877,11 +874,12 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
       .body = {},
       .quality_of_service = get_quality_of_service(),
   };
-  (*connection_)("cancel_all_orders_after"sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+  auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
     auto trace_info = server::create_trace_info();
     Trace event{trace_info, response};
     cancel_all_orders_after_ack(event);
-  });
+  };
+  (*connection_)("cancel_all_orders_after"sv, request, callback);
 }
 
 void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &event) {
