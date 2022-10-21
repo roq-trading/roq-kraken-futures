@@ -719,7 +719,8 @@ void OrderEntry::process_response(
         log::warn("error={}"sv, rest_error);
         auto text = std::size(rest_error.errors) > 0 ? rest_error.errors[0].message : rest_error.message;
         error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);
-      } break;
+        break;
+      }
       case SERVER_ERROR:  // 5xx
         error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, magic_enum::enum_name(status));
         break;
