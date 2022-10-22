@@ -198,8 +198,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        core::json::Buffer buffer{decode_buffer_};
-        auto instruments = core::json::Parser::create<json::Instruments>(body, buffer);
+        json::Instruments instruments{body, decode_buffer_};
         if (std::empty(instruments.error)) {
           Trace event_2{event, instruments};
           (*this)(event_2);
