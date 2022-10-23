@@ -49,7 +49,7 @@ class OrderUpdate final {
       case CANCELLED:
       case NO_ORDERS_TO_CANCEL:
       case NOT_FOUND:
-        throw RuntimeError("Unexpected: status={}"sv, send_status.status);
+        throw RuntimeError{"Unexpected: status={}"sv, send_status.status};
         break;
       case INVALID_ORDER_TYPE:
       case INVALID_SIDE:
@@ -71,7 +71,7 @@ class OrderUpdate final {
         break;
       case PLACED: {
         if (std::size(send_status.order_events) != 1)
-          throw RuntimeError("Unexpected: size={}"sv, std::size(send_status.order_events));
+          throw RuntimeError{"Unexpected: size={}"sv, std::size(send_status.order_events)};
         auto &order_event = send_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -79,7 +79,7 @@ class OrderUpdate final {
           case UNKNOWN:
           case EDIT:
           case CANCEL:
-            throw RuntimeError("Unexpected: type={}"sv, order_event.type);
+            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
             break;
           case PLACE: {
             auto &order_ = order_event.order;
@@ -179,7 +179,7 @@ class OrderUpdate final {
       case FILLED:
       case CANCELLED:
       case NO_ORDERS_TO_CANCEL:
-        throw RuntimeError("Unexpected: status={}"sv, edit_status.status);
+        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status};
         break;
       case NOT_FOUND:
       case INVALID_ORDER_TYPE:
@@ -202,7 +202,7 @@ class OrderUpdate final {
         break;
       case EDITED: {
         if (std::size(edit_status.order_events) != 1)
-          throw RuntimeError("Unexpected: size={}"sv, std::size(edit_status.order_events));
+          throw RuntimeError{"Unexpected: size={}"sv, std::size(edit_status.order_events)};
         auto &order_event = edit_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -210,7 +210,7 @@ class OrderUpdate final {
           case UNKNOWN:
           case PLACE:
           case CANCEL:
-            throw RuntimeError("Unexpected: type={}"sv, order_event.type);
+            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
             break;
           case EDIT: {
             auto &new_order = order_event.new_;
@@ -279,7 +279,7 @@ class OrderUpdate final {
       case PLACED:
       case EDITED:
       case FILLED:
-        throw RuntimeError("Unexpected: status={}"sv, cancel_status.status);
+        throw RuntimeError{"Unexpected: status={}"sv, cancel_status.status};
         break;
       case NO_ORDERS_TO_CANCEL:
       case INVALID_ORDER_TYPE:
@@ -302,7 +302,7 @@ class OrderUpdate final {
         break;
       case CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
-          throw RuntimeError("Unexpected: size={}"sv, std::size(cancel_status.order_events));
+          throw RuntimeError{"Unexpected: size={}"sv, std::size(cancel_status.order_events)};
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -310,7 +310,7 @@ class OrderUpdate final {
           case UNKNOWN:
           case PLACE:
           case EDIT:
-            throw RuntimeError("Unexpected: type={}"sv, order_event.type);
+            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
             break;
           case CANCEL: {
             auto &order_ = order_event.new_;

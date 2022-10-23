@@ -3,11 +3,11 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include "roq/api.hpp"
 #include "roq/server.hpp"
 
-#include "roq/core/memory.hpp"
 #include "roq/core/symbols.hpp"
 
 namespace roq {
@@ -37,9 +37,9 @@ struct Shared final {
   }
 
  public:
-  core::page_aligned_vector<Fill> fills;
-  core::page_aligned_vector<MBPUpdate> bids, asks, final_bids, final_asks;
-  core::page_aligned_vector<Trade> trades;
+  std::vector<Fill> fills;
+  std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
+  std::vector<Trade> trades;
 
  private:
   server::Dispatcher &dispatcher_;
