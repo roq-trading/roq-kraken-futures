@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-#include "roq/core/clock.hpp"
+#include "roq/clock.hpp"
 
 #include "roq/kraken_futures/flags.hpp"
 
@@ -29,7 +29,7 @@ std::string Security::signed_challenge(std::string_view const &original_challeng
 
 std::chrono::milliseconds Security::get_nonce() {
   if (Flags::rest_use_nonce()) {
-    auto now = std::chrono::duration_cast<decltype(nonce_)>(core::clock::GetRealTime());
+    auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
     nonce_ = std::max(now, nonce_ + 1ms);  // note! can't reuse
   }
   return nonce_;
