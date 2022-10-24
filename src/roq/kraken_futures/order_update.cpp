@@ -18,6 +18,8 @@ using namespace std::literals;
 namespace roq {
 namespace kraken_futures {
 
+// === IMPLEMENTATION ===
+
 void OrderUpdate::operator()(json::OpenOrdersSnapshot const &open_orders_snapshot, TraceInfo const &trace_info) {
   for (auto &order : open_orders_snapshot.orders)
     (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);

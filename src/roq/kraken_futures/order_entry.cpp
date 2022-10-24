@@ -83,8 +83,8 @@ auto get_quality_of_service() {
 
 OrderEntry::OrderEntry(
     Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared, bool master)
-    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_, security.get_account())), master_(master),
-      connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, security.get_account())}, master_{master},
+      connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
@@ -101,8 +101,9 @@ OrderEntry::OrderEntry(
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      security_(security), shared_(shared),
-      download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
+      security_{security}, shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) {
+                                                        return download(state);
+                                                      }} {
 }
 
 void OrderEntry::operator()(Event<Start> const &) {

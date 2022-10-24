@@ -16,7 +16,7 @@ namespace kraken_futures {
 // === CONSTANTS ===
 
 namespace {
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
@@ -26,8 +26,8 @@ Mask const SUPPORTS{
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
-auto MBP_ALLOW_REMOVE_NON_EXISTING = true;
-auto OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
+auto const MBP_ALLOW_REMOVE_NON_EXISTING = true;
+auto const OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
 }  // namespace
 
 // === IMPLEMENTATION ===
