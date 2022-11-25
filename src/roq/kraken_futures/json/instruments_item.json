@@ -79,6 +79,10 @@
     {
       "name": "openingDate",
       "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "feeScheduleUid",
+      "type": "std::string_view"
     }
   ]
 }
