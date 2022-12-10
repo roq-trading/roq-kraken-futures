@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cassert>
+#include <vector>
 
 #include "roq/core/binascii/base64.hpp"
 
@@ -19,7 +20,9 @@ namespace tools {
 
 namespace {
 auto create_hmac(auto const &secret) {
-  auto raw_secret = core::binascii::Base64::decode(secret, true);
+  std::vector<std::byte> buffer;
+  buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
+  auto raw_secret = core::binascii::Base64::decode(buffer, secret);
   return core::crypto::HMAC_SHA512{raw_secret};
 }
 }  // namespace
@@ -45,15 +48,16 @@ std::string Hasher::create_headers(
     }
     sha_.update(nonce_);
     sha_.update(path);
-    std::array<char, 32> buffer_1;
+    std::array<std::byte, 32> buffer_1;
     auto length_1 = sha_.digest(buffer_1);
     assert(length_1 == std::size(buffer_1));
     hmac_.clear();
     hmac_.update(std::data(buffer_1), std::size(buffer_1));
-    std::array<char, 64> buffer_2;
+    std::array<std::byte, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == std::size(buffer_2));
-    auto authent = core::binascii::Base64::encode(buffer_2, false);
+    std::string authent;
+    core::binascii::Base64::encode(authent, buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
@@ -69,15 +73,16 @@ std::string Hasher::create_headers(
       sha_.update(raw);
     }
     sha_.update(path);
-    std::array<char, 32> buffer_1;
+    std::array<std::byte, 32> buffer_1;
     auto length_1 = sha_.digest(buffer_1);
     assert(length_1 == std::size(buffer_1));
     hmac_.clear();
     hmac_.update(std::data(buffer_1), std::size(buffer_1));
-    std::array<char, 64> buffer_2;
+    std::array<std::byte, 64> buffer_2;
     auto length_2 = hmac_.digest(buffer_2);
     assert(length_2 == std::size(buffer_2));
-    auto authent = core::binascii::Base64::encode(buffer_2, false);
+    std::string authent;
+    core::binascii::Base64::encode(authent, buffer_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Authent: {}\r\n"sv,
@@ -89,15 +94,16 @@ std::string Hasher::create_headers(
 std::string Hasher::signed_challenge(std::string_view const &original_challenge) {
   sha_.clear();
   sha_.update(original_challenge);
-  std::array<char, 32> buffer_1;
+  std::array<std::byte, 32> buffer_1;
   auto length_1 = sha_.digest(buffer_1);
   assert(length_1 == std::size(buffer_1));
   hmac_.clear();
   hmac_.update(std::data(buffer_1), std::size(buffer_1));
-  std::array<char, 64> buffer_2;
+  std::array<std::byte, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == std::size(buffer_2));
-  auto result = core::binascii::Base64::encode(buffer_2, false);
+  std::string result;
+  core::binascii::Base64::encode(result, buffer_2, false);
   return result;
 }
 

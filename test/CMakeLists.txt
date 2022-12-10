@@ -32,8 +32,10 @@ target_link_libraries(
   "${TARGET_NAME}"
   "${PROJECT_NAME}-json"
   "${PROJECT_NAME}-tools"
+  roq-core::roq-core
   roq-io::roq-io
   roq-logging::roq-logging
+  aklomp::base64
   Catch2::Catch2
   ${RT_LIBRARIES})
 
