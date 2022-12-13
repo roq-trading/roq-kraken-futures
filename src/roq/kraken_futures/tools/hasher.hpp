@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <string_view>
 
 #include "roq/core/hash/sha256.hpp"
-#include "roq/core/mac/hmac_sha512.hpp"
+
+#include "roq/core/mac/hmac.hpp"
 
 namespace roq {
 namespace kraken_futures {
@@ -29,8 +31,13 @@ class Hasher final {
   std::string signed_challenge(std::string_view const &original_challenge);
 
  private:
-  core::hash::SHA256 sha_;
-  core::mac::HMAC_SHA512 hmac_;
+  using Hash = core::hash::SHA256;
+  using MAC = core::mac::HMAC<core::hash::SHA512>;
+  using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
+
+  Hash hash_;
+  MAC mac_;
+  Digest digest_;
 };
 
 }  // namespace tools

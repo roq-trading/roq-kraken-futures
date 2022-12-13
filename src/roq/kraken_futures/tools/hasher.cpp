@@ -4,7 +4,6 @@
 
 #include <fmt/format.h>
 
-#include <array>
 #include <cassert>
 #include <vector>
 
@@ -19,17 +18,18 @@ namespace tools {
 // === HELPERS ===
 
 namespace {
-auto create_hmac(auto const &secret) {
+template <typename R>
+R create_hmac(auto const &secret) {
   std::vector<std::byte> buffer;
   buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
   auto raw_secret = core::binascii::Base64::decode(buffer, secret);
-  return core::mac::HMAC_SHA512{raw_secret};
+  return R{raw_secret};
 }
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-Hasher::Hasher(std::string_view const &secret) : hmac_{create_hmac(secret)} {
+Hasher::Hasher(std::string_view const &secret) : mac_{create_hmac<decltype(mac_)>(secret)} {
 }
 
 std::string Hasher::create_headers(
@@ -40,24 +40,21 @@ std::string Hasher::create_headers(
   assert(!std::empty(path));
   if (nonce.count()) {
     auto nonce_ = fmt::format("{}"sv, nonce.count());
-    sha_.clear();
+    hash_.clear();
     if (!std::empty(query)) {
       assert(query[0] == '?');
       auto raw = query.substr(1);  // note! not including '?'
-      sha_.update(raw);
+      hash_.update(raw);
     }
-    sha_.update(nonce_);
-    sha_.update(path);
-    std::array<std::byte, 32> buffer_1;
-    auto length_1 = sha_.digest(buffer_1);
-    assert(length_1 == std::size(buffer_1));
-    hmac_.clear();
-    hmac_.update(std::data(buffer_1), std::size(buffer_1));
-    std::array<std::byte, 64> buffer_2;
-    auto length_2 = hmac_.digest(buffer_2);
-    assert(length_2 == std::size(buffer_2));
+    hash_.update(nonce_);
+    hash_.update(path);
+    std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
+    auto digest_1 = hash_.final(buffer_1);
+    mac_.clear();
+    mac_.update(digest_1);
+    auto digest_2 = mac_.final(digest_);
     std::string authent;
-    core::binascii::Base64::encode(authent, buffer_2, false);
+    core::binascii::Base64::encode(authent, digest_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
@@ -66,23 +63,20 @@ std::string Hasher::create_headers(
         nonce_,
         authent);
   } else {
-    sha_.clear();
+    hash_.clear();
     if (!std::empty(query)) {
       assert(query[0] == '?');
       auto raw = query.substr(1);  // note! not including '?'
-      sha_.update(raw);
+      hash_.update(raw);
     }
-    sha_.update(path);
-    std::array<std::byte, 32> buffer_1;
-    auto length_1 = sha_.digest(buffer_1);
-    assert(length_1 == std::size(buffer_1));
-    hmac_.clear();
-    hmac_.update(std::data(buffer_1), std::size(buffer_1));
-    std::array<std::byte, 64> buffer_2;
-    auto length_2 = hmac_.digest(buffer_2);
-    assert(length_2 == std::size(buffer_2));
+    hash_.update(path);
+    std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
+    auto digest_1 = hash_.final(buffer_1);
+    mac_.clear();
+    mac_.update(digest_1);
+    auto digest_2 = mac_.final(digest_);
     std::string authent;
-    core::binascii::Base64::encode(authent, buffer_2, false);
+    core::binascii::Base64::encode(authent, digest_2, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Authent: {}\r\n"sv,
@@ -92,18 +86,15 @@ std::string Hasher::create_headers(
 }
 
 std::string Hasher::signed_challenge(std::string_view const &original_challenge) {
-  sha_.clear();
-  sha_.update(original_challenge);
-  std::array<std::byte, 32> buffer_1;
-  auto length_1 = sha_.digest(buffer_1);
-  assert(length_1 == std::size(buffer_1));
-  hmac_.clear();
-  hmac_.update(std::data(buffer_1), std::size(buffer_1));
-  std::array<std::byte, 64> buffer_2;
-  auto length_2 = hmac_.digest(buffer_2);
-  assert(length_2 == std::size(buffer_2));
+  hash_.clear();
+  hash_.update(original_challenge);
+  std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
+  auto digest_1 = hash_.final(buffer_1);
+  mac_.clear();
+  mac_.update(digest_1);
+  auto digest_2 = mac_.final(digest_);
   std::string result;
-  core::binascii::Base64::encode(result, buffer_2, false);
+  core::binascii::Base64::encode(result, digest_2, false);
   return result;
 }
 
