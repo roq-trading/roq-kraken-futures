@@ -6,8 +6,8 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/crypto/hmac_sha512.hpp"
-#include "roq/core/crypto/sha256.hpp"
+#include "roq/core/hash/sha256.hpp"
+#include "roq/core/mac/hmac_sha512.hpp"
 
 namespace roq {
 namespace kraken_futures {
@@ -29,8 +29,8 @@ class Hasher final {
   std::string signed_challenge(std::string_view const &original_challenge);
 
  private:
-  core::crypto::SHA256 sha_;
-  core::crypto::HMAC_SHA512 hmac_;
+  core::hash::SHA256 sha_;
+  core::mac::HMAC_SHA512 hmac_;
 };
 
 }  // namespace tools
