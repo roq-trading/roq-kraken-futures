@@ -22,7 +22,7 @@ template <typename R>
 R create_hmac(auto const &secret) {
   std::vector<std::byte> buffer;
   buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
-  auto raw_secret = core::binascii::Base64::decode(buffer, secret);
+  auto raw_secret = core::binascii::Base64::decode(buffer, secret, false, false);
   return R{raw_secret};
 }
 }  // namespace
@@ -54,7 +54,7 @@ std::string Hasher::create_headers(
     mac_.update(digest_1);
     auto digest_2 = mac_.final(digest_);
     std::string authent;
-    core::binascii::Base64::encode(authent, digest_2, false);
+    core::binascii::Base64::encode(authent, digest_2, false, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Nonce: {}\r\n"
@@ -76,7 +76,7 @@ std::string Hasher::create_headers(
     mac_.update(digest_1);
     auto digest_2 = mac_.final(digest_);
     std::string authent;
-    core::binascii::Base64::encode(authent, digest_2, false);
+    core::binascii::Base64::encode(authent, digest_2, false, false);
     return fmt::format(
         "APIKey: {}\r\n"
         "Authent: {}\r\n"sv,
@@ -94,7 +94,7 @@ std::string Hasher::signed_challenge(std::string_view const &original_challenge)
   mac_.update(digest_1);
   auto digest_2 = mac_.final(digest_);
   std::string result;
-  core::binascii::Base64::encode(result, digest_2, false);
+  core::binascii::Base64::encode(result, digest_2, false, false);
   return result;
 }
 

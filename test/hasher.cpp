@@ -16,10 +16,12 @@ using namespace Catch::literals;
 // https://support.kraken.com/hc/en-us/articles/360022839451-Generate-API-keys
 // https://support.kraken.com/hc/en-us/articles/360022635592-Generate-authentication-strings-REST-API-
 
+/* note! this example includes an invalid secret -- length is 87 but should be 88
+
 TEST_CASE("hasher_headers_without_nonce", "[hasher]") {
   auto const KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
   auto const SECRET = "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
-  tools::Hasher hasher(SECRET);
+  tools::Hasher hasher{SECRET};
   auto result = hasher.create_headers("/api/v3/orderbook"sv, "?symbol=fi_xbtusd_180615"sv, KEY, {});
   CHECK(
       result ==
@@ -30,7 +32,7 @@ TEST_CASE("hasher_headers_without_nonce", "[hasher]") {
 TEST_CASE("hasher_headers_with_nonce", "[hasher]") {
   auto const KEY = "rRra59qKQs3y1egAgSaG0RJlBcbq97wTUXSxXxPdhRZdv7z9ijZRWgrf"sv;
   auto const SECRET = "rttp4AzwRfYEdQ7R7X8Z/04Y4TZPa97pqCypi3xXxAqftygftnI6H9yGV+OcUOOJeFtZkr8mVwbAndU3Kz4Q+eG"sv;
-  tools::Hasher hasher(SECRET);
+  tools::Hasher hasher{SECRET};
   auto result = hasher.create_headers("/api/v3/orderbook"sv, "?symbol=fi_xbtusd_180615"sv, KEY, 1415957147987ms);
   CHECK(
       result ==
@@ -38,6 +40,7 @@ TEST_CASE("hasher_headers_with_nonce", "[hasher]") {
       "Nonce: 1415957147987\r\n"
       "Authent: DqUyz8Wh/72af7dimSXHw91IFxrAriTgVodyg2s67PU2mVStwLDQak+uIoCtfb43XONq0xVAp+vm5dqnhFAB1Q==\r\n"sv);
 }
+*/
 
 TEST_CASE("hasher_test_url_encoded", "[hasher]") {
   auto const KEY = "zO4Zjh5GO+Zy2n4QwIyWEKb/EAgxSjOdtA+W1zZvOBYU3na2pE/p/nwx"sv;
@@ -45,7 +48,7 @@ TEST_CASE("hasher_test_url_encoded", "[hasher]") {
   auto const PATH = "/api/v3/sendorder"sv;
   auto const QUERY =
       R"(?orderType=lmt&symbol=PI_XBTUSD&side=buy&size=1&limitPrice=44587.5&cliOrdId=123%2B%2F%3D&reduceOnly=false)"sv;
-  tools::Hasher hasher(SECRET);
+  tools::Hasher hasher{SECRET};
   auto result = hasher.create_headers(PATH, QUERY, KEY, 1629361663947ms);
   CHECK(
       result ==
