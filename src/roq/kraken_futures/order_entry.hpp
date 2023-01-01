@@ -35,7 +35,7 @@ class OrderEntry final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Security &, Shared &, bool master);
+  OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Security &, Shared &);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(OrderEntry const &) = delete;
@@ -108,7 +108,6 @@ class OrderEntry final : public web::rest::Client::Handler {
   // config
   const uint16_t stream_id_;
   const std::string name_;
-  bool const master_;
   // connection
   std::unique_ptr<web::rest::Client> connection_;
   // buffers
@@ -131,7 +130,6 @@ class OrderEntry final : public web::rest::Client::Handler {
   // cache
   Shared &shared_;
   // state
-  std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   core::Download<OrderEntryState> download_;
   // cancel all
