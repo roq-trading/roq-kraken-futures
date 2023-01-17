@@ -15,8 +15,7 @@ namespace roq {
 namespace kraken_futures {
 namespace tools {
 
-class Hasher final {
- public:
+struct Hasher final {
   explicit Hasher(std::string_view const &secret);
 
   Hasher(Hasher &&) = delete;

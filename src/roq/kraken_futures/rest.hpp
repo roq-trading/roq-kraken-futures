@@ -29,8 +29,7 @@
 namespace roq {
 namespace kraken_futures {
 
-class Rest final : public web::rest::Client::Handler {
- public:
+struct Rest final : public web::rest::Client::Handler {
   struct TokenUpdate final {
     std::string_view account;
     std::string_view token;
