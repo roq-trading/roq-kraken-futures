@@ -366,7 +366,7 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
         .checksum = {},
     };
     log::info<3>("market_by_price_update={}"sv, market_by_price_update);
-    create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
+    create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false);
   });
 }
 
@@ -404,7 +404,7 @@ void MarketData::operator()(Trace<json::Book> const &event) {
     };
     try {
       log::info<3>("market_by_price_update={}"sv, market_by_price_update);
-      create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false, false);
+      create_trace_and_dispatch(handler_, trace_info, market_by_price_update, false);
     } catch (BadState &e) {
       resubscribe(trace_info, symbol);
     }
@@ -462,7 +462,7 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
       .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
-  create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
+  create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true);
   latch_.emplace(symbol);  // latch
   unsubscribe("book"sv, symbol);
   subscribe("book"sv, symbol);
