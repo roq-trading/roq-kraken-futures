@@ -51,7 +51,7 @@ auto create_name(auto stream_id, auto const &account) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  web::rest::Client::Config config{
+  auto config = web::rest::Client::Config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
@@ -199,7 +199,7 @@ uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &event, std::string
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -232,7 +232,7 @@ void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
 
 void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   TraceInfo trace_info;
-  ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -310,7 +310,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/sendorder"sv;
     auto headers = security_.create_headers(path, query);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
         .query = query,
@@ -377,7 +377,7 @@ void OrderEntry::create_order_ack(
       }
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::CREATE_ORDER,
           .origin = origin,
           .status = status,
@@ -417,7 +417,7 @@ void OrderEntry::modify_order(
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/editorder"sv;
     auto headers = security_.create_headers(path, query);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
         .query = query,
@@ -462,7 +462,7 @@ void OrderEntry::modify_order_ack(
               edit_order,
               [&](auto &order_update) {
                 log::debug("order_update={}"sv, order_update);
-                oms::Response response{
+                auto response = oms::Response{
                     .type = RequestType::MODIFY_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::ACCEPTED,
@@ -484,7 +484,7 @@ void OrderEntry::modify_order_ack(
       }
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::MODIFY_ORDER,
           .origin = origin,
           .status = status,
@@ -517,7 +517,7 @@ void OrderEntry::cancel_order(
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/cancelorder"sv;
     auto headers = security_.create_headers(path, query);
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
         .query = query,
@@ -562,7 +562,7 @@ void OrderEntry::cancel_order_ack(
               cancel_order,
               [&](auto &order_update) {
                 log::debug("order_update={}"sv, order_update);
-                oms::Response response{
+                auto response = oms::Response{
                     .type = RequestType::CANCEL_ORDER,
                     .origin = Origin::EXCHANGE,
                     .status = RequestStatus::ACCEPTED,
@@ -584,7 +584,7 @@ void OrderEntry::cancel_order_ack(
       }
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
-      oms::Response response{
+      auto response = oms::Response{
           .type = RequestType::CANCEL_ORDER,
           .origin = origin,
           .status = status,
@@ -610,7 +610,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_v
       throw oms::NotReady{"not ready"sv};
     auto path = "/api/v3/cancelallorders"sv;
     auto headers = security_.create_headers(path, {});
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
         .query = {},
@@ -650,7 +650,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   auto query = fmt::format("?timeout={}"sv, value.count());
   auto path = "/api/v3/cancelallordersafter"sv;
   auto headers = security_.create_headers(path, query);
-  web::rest::Request request{
+  auto request = web::rest::Request{
       .method = web::http::Method::POST,
       .path = path,
       .query = query,

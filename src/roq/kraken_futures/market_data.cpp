@@ -3,12 +3,11 @@
 #include "roq/kraken_futures/market_data.hpp"
 
 #include <algorithm>
+#include <utility>
 
 #include "roq/mask.hpp"
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
-
-#include "roq/core/back_emplacer.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -44,7 +43,7 @@ auto create_name(auto stream_id) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_uri();
-  web::socket::Client::Config config{
+  auto config = web::socket::Client::Config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
@@ -142,7 +141,7 @@ void MarketData::operator()(web::socket::Client::Close const &) {
 
 void MarketData::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
-  const ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -162,7 +161,7 @@ void MarketData::operator()(web::socket::Client::Binary const &) {
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    const StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -267,7 +266,7 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
     auto &[trace_info, ticker] = event;
     log::info<4>("ticker={}"sv, ticker);
     (*connection_).touch(trace_info.source_receive_time);
-    const TopOfBook top_of_book{
+    auto top_of_book = TopOfBook{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
@@ -283,7 +282,7 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     // note! using *relative* funding rate to be compatible with other exchanges
-    Statistics statistics[] = {
+    auto statistics = std::array<Statistics, 4>{{
         {
             .type = StatisticsType::INDEX_VALUE,
             .value = ticker.index,
@@ -308,8 +307,8 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
             .begin_time_utc = utils::safe_cast(ticker.next_funding_rate_time),
             .end_time_utc = {},
         },
-    };
-    const StatisticsUpdate statistics_update{
+    }};
+    auto statistics_update = StatisticsUpdate{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
@@ -319,7 +318,7 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
     auto trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN;
-    const MarketStatus market_status{
+    auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = ticker.product_id,
@@ -336,8 +335,10 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
     (*connection_).touch(trace_info.source_receive_time);
     auto &symbol = book_snapshot.product_id;
     latch_.erase(symbol);  // unlatch
-    auto create_mbp_update = []<typename T>(T &result, auto const &value) {
-      new (&result) T{
+    shared_.bids.clear();
+    shared_.asks.clear();
+    auto emplace_back = [](auto &result, auto &value) {
+      auto mbp_update = MBPUpdate{
           .price = value.price,
           .quantity = value.qty,
           .implied_quantity = NaN,
@@ -345,18 +346,18 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
           .update_action = {},
           .price_level = {},
       };
+      result.emplace_back(std::move(mbp_update));
     };
-    core::back_emplacer bids{shared_.bids}, asks{shared_.asks};
-    for (const auto &bid : book_snapshot.bids)
-      bids.emplace_back([&](auto &result) { create_mbp_update(result, bid); });
-    for (const auto &ask : book_snapshot.asks)
-      asks.emplace_back([&](auto &result) { create_mbp_update(result, ask); });
-    const MarketByPriceUpdate market_by_price_update{
+    for (const auto &item : book_snapshot.bids)
+      emplace_back(shared_.bids, item);
+    for (const auto &item : book_snapshot.asks)
+      emplace_back(shared_.asks, item);
+    auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
-        .bids = bids,
-        .asks = asks,
+        .bids = shared_.bids,
+        .asks = shared_.asks,
         .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = book_snapshot.timestamp,
         .exchange_sequence = book_snapshot.seq,
@@ -377,7 +378,7 @@ void MarketData::operator()(Trace<json::Book> const &event) {
     auto &symbol = book.product_id;
     if (latch_.find(symbol) != std::end(latch_))
       return;  //  waiting for snapshot
-    MBPUpdate mbp_update{
+    auto mbp_update = MBPUpdate{
         .price = book.price,
         .quantity = book.qty,
         .implied_quantity = NaN,
@@ -388,7 +389,7 @@ void MarketData::operator()(Trace<json::Book> const &event) {
     auto bid = book.side == json::Side::BUY;
     auto ask = book.side == json::Side::SELL;
     assert((bid || ask) && !(bid && ask));
-    const MarketByPriceUpdate market_by_price_update{
+    auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -425,23 +426,19 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
     auto &trade = event.value;
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
-    auto create_trade = []<typename T>(T &result, auto const &value) {
-      new (&result) T{
-          .side = json::map(value.side),
-          .price = value.price,
-          .quantity = value.qty,
-          .trade_id = value.uid,
-          .taker_order_id = {},
-          .maker_order_id = {},
-      };
+    auto trade_2 = Trade{
+        .side = json::map(trade.side),
+        .price = trade.price,
+        .quantity = trade.qty,
+        .trade_id = trade.uid,
+        .taker_order_id = {},
+        .maker_order_id = {},
     };
-    core::back_emplacer trades{shared_.trades};
-    trades.emplace_back([&](auto &result) { create_trade(result, trade); });
-    const TradeSummary trade_summary{
+    auto trade_summary = TradeSummary{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = trade.product_id,
-        .trades = trades,
+        .trades = {&trade_2, 1u},
         .exchange_time_utc = trade.time,
         .exchange_sequence = {},
     };
@@ -451,7 +448,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
 
 void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const &symbol) {
   log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
-  const MarketByPriceUpdate market_by_price_update{
+  auto market_by_price_update = MarketByPriceUpdate{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
       .symbol = symbol,

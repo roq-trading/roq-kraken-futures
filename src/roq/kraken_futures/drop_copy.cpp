@@ -41,7 +41,7 @@ auto create_name(auto stream_id, auto const &account) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_uri();
-  web::socket::Client::Config config{
+  auto config = web::socket::Client::Config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = {},
@@ -183,7 +183,7 @@ void DropCopy::operator()(web::socket::Client::Close const &) {
 
 void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
-  const ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -203,7 +203,7 @@ void DropCopy::operator()(web::socket::Client::Binary const &) {
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    const StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -292,7 +292,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
       std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
-      const FundsUpdate funds_update{
+      auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .currency = currency,
@@ -312,7 +312,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
     for (auto &item : open_positions.positions) {
       auto long_quantity = std::max(0.0, item.balance);
       auto short_quantity = std::max(0.0, -item.balance);
-      const PositionUpdate position_update{
+      auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = security_.get_account(),
           .exchange = Flags::exchange(),
@@ -358,13 +358,13 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
             auto side = item.buy ? Side::BUY : Side::SELL;
             if (side != order.side)
               log::warn("Unexpected: side={}/{})"sv, side, order.side);
-            Fill fill{
+            auto fill = Fill{
                 .external_trade_id = item.fill_id,
                 .quantity = item.qty,
                 .price = item.price,
                 .liquidity = json::map(item.fill_type),
             };
-            const TradeUpdate trade_update{
+            auto trade_update = TradeUpdate{
                 .stream_id = stream_id_,
                 .account = order.account,
                 .order_id = order.order_id,
@@ -406,13 +406,13 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
             auto side = item.buy ? Side::BUY : Side::SELL;
             if (side != order.side)
               log::warn("Unexpected: side={}/{})"sv, side, order.side);
-            Fill fill{
+            auto fill = Fill{
                 .external_trade_id = item.fill_id,
                 .quantity = item.qty,
                 .price = item.price,
                 .liquidity = json::map(item.fill_type),
             };
-            const TradeUpdate trade_update{
+            auto trade_update = TradeUpdate{
                 .stream_id = stream_id_,
                 .account = order.account,
                 .order_id = order.order_id,

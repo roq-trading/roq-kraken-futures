@@ -43,7 +43,7 @@ auto create_name(auto stream_id) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  web::rest::Client::Config config{
+  auto config = web::rest::Client::Config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
@@ -109,7 +109,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -142,7 +142,7 @@ void Rest::operator()(web::rest::Client::Disconnected const &) {
 
 void Rest::operator()(web::rest::Client::Latency const &latency) {
   TraceInfo trace_info;
-  ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -172,7 +172,7 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_instruments() {
   profile_.instruments([&]() {
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = "/api/v3/instruments"sv,
         .query = {},
@@ -233,7 +233,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     std::string symbol{item.symbol};  // note! we need the upper-case version
     std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
     auto discard = shared_.discard_symbol(symbol);
-    ReferenceData reference_data{
+    auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -269,7 +269,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
   }
   log::info("Instruments {} / {}"sv, counter, std::size(instruments.instruments));
   if (!std::empty(symbols)) {
-    SymbolsUpdate symbols_update{
+    auto symbols_update = SymbolsUpdate{
         .symbols = symbols,
     };
     handler_(symbols_update);
