@@ -214,7 +214,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
   }
 }
 
-void OrderEntry::operator()(web::rest::Client::Connected const &) {
+void OrderEntry::operator()(Trace<web::rest::Client::Connected> const &) {
   if (download_.downloading()) {
     download_.bump();
   } else {
@@ -223,15 +223,15 @@ void OrderEntry::operator()(web::rest::Client::Connected const &) {
   }
 }
 
-void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
+void OrderEntry::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
   if (!download_.downloading())
     download_.reset();
 }
 
-void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
-  TraceInfo trace_info;
+void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
+  auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
@@ -239,6 +239,10 @@ void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
+}
+
+void OrderEntry::operator()(
+    Trace<web::rest::Response> const &, [[maybe_unused]] uint64_t request_id, [[maybe_unused]] uint64_t opaque) {
 }
 
 // create-order
