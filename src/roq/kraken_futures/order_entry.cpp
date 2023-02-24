@@ -81,8 +81,9 @@ auto get_quality_of_service() {
 
 // === IMPLEMENTATION ===
 
-OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, security.get_account())},
+OrderEntry::OrderEntry(
+    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, authenticator.get_account())},
       connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -100,9 +101,9 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      security_{security}, shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) {
-                                                        return download(state);
-                                                      }} {
+      authenticator_{authenticator}, shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) {
+                                                                  return download(state);
+                                                                }} {
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
@@ -201,7 +202,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = security_.get_account(),
+        .account = authenticator_.get_account(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -234,7 +235,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = security_.get_account(),
+      .account = authenticator_.get_account(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -313,7 +314,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
     }
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/sendorder"sv;
-    auto headers = security_.create_headers(path, query);
+    auto headers = authenticator_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -354,7 +355,7 @@ void OrderEntry::create_order_ack(
           break;
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
               order_id,
               send_order,
               [&](auto &order_update) {
@@ -420,7 +421,7 @@ void OrderEntry::modify_order(
         modify_order.price);
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/editorder"sv;
-    auto headers = security_.create_headers(path, query);
+    auto headers = authenticator_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -461,7 +462,7 @@ void OrderEntry::modify_order_ack(
           break;
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
               order_id,
               edit_order,
               [&](auto &order_update) {
@@ -520,7 +521,7 @@ void OrderEntry::cancel_order(
     auto query = fmt::format("?order_id={}"sv, order.external_order_id);
     log::debug(R"(query="{}")"sv, query);
     auto path = "/api/v3/cancelorder"sv;
-    auto headers = security_.create_headers(path, query);
+    auto headers = authenticator_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -561,7 +562,7 @@ void OrderEntry::cancel_order_ack(
           break;
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, security_.get_account()}(
+          OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(
               order_id,
               cancel_order,
               [&](auto &order_update) {
@@ -613,7 +614,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_v
     if (!ready())
       throw oms::NotReady{"not ready"sv};
     auto path = "/api/v3/cancelallorders"sv;
-    auto headers = security_.create_headers(path, {});
+    auto headers = authenticator_.create_headers(path, {});
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -653,7 +654,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
   auto query = fmt::format("?timeout={}"sv, value.count());
   auto path = "/api/v3/cancelallordersafter"sv;
-  auto headers = security_.create_headers(path, query);
+  auto headers = authenticator_.create_headers(path, query);
   auto request = web::rest::Request{
       .method = web::http::Method::POST,
       .path = path,

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2023, Hans Erik Thrane */
 
-#include "roq/kraken_futures/tools/hasher.hpp"
+#include "roq/kraken_futures/tools/crypto.hpp"
 
 #include <fmt/format.h>
 
@@ -29,10 +29,10 @@ R create_hmac(auto const &secret) {
 
 // === IMPLEMENTATION ===
 
-Hasher::Hasher(std::string_view const &secret) : mac_{create_hmac<decltype(mac_)>(secret)} {
+Crypto::Crypto(std::string_view const &secret) : mac_{create_hmac<decltype(mac_)>(secret)} {
 }
 
-std::string Hasher::create_headers(
+std::string Crypto::create_headers(
     std::string_view const &path,
     std::string_view const &query,
     std::string_view const &key,
@@ -85,7 +85,7 @@ std::string Hasher::create_headers(
   }
 }
 
-std::string Hasher::signed_challenge(std::string_view const &original_challenge) {
+std::string Crypto::signed_challenge(std::string_view const &original_challenge) {
   hash_.clear();
   hash_.update(original_challenge);
   std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;

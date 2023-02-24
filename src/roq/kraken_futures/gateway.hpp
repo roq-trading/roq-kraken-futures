@@ -12,12 +12,12 @@
 
 #include "roq/io/context.hpp"
 
+#include "roq/kraken_futures/authenticator.hpp"
 #include "roq/kraken_futures/config.hpp"
 #include "roq/kraken_futures/drop_copy.hpp"
 #include "roq/kraken_futures/market_data.hpp"
 #include "roq/kraken_futures/order_entry.hpp"
 #include "roq/kraken_futures/rest.hpp"
-#include "roq/kraken_futures/security.hpp"
 #include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
@@ -77,8 +77,8 @@ struct Gateway final : public server::Handler,
 
  private:
   server::Dispatcher &dispatcher_;
-  // security
-  absl::flat_hash_map<Account, std::unique_ptr<Security>> security_;
+  // authenticator
+  absl::flat_hash_map<Account, std::unique_ptr<Authenticator>> authenticator_;
   // io
   io::Context &context_;
   // shared

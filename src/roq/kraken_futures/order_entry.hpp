@@ -21,8 +21,8 @@
 
 #include "roq/server.hpp"
 
+#include "roq/kraken_futures/authenticator.hpp"
 #include "roq/kraken_futures/order_entry_state.hpp"
-#include "roq/kraken_futures/security.hpp"
 #include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
@@ -34,7 +34,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Security &, Shared &);
+  OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Authenticator &, Shared &);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(OrderEntry const &) = delete;
@@ -125,8 +125,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   struct {
     core::metrics::Latency ping;
   } latency_;
-  // security
-  Security &security_;
+  // authenticator
+  Authenticator &authenticator_;
   // cache
   Shared &shared_;
   // state

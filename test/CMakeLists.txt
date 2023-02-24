@@ -1,7 +1,7 @@
 set(TARGET_NAME "${PROJECT_NAME}-test")
 
 set(SOURCES
-    hasher.cpp
+    crypto.cpp
     json_account_balances_and_margins.cpp
     json_book.cpp
     json_book_snapshot.cpp

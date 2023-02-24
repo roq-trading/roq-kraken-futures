@@ -63,8 +63,9 @@ struct create_metrics final : public core::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Security &security, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, security.get_account())},
+DropCopy::DropCopy(
+    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, authenticator.get_account())},
       connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -84,9 +85,9 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, S
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      security_{security}, shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) {
-                                                        return download(state);
-                                                      }} {
+      authenticator_{authenticator}, shared_{shared}, download_{Flags::ws_request_timeout(), [this](auto state) {
+                                                                  return download(state);
+                                                                }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
@@ -128,7 +129,7 @@ void DropCopy::get_challenge() {
       R"("event":"challenge",)"
       R"("api_key":"{}")"
       R"(}})"sv,
-      security_.get_key());
+      authenticator_.get_key());
   log::debug(R"(request="{}")"sv, message);
   log::info<2>(R"(request="{}")"sv, message);
   (*connection_).send_text(message);
@@ -151,7 +152,7 @@ void DropCopy::subscribe(std::string_view const &feed) {
       R"("signed_challenge":"{}")"
       R"(}})"sv,
       feed,
-      security_.get_key(),
+      authenticator_.get_key(),
       original_challenge_,
       signed_challenge_);
   log::debug(R"(request="{}")"sv, message);
@@ -185,7 +186,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = security_.get_account(),
+      .account = authenticator_.get_account(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -205,7 +206,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = security_.get_account(),
+        .account = authenticator_.get_account(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -266,7 +267,7 @@ void DropCopy::operator()(Trace<json::Challenge> const &event) {
     assert(std::empty(original_challenge_));
     assert(std::empty(signed_challenge_));
     original_challenge_ = challenge.message;
-    signed_challenge_ = security_.signed_challenge(original_challenge_);
+    signed_challenge_ = authenticator_.signed_challenge(original_challenge_);
     download_.check(DropCopyState::GET_CHALLENGE);  // note!
   });
 }
@@ -294,7 +295,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
       std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
-          .account = security_.get_account(),
+          .account = authenticator_.get_account(),
           .currency = currency,
           .balance = item.balance,
           .hold = NaN,
@@ -314,7 +315,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
       auto short_quantity = std::max(0.0, -item.balance);
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
-          .account = security_.get_account(),
+          .account = authenticator_.get_account(),
           .exchange = Flags::exchange(),
           .symbol = item.instrument,
           .external_account = open_positions.account,
@@ -332,7 +333,7 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
-    OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders_snapshot, trace_info);
+    OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(open_orders_snapshot, trace_info);
   });
 }
 
@@ -340,7 +341,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
-    OrderUpdate{shared_, stream_id_, security_.get_account()}(open_orders, trace_info);
+    OrderUpdate{shared_, stream_id_, authenticator_.get_account()}(open_orders, trace_info);
   });
 }
 

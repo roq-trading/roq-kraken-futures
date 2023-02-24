@@ -15,27 +15,27 @@ namespace kraken_futures {
 
 namespace {
 template <typename R>
-auto create_security(auto const &config) {
+auto create_authenticator(auto const &config) {
   R result;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(account.name, std::make_unique<Security>(config, account.name));
+    result.try_emplace(account.name, std::make_unique<Authenticator>(config, account.name));
   return result;
 }
 
 template <typename R>
-auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
+auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &authenticator_by_account, auto &shared) {
   R result;
-  for (auto &[account, security] : security_by_account) {
-    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *security, shared));
+  for (auto &[account, authenticator] : authenticator_by_account) {
+    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *authenticator, shared));
   }
   return result;
 }
 
 template <typename R>
-auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &security_by_account, auto &shared) {
+auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &authenticator_by_account, auto &shared) {
   R result;
-  for (auto &[account, security] : security_by_account)
-    result.try_emplace(account, std::make_unique<DropCopy>(gateway, context, ++stream_id, *security, shared));
+  for (auto &[account, authenticator] : authenticator_by_account)
+    result.try_emplace(account, std::make_unique<DropCopy>(gateway, context, ++stream_id, *authenticator, shared));
   return result;
 }
 }  // namespace
@@ -43,10 +43,10 @@ auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &secur
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, security_{create_security<decltype(security_)>(config)}, context_{context},
-      shared_{dispatcher}, rest_{*this, context_, ++stream_id_, shared_},
-      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, security_, shared_)},
-      drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, security_, shared_)} {
+    : dispatcher_{dispatcher}, authenticator_{create_authenticator<decltype(authenticator_)>(config)},
+      context_{context}, shared_{dispatcher}, rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, authenticator_, shared_)},
+      drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, authenticator_, shared_)} {
   if (!Flags::rest_cancel_on_disconnect())
     log::warn("Orders will *NOT* be cancelled on disconnect"sv);
 }
