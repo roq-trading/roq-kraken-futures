@@ -277,8 +277,9 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
             .ask_quantity = ticker.ask_size,
         },
         .update_type = UpdateType::INCREMENTAL,
-        .exchange_time_utc = utils::safe_cast(ticker.time),
+        .exchange_time_utc = ticker.time,
         .exchange_sequence = {},
+        .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     // note! using *relative* funding rate to be compatible with other exchanges
@@ -314,7 +315,9 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
         .symbol = ticker.product_id,
         .statistics = statistics,
         .update_type = UpdateType::INCREMENTAL,
-        .exchange_time_utc = utils::safe_cast(ticker.time),
+        .exchange_time_utc = ticker.time,
+        .exchange_sequence = {},
+        .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
     auto trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN;
@@ -361,6 +364,7 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
         .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = book_snapshot.timestamp,
         .exchange_sequence = book_snapshot.seq,
+        .sending_time_utc = {},
         .price_decimals = {},
         .quantity_decimals = {},
         .checksum = {},
@@ -398,6 +402,7 @@ void MarketData::operator()(Trace<json::Book> const &event) {
         .update_type = UpdateType::INCREMENTAL,
         .exchange_time_utc = book.timestamp,
         .exchange_sequence = book.seq,
+        .sending_time_utc = {},
         .price_decimals = {},
         .quantity_decimals = {},
         .checksum = {},
@@ -441,6 +446,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
         .trades = {&trade_2, 1u},
         .exchange_time_utc = trade.time,
         .exchange_sequence = {},
+        .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
   });
@@ -457,6 +463,7 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
       .update_type = UpdateType::STALE,
       .exchange_time_utc = {},
       .exchange_sequence = {},
+      .sending_time_utc = {},
       .price_decimals = {},
       .quantity_decimals = {},
       .checksum = {},
