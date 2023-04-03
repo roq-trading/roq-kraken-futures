@@ -2,9 +2,11 @@
 
 #include "roq/kraken_futures/tools/crypto.hpp"
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cassert>
+#include <iterator>
+#include <span>
 #include <vector>
 
 #include "roq/core/codec/base64.hpp"

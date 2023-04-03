@@ -4,10 +4,12 @@
 
 #include <array>
 #include <chrono>
+#include <cstddef>
 #include <string>
 #include <string_view>
 
 #include "roq/core/hash/sha256.hpp"
+#include "roq/core/hash/sha512.hpp"
 
 #include "roq/core/mac/hmac.hpp"
 
