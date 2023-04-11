@@ -312,6 +312,9 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
           .balance = item.balance,
           .hold = NaN,
           .external_account = account_balances_and_margins.account,
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = {},
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
@@ -333,8 +336,9 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
           .external_account = open_positions.account,
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
-          .long_quantity_begin = NaN,
-          .short_quantity_begin = NaN,
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = {},
+          .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, position_update, true);
     }
@@ -390,6 +394,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
                 .external_order_id = item.order_id,
                 .fills = {&fill, 1},
                 .update_type = {},
+                .sending_time_utc = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
           })) {
@@ -435,6 +440,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
                 .external_order_id = item.order_id,
                 .fills = {&fill, 1},
                 .update_type = {},
+                .sending_time_utc = {},
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
           })) {

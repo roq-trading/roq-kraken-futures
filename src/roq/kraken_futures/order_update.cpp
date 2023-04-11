@@ -171,6 +171,7 @@ void OrderUpdate::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = update_type,
+      .sending_time_utc = {},
   };
   // auto request_type = compute_request_type(reason);
   auto request_id = cli_ord_id;
