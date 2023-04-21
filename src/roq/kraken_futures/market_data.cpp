@@ -289,7 +289,7 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
             .ask_price = ticker.ask,
             .ask_quantity = ticker.ask_size,
         },
-        .update_type = UpdateType::INCREMENTAL,
+        .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = ticker.time,
         .exchange_sequence = {},
         .sending_time_utc = {},
