@@ -129,10 +129,10 @@ bool ParserPrivate::dispatch(
       Event event(value);
       switch (event) {
         using enum Event::type_t;
-        case UNDEFINED:
+        case UNDEFINED__:
           assert(false);
           [[fallthrough]];
-        case UNKNOWN:
+        case UNKNOWN__:
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
@@ -159,10 +159,10 @@ bool ParserPrivate::dispatch(
       Feed feed(value);
       switch (feed) {
         using enum Feed::type_t;
-        case UNDEFINED:
+        case UNDEFINED__:
           assert(false);
           [[fallthrough]];
-        case UNKNOWN:
+        case UNKNOWN__:
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:

@@ -355,8 +355,8 @@ void OrderEntry::create_order_ack(
       json::SendOrder send_order{body, decode_buffer_};
       switch (send_order.result) {
         using enum json::Result::type_t;
-        case UNDEFINED:
-        case UNKNOWN:
+        case UNDEFINED__:
+        case UNKNOWN__:
           log::warn(R"(response="{}")"sv, body);
           log::warn("send_order={}"sv, send_order);
           log::fatal("Unexpected"sv);
@@ -462,8 +462,8 @@ void OrderEntry::modify_order_ack(
       json::EditOrder edit_order{body, decode_buffer_};
       switch (edit_order.result) {
         using enum json::Result::type_t;
-        case UNDEFINED:
-        case UNKNOWN:
+        case UNDEFINED__:
+        case UNKNOWN__:
           log::warn(R"(response="{}")"sv, body);
           log::warn("edit_order={}"sv, edit_order);
           log::fatal("Unexpected"sv);
@@ -562,8 +562,8 @@ void OrderEntry::cancel_order_ack(
       json::CancelOrder cancel_order{body, decode_buffer_};
       switch (cancel_order.result) {
         using enum json::Result::type_t;
-        case UNDEFINED:
-        case UNKNOWN:
+        case UNDEFINED__:
+        case UNKNOWN__:
           log::warn(R"(response="{}")"sv, body);
           log::warn("cancel_order={}"sv, cancel_order);
           log::fatal("Unexpected"sv);

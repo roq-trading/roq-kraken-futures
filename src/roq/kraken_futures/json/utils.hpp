@@ -42,8 +42,8 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
 inline roq::Liquidity map(json::FillType value) {
   switch (value) {
     using enum json::FillType::type_t;
-    case UNDEFINED:
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case MAKER:
       return Liquidity::MAKER;
@@ -68,9 +68,8 @@ inline roq::Liquidity map(json::FillType value) {
 inline roq::OrderType map(json::OrderEventOrderType value) {
   switch (value) {
     using enum json::OrderEventOrderType::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case LMT:
       return roq::OrderType::LIMIT;
@@ -89,9 +88,8 @@ inline roq::OrderType map(json::OrderEventOrderType value) {
 inline roq::OrderType map(json::OrderType value) {
   switch (value) {
     using enum json::OrderType::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case LIMIT:
       return roq::OrderType::LIMIT;
@@ -104,9 +102,8 @@ inline roq::OrderType map(json::OrderType value) {
 inline roq::Side map(json::Side value) {
   switch (value) {
     using enum json::Side::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case BUY:
       return roq::Side::BUY;

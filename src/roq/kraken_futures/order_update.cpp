@@ -38,8 +38,8 @@ namespace {
 RequestType compute_request_type(const json::Reason reason) {
   switch (reason) {
     using enum json::Reason::type_t;
-    case UNDEFINED:
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case NEW_PLACED_ORDER_BY_USER:
       return RequestType::CREATE_ORDER;
@@ -84,8 +84,8 @@ RequestType compute_request_type(const json::Reason reason) {
 OrderStatus compute_order_status_2(json::Reason reason, bool is_cancel, double quantity, double filled) {
   switch (reason) {
     using enum json::Reason::type_t;
-    case UNDEFINED:
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case NEW_PLACED_ORDER_BY_USER:
       return OrderStatus::WORKING;  // note! is this correct also for market/stop orders?
