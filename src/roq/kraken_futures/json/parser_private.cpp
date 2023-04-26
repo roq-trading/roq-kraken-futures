@@ -17,116 +17,92 @@ namespace json {
 namespace {
 template <typename H>
 void dispatch_info(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Info info(root);
+  Info info{message};
   create_trace_and_dispatch(handler, trace_info, info);
 }
 
 template <typename H>
 void dispatch_alert(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Alert alert(root);
+  Alert alert{message};
   create_trace_and_dispatch(handler, trace_info, alert);
 }
 
 template <typename H>
 void dispatch_error(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Error error(root);
+  Error error{message};
   create_trace_and_dispatch(handler, trace_info, error);
 }
 
 template <typename H>
 void dispatch_challenge(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Challenge challenge(root);
+  Challenge challenge{message};
   create_trace_and_dispatch(handler, trace_info, challenge);
 }
 
 template <typename H>
 void dispatch_subscribed(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Subscribed subscribed(root, buffer);
+  Subscribed subscribed(message, buffer);
   create_trace_and_dispatch(handler, trace_info, subscribed);
 }
 
 template <typename H>
 void dispatch_heartbeat(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Heartbeat heartbeat(root);
+  Heartbeat heartbeat(message);
   create_trace_and_dispatch(handler, trace_info, heartbeat);
 }
 
 template <typename H>
 void dispatch_account_balances_and_margins(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const AccountBalancesAndMargins account_balances_and_margins(root, buffer);
+  AccountBalancesAndMargins account_balances_and_margins(message, buffer);
   create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
 }
 
 template <typename H>
 void dispatch_open_positions(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const OpenPositions open_positions(root, buffer);
+  OpenPositions open_positions(message, buffer);
   create_trace_and_dispatch(handler, trace_info, open_positions);
 }
 
 template <typename H>
 void dispatch_open_orders_snapshot(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const OpenOrdersSnapshot open_orders_snapshot(root, buffer);
+  OpenOrdersSnapshot open_orders_snapshot(message, buffer);
   create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
 }
 
 template <typename H>
 void dispatch_open_orders(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const OpenOrders open_orders(root, buffer);
+  OpenOrders open_orders(message, buffer);
   create_trace_and_dispatch(handler, trace_info, open_orders);
 }
 
 template <typename H>
 void dispatch_fills_snapshot(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const FillsSnapshot fills_snapshot(root, buffer);
+  FillsSnapshot fills_snapshot(message, buffer);
   create_trace_and_dispatch(handler, trace_info, fills_snapshot);
 }
 
 template <typename H>
 void dispatch_fills(
     H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
-  auto root = parser.root();
-  const Fills fills(root, buffer);
+  Fills fills(message, buffer);
   create_trace_and_dispatch(handler, trace_info, fills);
 }
 }  // namespace
 
 bool ParserPrivate::dispatch(
     Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  core::json::Parser parser(message);
+  core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
     // event
     if (key.compare("event"sv) == 0) {
-      Event event(value);
+      Event event{value};
       switch (event) {
         using enum Event::type_t;
         case UNDEFINED__:
@@ -156,7 +132,7 @@ bool ParserPrivate::dispatch(
     }
     // feed
     if (key.compare("feed"sv) == 0) {
-      Feed feed(value);
+      Feed feed{value};
       switch (feed) {
         using enum Feed::type_t;
         case UNDEFINED__:
