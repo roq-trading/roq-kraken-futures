@@ -12,13 +12,13 @@
 namespace roq {
 namespace kraken_futures {
 
-struct Authenticator final {
-  Authenticator(Config const &, std::string_view const &account);
+struct Account final {
+  Account(Config const &, std::string_view const &name);
 
-  Authenticator(Authenticator &&) = delete;
-  Authenticator(Authenticator const &) = delete;
+  Account(Account &&) = delete;
+  Account(Account const &) = delete;
 
-  std::string_view get_account() const { return account_; }
+  std::string_view get_name() const { return name_; }
   std::string_view get_key() const { return key_; }
 
   std::string create_headers(std::string_view const &path, std::string_view const &body);
@@ -29,7 +29,7 @@ struct Authenticator final {
   std::chrono::milliseconds get_nonce();
 
  private:
-  std::string const account_;
+  std::string const name_;
   std::string const key_;
   tools::Crypto crypto_;
   std::chrono::milliseconds nonce_ = {};
