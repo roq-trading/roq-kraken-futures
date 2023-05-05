@@ -366,41 +366,34 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
     auto &fills_snapshot = event.value;
     log::info<2>("fills_snapshot={}"sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
-      if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
-            auto symbol = std::string{item.instrument};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            if (symbol.compare(order.symbol) != 0)
-              log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
-            auto side = item.buy ? Side::BUY : Side::SELL;
-            if (side != order.side)
-              log::warn("Unexpected: side={}/{})"sv, side, order.side);
-            auto fill = Fill{
-                .external_trade_id = item.fill_id,
-                .quantity = item.qty,
-                .price = item.price,
-                .liquidity = json::map(item.fill_type),
-            };
-            auto trade_update = oms::TradeUpdate{
-                .account = order.account,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
-                .symbol = order.symbol,
-                .side = order.side,
-                .position_effect = order.position_effect,
-                .create_time_utc = item.time,
-                .update_time_utc = item.time,
-                .external_account = fills_snapshot.account,
-                .external_order_id = item.order_id,
-                .fills = {&fill, 1},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-          })) {
-      } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"sv);
-        log::warn<2>("fill={}"sv, item);
-      }
+      auto symbol = std::string{item.instrument};
+      std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+      auto side = item.buy ? Side::BUY : Side::SELL;
+      auto fill = Fill{
+          .external_trade_id = item.fill_id,
+          .quantity = item.qty,
+          .price = item.price,
+          .liquidity = json::map(item.fill_type),
+      };
+      auto trade_update = TradeUpdate{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = ORDER_ID_NONE,
+          .exchange = flags::Flags::exchange(),
+          .symbol = symbol,
+          .side = side,
+          .position_effect = {},
+          .create_time_utc = item.time,
+          .update_time_utc = item.time,
+          .external_account = {},
+          .external_order_id = item.order_id,
+          .fills = {&fill, 1},
+          .routing_id = {},
+          .update_type = UpdateType::SNAPSHOT,
+          .sending_time_utc = {},
+          .user = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
     }
   });
 }
@@ -412,41 +405,34 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     log::info<2>("fills={}"sv, fills);
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
-      if (shared_.find_order(item.cli_ord_id, [&](auto &order) {
-            auto symbol = std::string{item.instrument};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            if (symbol.compare(order.symbol) != 0)
-              log::warn(R"(Unexpected: symbol="{}"/"{}")"sv, symbol, order.symbol);
-            auto side = item.buy ? Side::BUY : Side::SELL;
-            if (side != order.side)
-              log::warn("Unexpected: side={}/{})"sv, side, order.side);
-            auto fill = Fill{
-                .external_trade_id = item.fill_id,
-                .quantity = item.qty,
-                .price = item.price,
-                .liquidity = json::map(item.fill_type),
-            };
-            auto trade_update = oms::TradeUpdate{
-                .account = order.account,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
-                .symbol = order.symbol,
-                .side = order.side,
-                .position_effect = order.position_effect,
-                .create_time_utc = item.time,
-                .update_time_utc = item.time,
-                .external_account = fills.username,  // note! appears to be account
-                .external_order_id = item.order_id,
-                .fills = {&fill, 1},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-          })) {
-      } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"sv);
-        log::warn<2>("fill={}"sv, item);
-      }
+      auto symbol = std::string{item.instrument};
+      std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+      auto side = item.buy ? Side::BUY : Side::SELL;
+      auto fill = Fill{
+          .external_trade_id = item.fill_id,
+          .quantity = item.qty,
+          .price = item.price,
+          .liquidity = json::map(item.fill_type),
+      };
+      auto trade_update = TradeUpdate{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = ORDER_ID_NONE,
+          .exchange = flags::Flags::exchange(),
+          .symbol = symbol,
+          .side = side,
+          .position_effect = {},
+          .create_time_utc = item.time,
+          .update_time_utc = item.time,
+          .external_account = fills.username,  // note! appears to be account
+          .external_order_id = item.order_id,
+          .fills = {&fill, 1},
+          .routing_id = {},
+          .update_type = UpdateType::INCREMENTAL,
+          .sending_time_utc = {},
+          .user = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
     }
   });
 }
