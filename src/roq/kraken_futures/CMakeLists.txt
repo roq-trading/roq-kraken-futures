@@ -13,6 +13,7 @@ set(SOURCES
     order_entry.cpp
     order_update.cpp
     rest.cpp
+    settings.cpp
     shared.cpp
     main.cpp)
 

@@ -18,6 +18,7 @@
 #include "roq/kraken_futures/market_data.hpp"
 #include "roq/kraken_futures/order_entry.hpp"
 #include "roq/kraken_futures/rest.hpp"
+#include "roq/kraken_futures/settings.hpp"
 #include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
@@ -28,7 +29,7 @@ struct Gateway final : public server::Handler,
                        public OrderEntry::Handler,
                        public MarketData::Handler,
                        public DropCopy::Handler {
-  Gateway(server::Dispatcher &, Config const &, io::Context &);
+  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
  protected:
   // server::Handler
