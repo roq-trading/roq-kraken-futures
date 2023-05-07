@@ -9,8 +9,8 @@ namespace kraken_futures {
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher)
-    : dispatcher_{dispatcher}, symbols{Flags::ws_max_subscriptions_per_stream()} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
+    : dispatcher_{dispatcher}, settings{settings}, symbols{Flags::ws_max_subscriptions_per_stream()} {
 }
 
 }  // namespace kraken_futures

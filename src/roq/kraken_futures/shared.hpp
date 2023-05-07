@@ -10,11 +10,13 @@
 
 #include "roq/core/symbols.hpp"
 
+#include "roq/kraken_futures/settings.hpp"
+
 namespace roq {
 namespace kraken_futures {
 
 struct Shared final {
-  explicit Shared(server::Dispatcher &);
+  Shared(server::Dispatcher &, Settings const &);
 
   Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
@@ -43,6 +45,7 @@ struct Shared final {
   server::Dispatcher &dispatcher_;
 
  public:
+  Settings const &settings;
   core::Symbols symbols;
 };
 
