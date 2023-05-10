@@ -1,0 +1,66 @@
+{
+  "name": "REST",
+  "type": "flags",
+  "prefix": "rest_",
+  "values": [
+    {
+      "name": "uri",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "default": "https://demo-futures.kraken.com/derivatives",
+      "description": "REST end-point (URI)"
+    },
+    {
+      "name": "proxy",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "description": "proxy end-point (URI)"
+    },
+    {
+      "name": "ping_freq",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "ping frequency"
+    },
+    {
+      "name": "ping_path",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path",
+      "default": "/api/v3/instruments",
+      "description": "URI path used for REST connection keep-alive messages"
+    },
+    {
+      "name": "cancel_on_disconnect",
+      "type": "bool",
+      "default": true,
+      "description": "cancel orders on disconnect? (bool)"
+    },
+    {
+      "name": "cancel_all_after",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "cancel all after, requires cancel-on-disconnect"
+    },
+    {
+      "name": "request_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "request: timeout"
+    },
+    {
+      "name": "allow_order_request_pipeline",
+      "type": "bool",
+      "default": false,
+      "description": "allow more than one in-flight order action? (bool)"
+    },
+    {
+      "name": "use_nonce",
+      "type": "bool",
+      "default": "true",
+      "description": "use nonce for security?"
+    }
+  ]
+}

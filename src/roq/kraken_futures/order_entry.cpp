@@ -13,7 +13,6 @@
 
 #include "roq/web/rest/client_factory.hpp"
 
-#include "roq/kraken_futures/flags.hpp"
 #include "roq/kraken_futures/order_update.hpp"
 
 #include "roq/kraken_futures/json/cancel_all_after_ack.hpp"
@@ -50,7 +49,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::rest_uri();
+  auto uri = settings.rest.uri;
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
@@ -61,16 +60,16 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .disconnect_on_idle_timeout = {},
       .connection = web::http::Connection::KEEP_ALIVE,
       // proxy
-      .proxy = Flags::rest_proxy(),
+      .proxy = settings.rest.proxy,
       // http
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
-      .request_timeout = Flags::rest_request_timeout(),
-      .ping_frequency = Flags::rest_ping_freq(),
-      .ping_path = Flags::rest_ping_path(),
+      .request_timeout = settings.rest.request_timeout,
+      .ping_frequency = settings.rest.ping_freq,
+      .ping_path = settings.rest.ping_path,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
       .allow_pipelining = true,
   };
   return web::rest::ClientFactory::create(handler, context, config);
@@ -83,8 +82,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 // following is used from several places
 
-auto get_quality_of_service() {
-  return Flags::rest_allow_order_request_pipeline() ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
+auto get_quality_of_service(auto &settings) {
+  return settings.rest.allow_order_request_pipeline ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
 }  // namespace
 
@@ -92,7 +91,8 @@ auto get_quality_of_service() {
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -110,7 +110,7 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
       account_{account}, shared_{shared},
-      download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }} {
+      download_{shared.settings.rest.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
@@ -124,10 +124,10 @@ void OrderEntry::operator()(Event<Stop> const &) {
 void OrderEntry::operator()(Event<Timer> const &event) {
   auto now = event.value.now;
   (*connection_).refresh(now);
-  if (Flags::rest_cancel_on_disconnect() && Flags::rest_cancel_all_after().count() && ready() &&
+  if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() && ready() &&
       next_cancel_all_timer_ < now) {
-    next_cancel_all_timer_ = now + Flags::rest_cancel_all_after() / 4;
-    cancel_all_orders_after(Flags::rest_cancel_all_after());
+    next_cancel_all_timer_ = now + shared_.settings.rest.cancel_all_after / 4;
+    cancel_all_orders_after(shared_.settings.rest.cancel_all_after);
   }
 }
 
@@ -334,7 +334,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
         .content_type = web::http::ContentType::APPLICATION_JSON,
         .headers = headers,
         .body = {},
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](
                         [[maybe_unused]] auto &request_id, auto &response) {
@@ -441,7 +441,7 @@ void OrderEntry::modify_order(
         .content_type = {},
         .headers = headers,
         .body = {},
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback =
         [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
@@ -541,7 +541,7 @@ void OrderEntry::cancel_order(
         .content_type = {},
         .headers = headers,
         .body = {},
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback =
         [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
@@ -634,7 +634,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &, std::string_v
         .content_type = {},
         .headers = headers,
         .body = {},
-        .quality_of_service = get_quality_of_service(),
+        .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
@@ -674,7 +674,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
       .content_type = {},
       .headers = headers,
       .body = {},
-      .quality_of_service = get_quality_of_service(),
+      .quality_of_service = get_quality_of_service(shared_.settings),
   };
   auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
     TraceInfo trace_info;

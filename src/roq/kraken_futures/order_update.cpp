@@ -9,8 +9,6 @@
 
 #include "roq/utils/compare.hpp"
 
-#include "roq/kraken_futures/flags.hpp"
-
 #include "roq/kraken_futures/json/utils.hpp"
 
 using namespace std::literals;
@@ -148,7 +146,7 @@ void OrderUpdate::operator()(
   auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto order_update = oms::OrderUpdate{
       .account = account_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = order.instrument,
       .side = side,
       .position_effect = {},

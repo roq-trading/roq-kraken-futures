@@ -6,8 +6,6 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/kraken_futures/flags.hpp"
-
 using namespace std::chrono_literals;  // NOLINT
 
 namespace roq {
@@ -15,8 +13,8 @@ namespace kraken_futures {
 
 // === IMPLEMENTATION ===
 
-Account::Account(Config const &config, std::string_view const &name)
-    : name_{name}, key_{config.get_access_key(name)}, crypto_{config.get_access_secret(name)} {
+Account::Account(Config const &config, std::string_view const &name, bool use_nonce)
+    : name_{name}, key_{config.get_access_key(name)}, crypto_{config.get_access_secret(name)}, use_nonce_{use_nonce} {
 }
 
 std::string Account::create_headers(std::string_view const &path, std::string_view const &query) {
@@ -28,7 +26,7 @@ std::string Account::signed_challenge(std::string_view const &original_challenge
 }
 
 std::chrono::milliseconds Account::get_nonce() {
-  if (Flags::rest_use_nonce()) {
+  if (use_nonce_) {
     auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
     nonce_ = std::max(now, nonce_ + 1ms);  // note! can't reuse
   }

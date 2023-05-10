@@ -13,7 +13,7 @@ namespace roq {
 namespace kraken_futures {
 
 struct Account final {
-  Account(Config const &, std::string_view const &name);
+  Account(Config const &, std::string_view const &name, bool use_nonce);
 
   Account(Account &&) = delete;
   Account(Account const &) = delete;
@@ -33,6 +33,7 @@ struct Account final {
   std::string const key_;
   tools::Crypto crypto_;
   std::chrono::milliseconds nonce_ = {};
+  bool const use_nonce_;
 };
 
 }  // namespace kraken_futures

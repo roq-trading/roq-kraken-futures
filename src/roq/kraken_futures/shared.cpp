@@ -2,15 +2,13 @@
 
 #include "roq/kraken_futures/shared.hpp"
 
-#include "roq/kraken_futures/flags.hpp"
-
 namespace roq {
 namespace kraken_futures {
 
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, symbols{Flags::ws_max_subscriptions_per_stream()} {
+    : dispatcher_{dispatcher}, settings{settings}, symbols{settings.ws.max_subscriptions_per_stream} {
 }
 
 }  // namespace kraken_futures

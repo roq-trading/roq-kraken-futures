@@ -11,7 +11,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/kraken_futures/flags.hpp"
 #include "roq/kraken_futures/order_update.hpp"
 
 using namespace std::literals;
@@ -40,7 +39,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::ws_uri();
+  auto uri = settings.ws.uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -56,10 +55,10 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_ping_freq(),
+      .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
@@ -74,7 +73,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -94,7 +94,7 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
       account_{account}, shared_{shared},
-      download_{Flags::ws_request_timeout(), [this](auto state) { return download(state); }} {
+      download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
@@ -330,7 +330,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.instrument,
           .external_account = open_positions.account,
           .long_quantity = long_quantity,
@@ -379,7 +379,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .stream_id = stream_id_,
           .account = account_.get_name(),
           .order_id = ORDER_ID_NONE,
-          .exchange = flags::Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
           .position_effect = {},
@@ -418,7 +418,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .stream_id = stream_id_,
           .account = account_.get_name(),
           .order_id = ORDER_ID_NONE,
-          .exchange = flags::Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
           .position_effect = {},
