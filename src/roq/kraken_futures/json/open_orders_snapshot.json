@@ -12,7 +12,7 @@
     },
     {
       "name": "orders",
-      "type": "std::span<Order>"
+      "type": "std::span<Order const>"
     }
   ]
 }

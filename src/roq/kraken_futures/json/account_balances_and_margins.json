@@ -12,7 +12,7 @@
     },
     {
       "name": "margin_accounts",
-      "type": "std::span<MarginAccount>"
+      "type": "std::span<MarginAccount const>"
     },
     {
       "name": "seq",

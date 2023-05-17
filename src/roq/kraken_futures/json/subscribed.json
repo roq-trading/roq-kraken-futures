@@ -12,7 +12,7 @@
     },
     {
       "name": "product_ids",
-      "type": "std::span<ProductID>"
+      "type": "std::span<ProductID const>"
     }
   ]
 }

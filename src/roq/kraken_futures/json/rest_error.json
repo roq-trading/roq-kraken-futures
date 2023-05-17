@@ -32,7 +32,7 @@
     },
     {
       "name": "errors",
-      "type": "std::span<RestErrorItem>"
+      "type": "std::span<RestErrorItem const>"
     },
     {
       "name": "serverTime",

@@ -21,7 +21,7 @@
     },
     {
       "name": "orderEvents",
-      "type": "std::span<OrderEvent>"
+      "type": "std::span<OrderEvent const>"
     }
   ]
 }

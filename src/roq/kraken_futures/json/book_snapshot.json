@@ -24,11 +24,11 @@
     },
     {
       "name": "bids",
-      "type": "std::span<BookItem>"
+      "type": "std::span<BookItem const>"
     },
     {
       "name": "asks",
-      "type": "std::span<BookItem>"
+      "type": "std::span<BookItem const>"
     }
   ]
 }

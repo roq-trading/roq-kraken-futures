@@ -13,7 +13,7 @@
     },
     {
       "name": "instruments",
-      "type": "std::span<InstrumentsItem>",
+      "type": "std::span<InstrumentsItem const>",
       "required": false
     },
     {

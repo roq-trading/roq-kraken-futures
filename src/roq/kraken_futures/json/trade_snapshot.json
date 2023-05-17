@@ -12,7 +12,7 @@
     },
     {
       "name": "trades",
-      "type": "std::span<Trade>"
+      "type": "std::span<Trade const>"
     }
   ]
 }
