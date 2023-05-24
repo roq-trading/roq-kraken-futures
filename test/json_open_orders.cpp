@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/open_orders.hpp"
 
 using namespace roq;
@@ -36,9 +31,8 @@ TEST_CASE("json_open_orders_new_placed_order_by_user", "[json_open_orders]") {
                  R"("is_cancel":false,)"
                  R"("reason":"new_placed_order_by_user")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order.instrument == "PI_XBTUSD"sv);
   CHECK(obj.order.time == 1627578394576ms);
@@ -75,9 +69,8 @@ TEST_CASE("json_open_orders_new_placed_order_by_user_with_cli_ord_id", "[json_op
                  R"("is_cancel":false,)"
                  R"("reason":"new_placed_order_by_user")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order.instrument == "PI_XBTUSD"sv);
   CHECK(obj.order.time == 1627647670603ms);
@@ -115,9 +108,8 @@ TEST_CASE("json_open_orders_edited_by_user", "[json_open_orders]") {
                  R"("is_cancel":false,)"
                  R"("reason":"edited_by_user")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order.instrument == "PI_XBTUSD"sv);
   CHECK(obj.order.time == 1627906165185ms);
@@ -141,9 +133,8 @@ TEST_CASE("json_open_orders_cancelled_by_user", "[json_open_orders]") {
                  R"("is_cancel":true,)"
                  R"("reason":"cancelled_by_user")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order_id == "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"sv);
   CHECK(obj.is_cancel == true);
@@ -158,9 +149,8 @@ TEST_CASE("json_open_orders_cancelled_by_user_with_cli_ord_id", "[json_open_orde
                  R"("is_cancel":true,)"
                  R"("reason":"cancelled_by_user")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order_id == "f18e006d-c95e-4d89-b470-4402949d5a15"sv);
   CHECK(obj.cli_ord_id == "QAAF6QMAAQAA7DBK5YoQ"sv);
@@ -176,9 +166,8 @@ TEST_CASE("json_open_orders_full_fill", "[json_open_orders]") {
                  R"("is_cancel":true,)"
                  R"("reason":"full_fill")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::OpenOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::OpenOrders::create(message, buffer);
   CHECK(obj.feed == json::Feed::OPEN_ORDERS);
   CHECK(obj.order_id == "df2fa719-23bc-4cd7-8a84-5c3c41d75757"sv);
   CHECK(obj.cli_ord_id == "EwAF7gMAAQAAnNBFcdUQ"sv);

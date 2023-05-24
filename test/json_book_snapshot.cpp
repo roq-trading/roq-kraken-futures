@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/book_snapshot.hpp"
 
 using namespace roq;
@@ -39,9 +34,8 @@ TEST_CASE("json_book_snapshot_simple", "[json_book_snapshot]") {
                  R"({"price":139.65,"qty":5000.0})"
                  R"(])"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::BookSnapshot>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::BookSnapshot::create(message, buffer);
   CHECK(obj.feed == json::Feed::BOOK_SNAPSHOT);
   CHECK(obj.product_id == "FI_LTCUSD_210924"sv);
   CHECK(obj.timestamp == 1627535620727ms);

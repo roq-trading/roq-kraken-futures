@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/account_balances_and_margins.hpp"
 
 using namespace roq;
@@ -35,9 +30,8 @@ TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_an
                  R"(],)"
                  R"("seq":0)"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::AccountBalancesAndMargins>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::AccountBalancesAndMargins::create(message, buffer);
   CHECK(obj.feed == json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.margin_accounts) == 11);

@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/cancel_order.hpp"
 
 using namespace roq;
@@ -46,9 +41,8 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
                  R"(},)"
                  R"("serverTime":"2021-07-31T04:53:14.376Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::CancelOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::CANCELLED);
   CHECK(obj.cancel_status.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
@@ -84,9 +78,8 @@ TEST_CASE("json_cancel_order_not_found", "[json_cancel_order]") {
                  R"("serverTime":"2021-08-02T07:46:05.900Z")"
                  R"(})"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::CancelOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::CancelOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::NOT_FOUND);
   CHECK(obj.cancel_status.received_time == 1627890365900ms);

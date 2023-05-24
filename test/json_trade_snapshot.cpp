@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/trade_snapshot.hpp"
 
 using namespace roq;
@@ -28,9 +23,8 @@ TEST_CASE("json_trade_snapshot_simple", "[json_trade_snapshot]") {
       R"({"feed":"trade","product_id":"PI_XBTUSD","uid":"25ec0c98-676b-4522-a94e-f4a848f0ed84","side":"sell","type":"fill","seq":6920,"time":1627483200036,"qty":10.0,"price":39963.5})"
       R"(])"
       R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::TradeSnapshot>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::TradeSnapshot::create(message, buffer);
   CHECK(obj.feed == json::Feed::TRADE_SNAPSHOT);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
   CHECK(std::size(obj.trades) == 3);

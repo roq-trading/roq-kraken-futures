@@ -14,73 +14,23 @@ namespace roq {
 namespace kraken_futures {
 namespace json {
 
+// === HELPERS ===
+
 namespace {
-template <typename H>
-void dispatch_info(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Info info{message};
-  create_trace_and_dispatch(handler, trace_info, info);
-}
-
-template <typename H>
-void dispatch_alert(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Alert alert(message);
-  create_trace_and_dispatch(handler, trace_info, alert);
-}
-
-template <typename H>
-void dispatch_error(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Error error{message};
-  create_trace_and_dispatch(handler, trace_info, error);
-}
-
-template <typename H>
-void dispatch_subscribed(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  Subscribed subscribed{message, buffer};
-  create_trace_and_dispatch(handler, trace_info, subscribed);
-}
-
-template <typename H>
-void dispatch_heartbeat(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Heartbeat heartbeat{message};
-  create_trace_and_dispatch(handler, trace_info, heartbeat);
-}
-
-template <typename H>
-void dispatch_ticker(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Ticker ticker{message};
-  create_trace_and_dispatch(handler, trace_info, ticker);
-}
-
-template <typename H>
-void dispatch_book_snapshot(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  BookSnapshot book_snapshot{message, buffer};
-  create_trace_and_dispatch(handler, trace_info, book_snapshot);
-}
-
-template <typename H>
-void dispatch_book(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Book book{message};
-  create_trace_and_dispatch(handler, trace_info, book);
-}
-
-template <typename H>
-void dispatch_trade_snapshot(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  TradeSnapshot trade_snapshot(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, trade_snapshot);
-}
-
-template <typename H>
-void dispatch_trade(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Trade trade{message};
-  create_trace_and_dispatch(handler, trace_info, trade);
+template <typename T>
+void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_info) {
+  auto obj = T::create(message, buffer);
+  create_trace_and_dispatch(handler, trace_info, obj);
 }
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 bool ParserPublic::dispatch(
-    Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
+    Handler &handler,
+    std::string_view const &message,
+    std::span<std::byte> const &buffer,
+    TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
@@ -96,19 +46,19 @@ bool ParserPublic::dispatch(
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
-          dispatch_info(handler, message, trace_info);
+          dispatch_helper<Info>(handler, message, buffer, trace_info);
           return true;
         case ALERT:
-          dispatch_alert(handler, message, trace_info);
+          dispatch_helper<Alert>(handler, message, buffer, trace_info);
           return true;
         case ERROR:
-          dispatch_error(handler, message, trace_info);
+          dispatch_helper<Error>(handler, message, buffer, trace_info);
           return true;
         case CHALLENGE:
           log::fatal("Unexpected: event={}"sv, event);
           break;
         case SUBSCRIBED:
-          dispatch_subscribed(handler, message, buffer, trace_info);
+          dispatch_helper<Subscribed>(handler, message, buffer, trace_info);
           return true;
         default:
           assert(false);
@@ -126,22 +76,22 @@ bool ParserPublic::dispatch(
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:
-          dispatch_heartbeat(handler, message, trace_info);
+          dispatch_helper<Heartbeat>(handler, message, buffer, trace_info);
           return true;
         case TICKER:
-          dispatch_ticker(handler, message, trace_info);
+          dispatch_helper<Ticker>(handler, message, buffer, trace_info);
           return true;
         case BOOK_SNAPSHOT:
-          dispatch_book_snapshot(handler, message, buffer, trace_info);
+          dispatch_helper<BookSnapshot>(handler, message, buffer, trace_info);
           return true;
         case BOOK:
-          dispatch_book(handler, message, trace_info);
+          dispatch_helper<Book>(handler, message, buffer, trace_info);
           return true;
         case TRADE_SNAPSHOT:
-          dispatch_trade_snapshot(handler, message, buffer, trace_info);
+          dispatch_helper<TradeSnapshot>(handler, message, buffer, trace_info);
           return true;
         case TRADE:
-          dispatch_trade(handler, message, trace_info);
+          dispatch_helper<Trade>(handler, message, buffer, trace_info);
           return true;
         case CHALLENGE:
         case ACCOUNT_BALANCES_AND_MARGINS:

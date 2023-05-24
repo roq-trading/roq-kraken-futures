@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/cancel_all_orders.hpp"
 
 using namespace roq;
@@ -29,9 +24,8 @@ TEST_CASE("json_cancel_all_orders_no_orders", "[json_cancel_all_orders]") {
                  R"(},)"
                  R"("serverTime":"2021-07-31T06:18:18.468Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::CancelAllOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::CancelAllOrders::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.received_time == 1627712298468ms);
   CHECK(obj.cancel_status.cancel_only == "all"sv);
@@ -76,9 +70,8 @@ TEST_CASE("json_cancel_all_orders_cancelled", "[json_cancel_all_orders]") {
                  R"(},)"
                  R"("serverTime":"2021-07-31T06:20:10.488Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::CancelAllOrders>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::CancelAllOrders::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.received_time == 1627712410487ms);
   CHECK(obj.cancel_status.cancel_only == "all"sv);

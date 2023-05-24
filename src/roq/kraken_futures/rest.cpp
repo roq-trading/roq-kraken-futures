@@ -77,7 +77,7 @@ struct create_metrics final : public core::metrics::Factory {
 Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -214,7 +214,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::Instruments instruments{body, decode_buffer_};
+        auto instruments = json::Instruments::create(body, decode_buffer_);
         if (std::empty(instruments.error)) {
           Trace event_2{event, instruments};
           (*this)(event_2);

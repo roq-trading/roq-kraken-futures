@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/edit_order.hpp"
 
 using namespace roq;
@@ -59,9 +54,8 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::EditOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627648619235ms);
   CHECK(obj.edit_status.status == json::Status::EDITED);
@@ -103,9 +97,8 @@ TEST_CASE("json_edit_order_authentication_error", "[json_edit_order]") {
                  R"("error":"authenticationError",)"
                  R"("serverTime":"2021-07-31T04:30:20.840Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::EditOrder::create(message, buffer);
   CHECK(obj.result == json::Result::ERROR);
   CHECK(obj.error == "authenticationError"sv);
   CHECK(obj.server_time == 1627705820840ms);
@@ -138,9 +131,8 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::EditOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627876310939ms);
   // edit_status
@@ -211,9 +203,8 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::EditOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::EditOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627972925376ms);
   // edit_status

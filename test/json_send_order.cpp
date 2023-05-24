@@ -2,11 +2,6 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
-#include "roq/core/json/parser.hpp"
-
 #include "roq/kraken_futures/json/send_order.hpp"
 
 using namespace roq;
@@ -47,9 +42,8 @@ TEST_CASE("json_send_order_simple", "[json_send_order]") {
                  R"(},)"
                  R"("serverTime":"2021-07-30T04:19:40.804Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::SendOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::SendOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "f2af600b-5fe8-49be-8983-de874071563b"sv);
   CHECK(obj.send_status.cli_ord_id == "TgAF6QMAAQAAbl1bG4QQ"sv);
@@ -108,9 +102,8 @@ TEST_CASE("json_send_order_order_prior_execution", "[json_send_order]") {
                  R"(},)"
                  R"("serverTime":"2021-08-03T05:56:30.992Z")"
                  R"(})";
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_(buffer);
-  auto obj = core::json::Parser::create<json::SendOrder>(message, buffer_);
+  std::vector<std::byte> buffer(8192);
+  auto obj = json::SendOrder::create(message, buffer);
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
   CHECK(obj.send_status.cli_ord_id == "WwAF6QMAAQAAPOEH7dUQ"sv);

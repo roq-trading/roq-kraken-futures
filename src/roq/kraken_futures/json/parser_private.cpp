@@ -14,89 +14,23 @@ namespace roq {
 namespace kraken_futures {
 namespace json {
 
+// === HELPERS ===
+
 namespace {
-template <typename H>
-void dispatch_info(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Info info{message};
-  create_trace_and_dispatch(handler, trace_info, info);
-}
-
-template <typename H>
-void dispatch_alert(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Alert alert{message};
-  create_trace_and_dispatch(handler, trace_info, alert);
-}
-
-template <typename H>
-void dispatch_error(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Error error{message};
-  create_trace_and_dispatch(handler, trace_info, error);
-}
-
-template <typename H>
-void dispatch_challenge(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Challenge challenge{message};
-  create_trace_and_dispatch(handler, trace_info, challenge);
-}
-
-template <typename H>
-void dispatch_subscribed(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  Subscribed subscribed(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, subscribed);
-}
-
-template <typename H>
-void dispatch_heartbeat(H &handler, std::string_view const &message, TraceInfo const &trace_info) {
-  Heartbeat heartbeat(message);
-  create_trace_and_dispatch(handler, trace_info, heartbeat);
-}
-
-template <typename H>
-void dispatch_account_balances_and_margins(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  AccountBalancesAndMargins account_balances_and_margins(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, account_balances_and_margins);
-}
-
-template <typename H>
-void dispatch_open_positions(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  OpenPositions open_positions(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, open_positions);
-}
-
-template <typename H>
-void dispatch_open_orders_snapshot(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  OpenOrdersSnapshot open_orders_snapshot(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, open_orders_snapshot);
-}
-
-template <typename H>
-void dispatch_open_orders(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  OpenOrders open_orders(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, open_orders);
-}
-
-template <typename H>
-void dispatch_fills_snapshot(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  FillsSnapshot fills_snapshot(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, fills_snapshot);
-}
-
-template <typename H>
-void dispatch_fills(
-    H &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  Fills fills(message, buffer);
-  create_trace_and_dispatch(handler, trace_info, fills);
+template <typename T>
+void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_info) {
+  auto obj = T::create(message, buffer);
+  create_trace_and_dispatch(handler, trace_info, obj);
 }
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 bool ParserPrivate::dispatch(
-    Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
+    Handler &handler,
+    std::string_view const &message,
+    std::span<std::byte> const &buffer,
+    TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
@@ -112,19 +46,19 @@ bool ParserPrivate::dispatch(
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
-          dispatch_info(handler, message, trace_info);
+          dispatch_helper<Info>(handler, message, buffer, trace_info);
           return true;
         case ALERT:
-          dispatch_alert(handler, message, trace_info);
+          dispatch_helper<Alert>(handler, message, buffer, trace_info);
           return true;
         case ERROR:
-          dispatch_error(handler, message, trace_info);
+          dispatch_helper<Error>(handler, message, buffer, trace_info);
           return true;
         case CHALLENGE:
-          dispatch_challenge(handler, message, trace_info);
+          dispatch_helper<Challenge>(handler, message, buffer, trace_info);
           return true;
         case SUBSCRIBED:
-          dispatch_subscribed(handler, message, buffer, trace_info);
+          dispatch_helper<Subscribed>(handler, message, buffer, trace_info);
           return true;
         default:
           assert(false);
@@ -142,7 +76,7 @@ bool ParserPrivate::dispatch(
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:
-          dispatch_heartbeat(handler, message, trace_info);
+          dispatch_helper<Heartbeat>(handler, message, buffer, trace_info);
           return true;
         case TICKER:
         case BOOK_SNAPSHOT:
@@ -152,28 +86,28 @@ bool ParserPrivate::dispatch(
           log::fatal("Unexpected: feed={}"sv, feed);
           break;
         case CHALLENGE:
-          dispatch_challenge(handler, message, trace_info);
+          dispatch_helper<Challenge>(handler, message, buffer, trace_info);
           return true;
         case ACCOUNT_BALANCES_AND_MARGINS:
-          dispatch_account_balances_and_margins(handler, message, buffer, trace_info);
+          dispatch_helper<AccountBalancesAndMargins>(handler, message, buffer, trace_info);
           return true;
         case OPEN_POSITIONS:
-          dispatch_open_positions(handler, message, buffer, trace_info);
+          dispatch_helper<OpenPositions>(handler, message, buffer, trace_info);
           return true;
         case OPEN_ORDERS_SNAPSHOT:
-          dispatch_open_orders_snapshot(handler, message, buffer, trace_info);
+          dispatch_helper<OpenOrdersSnapshot>(handler, message, buffer, trace_info);
           return true;
         case OPEN_ORDERS:
-          dispatch_open_orders(handler, message, buffer, trace_info);
+          dispatch_helper<OpenOrders>(handler, message, buffer, trace_info);
           return true;
         case OPEN_ORDERS_VERBOSE:
           // XXX
           break;
         case FILLS_SNAPSHOT:
-          dispatch_fills_snapshot(handler, message, buffer, trace_info);
+          dispatch_helper<FillsSnapshot>(handler, message, buffer, trace_info);
           return true;
         case FILLS:
-          dispatch_fills(handler, message, buffer, trace_info);
+          dispatch_helper<Fills>(handler, message, buffer, trace_info);
           return true;
           break;
         default:

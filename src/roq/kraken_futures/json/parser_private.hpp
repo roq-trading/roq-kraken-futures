@@ -4,9 +4,7 @@
 
 #include <string_view>
 
-#include "roq/core/json/parser.hpp"
-
-#include "roq/server.hpp"
+#include "roq/trace_info.hpp"
 
 #include "roq/kraken_futures/json/alert.hpp"
 #include "roq/kraken_futures/json/error.hpp"
@@ -53,7 +51,8 @@ struct ParserPrivate final {
     virtual void operator()(Trace<Fills> const &) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &);
+  static bool dispatch(
+      Handler &, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &);
 };
 
 }  // namespace json
