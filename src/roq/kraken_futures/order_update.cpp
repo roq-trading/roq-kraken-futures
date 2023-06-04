@@ -158,6 +158,7 @@ void OrderUpdate::operator()(
       .update_time_utc = order.last_update_time,
       .external_account = {},
       .external_order_id = order.order_id,
+      .client_order_id = {},
       .status = order_status,
       .quantity = order.qty,
       .price = order.limit_price,
