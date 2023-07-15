@@ -27,7 +27,7 @@
     {
       "name": "max_subscriptions_per_stream",
       "type": "uint32_t",
-      "validator": "roq::flags::validators::Positive<uint32_t>",
+      "required": true,
       "default": 128,
       "description": "max subscriptions per connection (count)"
     }
