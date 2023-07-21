@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-CWD="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-
 if [ "$1" == "debug" ]; then
   PREFIX="libtool --mode=execute gdb --args"
 else
@@ -10,7 +8,9 @@ fi
 
 NAME="kraken-futures"
 
-CONFIG_FILE="$CWD/config/$NAME-demo.toml"
+CONFIG="${CONFIG:-$NAME-demo}"
+
+CONFIG_FILE="$ROQ_CONFIG_PATH/roq-kraken-futures/$CONFIG.toml"
 
 ENV="demo-"
 
