@@ -36,7 +36,7 @@ struct OrderUpdate final {
   void operator()(json::OpenOrders const &, TraceInfo const &);
 
   template <typename Accept, typename Reject>
-  void operator()([[maybe_unused]] uint32_t order_id, json::SendOrder const &send_order, Accept accept, Reject reject) {
+  void operator()([[maybe_unused]] uint64_t order_id, json::SendOrder const &send_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
@@ -167,7 +167,7 @@ struct OrderUpdate final {
   }
 
   template <typename Accept, typename Reject>
-  void operator()([[maybe_unused]] uint32_t order_id, json::EditOrder const &edit_order, Accept accept, Reject reject) {
+  void operator()([[maybe_unused]] uint64_t order_id, json::EditOrder const &edit_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
@@ -268,7 +268,7 @@ struct OrderUpdate final {
 
   template <typename Accept, typename Reject>
   void operator()(
-      [[maybe_unused]] uint32_t order_id, json::CancelOrder const &cancel_order, Accept accept, Reject reject) {
+      [[maybe_unused]] uint64_t order_id, json::CancelOrder const &cancel_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {

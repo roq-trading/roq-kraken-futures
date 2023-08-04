@@ -348,7 +348,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, oms::Order const 
 }
 
 void OrderEntry::create_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto send_order = json::SendOrder::create(body, decode_buffer_);
@@ -455,7 +455,7 @@ void OrderEntry::modify_order(
 }
 
 void OrderEntry::modify_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto edit_order = json::EditOrder::create(body, decode_buffer_);
@@ -555,7 +555,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto cancel_order = json::CancelOrder::create(body, decode_buffer_);
@@ -752,7 +752,7 @@ void OrderEntry::process_response(
 }
 
 template <typename... Args>
-void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint32_t order_id, Args &&...args) {
+void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
   auto &[trace_info, response] = event;
   if (shared_.update_order(
           user_id,
