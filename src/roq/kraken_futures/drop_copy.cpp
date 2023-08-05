@@ -378,7 +378,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .order_id = ORDER_ID_NONE,
+          .order_id = {},
           .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
@@ -392,6 +392,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .update_type = UpdateType::SNAPSHOT,
           .sending_time_utc = {},
           .user = {},
+          .strategy_id = {},
       };
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
     }
@@ -417,7 +418,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .order_id = ORDER_ID_NONE,
+          .order_id = {},
           .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
@@ -431,6 +432,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = {},
           .user = {},
+          .strategy_id = {},
       };
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
     }
