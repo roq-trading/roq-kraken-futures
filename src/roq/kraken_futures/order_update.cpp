@@ -170,6 +170,9 @@ void OrderUpdate::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
       .update_type = update_type,
       .sending_time_utc = {},
   };

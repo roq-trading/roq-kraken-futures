@@ -114,6 +114,9 @@ struct OrderUpdate final {
                 .last_traded_price = NaN,
                 .last_liquidity = {},
                 .routing_id = {},
+                .max_request_version = {},
+                .max_response_version = {},
+                .max_accepted_version = {},
                 .update_type = {},
                 .sending_time_utc = {},
             };
@@ -156,6 +159,9 @@ struct OrderUpdate final {
                 .last_traded_price = NaN,
                 .last_liquidity = {},
                 .routing_id = {},
+                .max_request_version = {},
+                .max_response_version = {},
+                .max_accepted_version = {},
                 .update_type = {},
                 .sending_time_utc = {},
             };
@@ -251,6 +257,9 @@ struct OrderUpdate final {
                 .last_traded_price = NaN,
                 .last_liquidity = {},
                 .routing_id = {},
+                .max_request_version = {},
+                .max_response_version = {},
+                .max_accepted_version = {},
                 .update_type = {},
                 .sending_time_utc = {},
             };
@@ -353,6 +362,9 @@ struct OrderUpdate final {
                 .last_traded_price = NaN,
                 .last_liquidity = {},
                 .routing_id = {},
+                .max_request_version = {},
+                .max_response_version = {},
+                .max_accepted_version = {},
                 .update_type = {},
                 .sending_time_utc = {},
             };
