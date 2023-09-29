@@ -395,7 +395,7 @@ struct OrderUpdate final {
       json::Order const &,
       std::string_view const &order_id,
       std::string_view const &cli_ord_id,
-      const json::Reason,
+      json::Reason const,
       bool is_cancel,
       TraceInfo const &,
       bool is_download);
@@ -460,8 +460,8 @@ struct OrderUpdate final {
 
  private:
   Shared &shared_;
-  const uint16_t stream_id_;
-  const std::string_view account_;
+  uint16_t const stream_id_;
+  std::string_view const account_;
 };
 
 }  // namespace kraken_futures

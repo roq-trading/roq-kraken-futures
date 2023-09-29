@@ -136,7 +136,7 @@ void OrderUpdate::operator()(
     json::Order const &order,
     [[maybe_unused]] std::string_view const &order_id,
     std::string_view const &cli_ord_id,
-    const json::Reason reason,
+    json::Reason const reason,
     bool is_cancel,
     TraceInfo const &trace_info,
     bool is_download) {
