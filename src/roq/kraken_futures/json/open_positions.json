@@ -13,6 +13,14 @@
     {
       "name": "positions",
       "type": "std::span<Position const>"
+    },
+    {
+      "name": "seq",
+      "type": "int64_t"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }
