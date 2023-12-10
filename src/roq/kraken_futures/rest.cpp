@@ -274,6 +274,9 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .settlement_date = {},
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
+        .exchange_time_utc = {},
+        .exchange_sequence = {},
+        .sending_time_utc = {},
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
