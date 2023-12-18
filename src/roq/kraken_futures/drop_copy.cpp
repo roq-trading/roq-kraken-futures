@@ -307,8 +307,8 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .margin_mode = {},
           .currency = currency,
+          .margin_mode = {},
           .balance = item.balance,
           .hold = NaN,
           .external_account = account_balances_and_margins.account,
@@ -331,9 +331,9 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .margin_mode = {},
           .exchange = shared_.settings.exchange,
           .symbol = item.instrument,
+          .margin_mode = {},
           .external_account = open_positions.account,
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
