@@ -150,6 +150,7 @@ void OrderUpdate::operator()(
       .symbol = order.instrument,
       .side = side,
       .position_effect = {},
+      .margin_mode = {},
       .max_show_quantity = NaN,
       .order_type = order_type,
       .time_in_force = {},

@@ -385,6 +385,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .symbol = symbol,
           .side = side,
           .position_effect = {},
+          .margin_mode = {},
           .create_time_utc = item.time,
           .update_time_utc = item.time,
           .external_account = {},
@@ -426,6 +427,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .symbol = symbol,
           .side = side,
           .position_effect = {},
+          .margin_mode = {},
           .create_time_utc = item.time,
           .update_time_utc = item.time,
           .external_account = fills.username,  // note! appears to be account
