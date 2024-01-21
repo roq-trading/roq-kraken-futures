@@ -112,20 +112,20 @@ void DropCopy::operator()(Event<Timer> const &event) {
 void DropCopy::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.parse, metrics::PROFILE)
-      .write(profile_.challenge, metrics::PROFILE)
-      .write(profile_.heartbeat, metrics::PROFILE)
-      .write(profile_.account_balances_and_margins, metrics::PROFILE)
-      .write(profile_.open_positions, metrics::PROFILE)
-      .write(profile_.open_orders_snapshot, metrics::PROFILE)
-      .write(profile_.open_orders, metrics::PROFILE)
-      .write(profile_.fills_snapshot, metrics::PROFILE)
-      .write(profile_.fills, metrics::PROFILE)
+      .write(profile_.parse, utils::metrics::PROFILE)
+      .write(profile_.challenge, utils::metrics::PROFILE)
+      .write(profile_.heartbeat, utils::metrics::PROFILE)
+      .write(profile_.account_balances_and_margins, utils::metrics::PROFILE)
+      .write(profile_.open_positions, utils::metrics::PROFILE)
+      .write(profile_.open_orders_snapshot, utils::metrics::PROFILE)
+      .write(profile_.open_orders, utils::metrics::PROFILE)
+      .write(profile_.fills_snapshot, utils::metrics::PROFILE)
+      .write(profile_.fills, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY)
-      .write(latency_.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY)
+      .write(latency_.heartbeat, utils::metrics::LATENCY);
 }
 
 void DropCopy::get_challenge() {

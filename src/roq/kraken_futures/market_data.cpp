@@ -110,18 +110,18 @@ void MarketData::operator()(Event<Timer> const &event) {
 void MarketData::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.parse, metrics::PROFILE)
-      .write(profile_.heartbeat, metrics::PROFILE)
-      .write(profile_.ticker, metrics::PROFILE)
-      .write(profile_.book_snapshot, metrics::PROFILE)
-      .write(profile_.book, metrics::PROFILE)
-      .write(profile_.trade_snapshot, metrics::PROFILE)
-      .write(profile_.trade, metrics::PROFILE)
+      .write(profile_.parse, utils::metrics::PROFILE)
+      .write(profile_.heartbeat, utils::metrics::PROFILE)
+      .write(profile_.ticker, utils::metrics::PROFILE)
+      .write(profile_.book_snapshot, utils::metrics::PROFILE)
+      .write(profile_.book, utils::metrics::PROFILE)
+      .write(profile_.trade_snapshot, utils::metrics::PROFILE)
+      .write(profile_.trade, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY)
-      .write(latency_.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY)
+      .write(latency_.heartbeat, utils::metrics::LATENCY);
 }
 
 void MarketData::subscribe(size_t start_from) {
