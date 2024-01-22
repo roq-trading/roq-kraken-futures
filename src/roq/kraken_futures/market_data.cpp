@@ -10,8 +10,6 @@
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
-#include "roq/utils/metrics/const.hpp"
-
 #include "roq/core/metrics/factory.hpp"
 
 #include "roq/web/socket/client_factory.hpp"
@@ -113,18 +111,18 @@ void MarketData::operator()(Event<Timer> const &event) {
 void MarketData::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, utils::metrics::COUNTER)
+      .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
-      .write(profile_.parse, utils::metrics::PROFILE)
-      .write(profile_.heartbeat, utils::metrics::PROFILE)
-      .write(profile_.ticker, utils::metrics::PROFILE)
-      .write(profile_.book_snapshot, utils::metrics::PROFILE)
-      .write(profile_.book, utils::metrics::PROFILE)
-      .write(profile_.trade_snapshot, utils::metrics::PROFILE)
-      .write(profile_.trade, utils::metrics::PROFILE)
+      .write(profile_.parse, metrics::Type::PROFILE)
+      .write(profile_.heartbeat, metrics::Type::PROFILE)
+      .write(profile_.ticker, metrics::Type::PROFILE)
+      .write(profile_.book_snapshot, metrics::Type::PROFILE)
+      .write(profile_.book, metrics::Type::PROFILE)
+      .write(profile_.trade_snapshot, metrics::Type::PROFILE)
+      .write(profile_.trade, metrics::Type::PROFILE)
       // latency
-      .write(latency_.ping, utils::metrics::LATENCY)
-      .write(latency_.heartbeat, utils::metrics::LATENCY);
+      .write(latency_.ping, metrics::Type::LATENCY)
+      .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
 void MarketData::subscribe(size_t start_from) {
