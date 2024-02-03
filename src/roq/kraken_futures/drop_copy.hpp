@@ -6,15 +6,15 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/download.hpp"
-
-#include "roq/core/metrics/counter.hpp"
-#include "roq/core/metrics/latency.hpp"
-#include "roq/core/metrics/profile.hpp"
+#include "roq/utils/metrics/counter.hpp"
+#include "roq/utils/metrics/latency.hpp"
+#include "roq/utils/metrics/profile.hpp"
 
 #include "roq/io/context.hpp"
 
 #include "roq/web/socket/client.hpp"
+
+#include "roq/core/download.hpp"
 
 #include "roq/server.hpp"
 
@@ -104,14 +104,14 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // core::stack::Buffer<char, 32> stack_buffer_;
   // metrics
   struct {
-    core::metrics::Counter disconnect;
+    utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins, open_positions,
+    utils::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins, open_positions,
         open_orders_snapshot, open_orders, fills_snapshot, fills;
   } profile_;
   struct {
-    core::metrics::Latency ping, heartbeat;
+    utils::metrics::Latency ping, heartbeat;
   } latency_;
   // account
   Account &account_;
