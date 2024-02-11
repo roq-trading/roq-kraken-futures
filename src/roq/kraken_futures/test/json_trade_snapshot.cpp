@@ -24,7 +24,7 @@ TEST_CASE("json_trade_snapshot_simple", "[json_trade_snapshot]") {
       R"(])"
       R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::TradeSnapshot::create(message, buffer);
+  json::TradeSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::TRADE_SNAPSHOT);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
   CHECK(std::size(obj.trades) == 3);

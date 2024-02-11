@@ -19,7 +19,7 @@ namespace json {
 namespace {
 template <typename T>
 void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_info) {
-  auto obj = T::create(message, buffer);
+  T obj{message, buffer};
   create_trace_and_dispatch(handler, trace_info, obj);
 }
 }  // namespace

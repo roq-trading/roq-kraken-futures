@@ -31,7 +31,7 @@ TEST_CASE("json_open_positions_simple_1", "[json_open_positions]") {
                  R"(])"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OpenPositions::create(message, buffer);
+  json::OpenPositions obj{message, buffer};
   CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.positions) == 1);
@@ -68,7 +68,7 @@ TEST_CASE("json_open_positions_simple_2", "[json_open_positions]") {
                  R"(])"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OpenPositions::create(message, buffer);
+  json::OpenPositions obj{message, buffer};
   CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.positions) == 1);

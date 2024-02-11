@@ -37,7 +37,7 @@ TEST_CASE("json_ticker_simple", "[json_ticker]") {
                  R"("markPrice":2312.725,)"
                  R"("maturityTime":1627657200000)"
                  R"(})";
-  auto obj = core::json::Parser::create<json::Ticker>(message);
+  json::Ticker obj{message};
   CHECK(obj.time == 1627460663568ms);
   CHECK(obj.feed == json::Feed::TICKER);
   CHECK(obj.product_id == "FI_ETHUSD_210730"sv);
@@ -88,7 +88,7 @@ TEST_CASE("json_ticker_funding_rates", "[json_ticker]") {
                  R"("relative_funding_rate_prediction":0.000874329625,)"
                  R"("next_funding_rate_time":1627473600000)"
                  R"(})";
-  auto obj = core::json::Parser::create<json::Ticker>(message);
+  json::Ticker obj{message};
   CHECK(obj.time == 1627462526224ms);
   CHECK(obj.feed == json::Feed::TICKER);
   CHECK(obj.product_id == "PI_XBTUSD"sv);

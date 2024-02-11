@@ -28,7 +28,7 @@ TEST_CASE("json_order_simple", "[json_order]") {
                  R"("direction":0,)"
                  R"("reduce_only":false)"
                  R"(})";
-  auto obj = core::json::Parser::create<json::Order>(message);
+  json::Order obj{message};
   CHECK(obj.instrument == "PI_XBTUSD"sv);
   CHECK(obj.time == 1627577572583ms);
   CHECK(obj.last_update_time == 1627577572583ms);

@@ -25,7 +25,7 @@ TEST_CASE("json_rest_error_error_400", "[json_rest_error]") {
                  R"("serverTime":"2021-08-02T08:06:27.896Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::RestError::create(message, buffer);
+  json::RestError obj{message, buffer};
   // CHECK(obj.status == "BAD_REQUEST"sv);
   CHECK(std::size(obj.errors) == 1);
   // idx 0
@@ -47,7 +47,7 @@ TEST_CASE("json_rest_error_error_404", "[json_rest_error]") {
       R"("requestId":"7ad2fe97-69108954")"
       R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::RestError::create(message, buffer);
+  json::RestError obj{message, buffer};
   CHECK(obj.timestamp == 1627618268981ms);
   // CHECK(obj.status == 404);
   CHECK(obj.error == "Not Found"sv);

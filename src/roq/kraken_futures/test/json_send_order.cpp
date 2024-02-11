@@ -43,7 +43,7 @@ TEST_CASE("json_send_order_simple", "[json_send_order]") {
                  R"("serverTime":"2021-07-30T04:19:40.804Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::SendOrder::create(message, buffer);
+  json::SendOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "f2af600b-5fe8-49be-8983-de874071563b"sv);
   CHECK(obj.send_status.cli_ord_id == "TgAF6QMAAQAAbl1bG4QQ"sv);
@@ -103,7 +103,7 @@ TEST_CASE("json_send_order_order_prior_execution", "[json_send_order]") {
                  R"("serverTime":"2021-08-03T05:56:30.992Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::SendOrder::create(message, buffer);
+  json::SendOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
   CHECK(obj.send_status.cli_ord_id == "WwAF6QMAAQAAPOEH7dUQ"sv);

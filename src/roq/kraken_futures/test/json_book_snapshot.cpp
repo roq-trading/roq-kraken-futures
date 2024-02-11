@@ -35,7 +35,7 @@ TEST_CASE("json_book_snapshot_simple", "[json_book_snapshot]") {
                  R"(])"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::BookSnapshot::create(message, buffer);
+  json::BookSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::BOOK_SNAPSHOT);
   CHECK(obj.product_id == "FI_LTCUSD_210924"sv);
   CHECK(obj.timestamp == 1627535620727ms);

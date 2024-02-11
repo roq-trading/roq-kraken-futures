@@ -31,7 +31,7 @@ TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_an
                  R"("seq":0)"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::AccountBalancesAndMargins::create(message, buffer);
+  json::AccountBalancesAndMargins obj{message, buffer};
   CHECK(obj.feed == json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.margin_accounts) == 11);

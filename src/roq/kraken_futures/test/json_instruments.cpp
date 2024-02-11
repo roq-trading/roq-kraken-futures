@@ -45,7 +45,7 @@ TEST_CASE("json_instruments_simple", "[json_instruments]") {
       R"("serverTime":"2021-07-28T05:32:46.371Z")"
       R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Instruments::create(message, buffer);
+  json::Instruments obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(std::size(obj.instruments) == 25);
 }

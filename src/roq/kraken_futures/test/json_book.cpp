@@ -24,7 +24,7 @@ TEST_CASE("json_book_simple", "[json_book]") {
                  R"("qty":3951.0,)"
                  R"("timestamp":1627535639684)"
                  R"(})";
-  auto obj = core::json::Parser::create<json::Book>(message);
+  json::Book obj{message};
   CHECK(obj.feed == json::Feed::BOOK);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
   CHECK(obj.side == json::Side::BUY);

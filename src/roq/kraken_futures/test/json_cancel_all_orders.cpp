@@ -25,7 +25,7 @@ TEST_CASE("json_cancel_all_orders_no_orders", "[json_cancel_all_orders]") {
                  R"("serverTime":"2021-07-31T06:18:18.468Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::CancelAllOrders::create(message, buffer);
+  json::CancelAllOrders obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.received_time == 1627712298468ms);
   CHECK(obj.cancel_status.cancel_only == "all"sv);
@@ -71,7 +71,7 @@ TEST_CASE("json_cancel_all_orders_cancelled", "[json_cancel_all_orders]") {
                  R"("serverTime":"2021-07-31T06:20:10.488Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::CancelAllOrders::create(message, buffer);
+  json::CancelAllOrders obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.received_time == 1627712410487ms);
   CHECK(obj.cancel_status.cancel_only == "all"sv);

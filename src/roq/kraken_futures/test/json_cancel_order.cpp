@@ -42,7 +42,7 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
                  R"("serverTime":"2021-07-31T04:53:14.376Z")"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::CancelOrder::create(message, buffer);
+  json::CancelOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::CANCELLED);
   CHECK(obj.cancel_status.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
@@ -79,7 +79,7 @@ TEST_CASE("json_cancel_order_not_found", "[json_cancel_order]") {
                  R"(})"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::CancelOrder::create(message, buffer);
+  json::CancelOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::NOT_FOUND);
   CHECK(obj.cancel_status.received_time == 1627890365900ms);

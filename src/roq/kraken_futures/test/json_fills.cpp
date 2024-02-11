@@ -34,7 +34,7 @@ TEST_CASE("json_fills_simple", "[json_fills]") {
                  R"(])"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Fills::create(message, buffer);
+  json::Fills obj{message, buffer};
   CHECK(obj.feed == json::Feed::FILLS);
   CHECK(obj.username == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.fills) == 1);

@@ -6,6 +6,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/oms/exceptions.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -348,7 +350,7 @@ void OrderEntry::create_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto send_order = json::SendOrder::create(body, decode_buffer_);
+      json::SendOrder send_order{body, decode_buffer_};
       switch (send_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED__:
@@ -455,7 +457,7 @@ void OrderEntry::modify_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto edit_order = json::EditOrder::create(body, decode_buffer_);
+      json::EditOrder edit_order{body, decode_buffer_};
       switch (edit_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED__:
@@ -555,7 +557,7 @@ void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto cancel_order = json::CancelOrder::create(body, decode_buffer_);
+      json::CancelOrder cancel_order{body, decode_buffer_};
       switch (cancel_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED__:
@@ -692,7 +694,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
-      auto cancel_all_orders = json::CancelAllOrders::create(body, decode_buffer_);
+      json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
@@ -732,7 +734,7 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
 void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      auto cancel_all_after_ack = json::CancelAllAfterAck::create(body, decode_buffer_);
+      json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
       log::debug("cancel_all_after_ack={}"sv, cancel_all_after_ack);
       log::info<2>("cancel_all_after_ack={}"sv, cancel_all_after_ack);
     };
@@ -770,7 +772,7 @@ void OrderEntry::process_response(
         success_handler(body);
         break;
       case CLIENT_ERROR: {  // 4xx
-        auto rest_error = json::RestError::create(body, decode_buffer_);
+        json::RestError rest_error{body, decode_buffer_};
         log::warn("error={}"sv, rest_error);
         auto text = std::size(rest_error.errors) > 0 ? rest_error.errors[0].message : rest_error.message;
         error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);

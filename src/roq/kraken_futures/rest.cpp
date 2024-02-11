@@ -7,6 +7,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/oms/exceptions.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -211,7 +213,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        auto instruments = json::Instruments::create(body, decode_buffer_);
+        json::Instruments instruments{body, decode_buffer_};
         if (std::empty(instruments.error)) {
           Trace event_2{event, instruments};
           (*this)(event_2);

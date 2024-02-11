@@ -33,7 +33,7 @@ TEST_CASE("json_open_orders_snapshot_simple", "[json_open_orders_snapshot]") {
                  R"(])"
                  R"(})";
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OpenOrdersSnapshot::create(message, buffer);
+  json::OpenOrdersSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::OPEN_ORDERS_SNAPSHOT);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.orders) == 1);

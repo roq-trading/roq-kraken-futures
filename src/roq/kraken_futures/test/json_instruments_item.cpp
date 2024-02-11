@@ -30,7 +30,7 @@ TEST_CASE("json_instruments_item_simple", "[json_instruments_item]") {
                  R"({"contracts":0,"initialMargin":0.02,"maintenanceMargin":0.01})"
                  R"(])"
                  R"(})";
-  auto obj = core::json::Parser::create<json::InstrumentsItem>(message);
+  json::InstrumentsItem obj{message};
   CHECK(obj.symbol == "pi_xbtusd"sv);
   CHECK(obj.type == "futures_inverse"sv);
   CHECK(obj.underlying == "rr_xbtusd"sv);

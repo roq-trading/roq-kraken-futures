@@ -26,7 +26,7 @@ TEST_CASE("json_trade_simple", "[json_trade]") {
                  R"("qty":1.0,)"
                  R"("price":136.53)"
                  R"(})";
-  auto obj = core::json::Parser::create<json::Trade>(message);
+  json::Trade obj{message};
   CHECK(obj.feed == json::Feed::TRADE);
   CHECK(obj.product_id == "PI_LTCUSD"sv);
   CHECK(obj.uid == "bee759b2-c264-4a9e-a8a6-07b60556786d"sv);
