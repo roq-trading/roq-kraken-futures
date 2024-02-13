@@ -88,7 +88,7 @@ struct OrderUpdate final {
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(send_status.status);
             // XXX HANS should we use reduced_quantity to log a warning ???
-            auto order_update = oms::OrderUpdate{
+            auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
@@ -134,7 +134,7 @@ struct OrderUpdate final {
             auto traded_quantity = order_event.amount;
             auto remaining_quantity = order_.quantity - traded_quantity;
             // XXX HANS should we use reduced_quantity to log a warning ???
-            auto order_update = oms::OrderUpdate{
+            auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
@@ -233,7 +233,7 @@ struct OrderUpdate final {
             auto order_type = json::map(new_order.type);
             auto status = compute_order_status(edit_status.status);
             // XXX HANS should we use reduced_quantity to compute remaining quantity ???
-            auto order_update = oms::OrderUpdate{
+            auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
@@ -339,7 +339,7 @@ struct OrderUpdate final {
             auto side = json::map(order_.side);
             auto order_type = json::map(order_.type);
             auto status = compute_order_status(cancel_status.status);
-            auto order_update = oms::OrderUpdate{
+            auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,

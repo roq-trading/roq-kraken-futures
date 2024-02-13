@@ -144,7 +144,7 @@ void OrderUpdate::operator()(
   auto order_type = json::map(order.type);
   auto order_status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
   auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
-  auto order_update = oms::OrderUpdate{
+  auto order_update = server::oms::OrderUpdate{
       .account = account_,
       .exchange = shared_.settings.exchange,
       .symbol = order.instrument,
