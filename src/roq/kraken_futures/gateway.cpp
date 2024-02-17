@@ -18,7 +18,8 @@ R create_accounts(auto &settings, auto &config) {
   result_type result;
   auto use_nonce = settings.rest.use_nonce;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(account.name, std::make_unique<Account>(config, account.name, use_nonce));
+    result.try_emplace(
+        static_cast<std::string_view>(account.name), std::make_unique<Account>(config, account.name, use_nonce));
   return result;
 }
 
@@ -27,7 +28,9 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[name, account] : accounts)
-    result.try_emplace(name, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
+    result.try_emplace(
+        static_cast<std::string_view>(name),
+        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
@@ -36,7 +39,9 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[name, account] : accounts)
-    result.try_emplace(name, std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
+    result.try_emplace(
+        static_cast<std::string_view>(name),
+        std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 }  // namespace

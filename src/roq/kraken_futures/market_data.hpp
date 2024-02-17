@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "roq/utils/container.hpp"
+
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
 #include "roq/utils/metrics/profile.hpp"
@@ -127,7 +129,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   // experimental
-  absl::flat_hash_set<Symbol> latch_;
+  utils::unordered_set<std::string> latch_;
 };
 
 }  // namespace kraken_futures
