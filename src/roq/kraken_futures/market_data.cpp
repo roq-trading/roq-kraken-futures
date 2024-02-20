@@ -377,8 +377,8 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
         .exchange_time_utc = book_snapshot.timestamp,
         .exchange_sequence = book_snapshot.seq,
         .sending_time_utc = {},
-        .price_decimals = {},
-        .quantity_decimals = {},
+        .price_precision = {},
+        .quantity_precision = {},
         .checksum = {},
     };
     log::info<3>("market_by_price_update={}"sv, market_by_price_update);
@@ -415,8 +415,8 @@ void MarketData::operator()(Trace<json::Book> const &event) {
         .exchange_time_utc = book.timestamp,
         .exchange_sequence = book.seq,
         .sending_time_utc = {},
-        .price_decimals = {},
-        .quantity_decimals = {},
+        .price_precision = {},
+        .quantity_precision = {},
         .checksum = {},
     };
     try {
@@ -476,8 +476,8 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
       .exchange_time_utc = {},
       .exchange_sequence = {},
       .sending_time_utc = {},
-      .price_decimals = {},
-      .quantity_decimals = {},
+      .price_precision = {},
+      .quantity_precision = {},
       .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
