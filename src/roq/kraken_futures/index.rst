@@ -1,0 +1,581 @@
+.. _roq-kraken-futures:
+
+.. |checkmark| unicode:: U+2713
+
+roq-kraken-futures
+==================
+
+Links
+-----
+
+* `Website <https://futures.kraken.com/>`__
+* `Demo <https://demo-futures.kraken.com/futures/PI_XBTUSD>`__
+* `Support <https://support.kraken.com/hc/en-us/categories/360001977131-Futures>`__
+* `API <https://support.kraken.com/hc/en-us/sections/360012894412-Futures-API>`__
+* `Reddit Support <https://www.reddit.com/r/KrakenSupport/>`__
+* `Telegram API <https://t.me/kraken_futures_api>`__
+* `Telegram General <https://t.me/kraken_futures>`__
+
+
+Purpose
+-------
+
+* Maintain network connectivity with the Kraken Futures exchange
+* Route exchange updates to connected clients
+* Route client requests to the relevant exchange accounts
+* Stream all messages to an event-log
+
+
+Overview
+--------
+
+.. grid::  2
+  :gutter: 2
+
+  .. grid-item-card::  Products
+
+    .. list-table::
+      :widths: auto
+
+      * - Spot
+        -
+      * - Futures
+        - |checkmark|
+      * - Options
+        -
+
+  .. grid-item-card::  Market Data
+
+    .. list-table::
+      :widths: auto
+
+      * - Reference Data
+        - |checkmark|
+      * - Market Status
+        - |checkmark|
+      * - Top of Book
+        - |checkmark|
+      * - Market by Price (L2)
+        - |checkmark|
+      * - Market by Order (L3)
+        -
+      * - Trade Summary
+        - |checkmark|
+      * - Statistics
+        - |checkmark|
+
+  .. grid-item-card::  Order Management
+
+    .. list-table::
+      :widths: auto
+
+      * - Create
+        - |checkmark|
+      * - Modify
+        - |checkmark|
+      * - Cancel
+        - |checkmark|
+      * - Cancel All
+        - |checkmark|
+      * - Auto Cancellation
+        - |checkmark|
+
+  .. grid-item-card::  Account Management
+
+    .. list-table::
+      :widths: auto
+
+      * - Positions
+        - |checkmark|
+      * - Funds
+        - |checkmark|
+
+* Data center located in (to be confirmed)
+* No test environment
+
+
+Conda
+-----
+
+* :ref:`Using Conda <tutorial-conda>`
+
+.. tab:: Install
+
+  .. code-block:: bash
+
+    $ mamba install \
+      --channel https://roq-trading.com/conda/stable \
+      roq-kraken-futures
+
+.. tab:: Configure
+
+  .. code-block:: bash
+
+    $ cp $CONDA_PREFIX/share/roq-kraken-futures/config.toml $CONFIG_FILE_PATH
+
+    # Then modify $CONFIG_FILE_PATH to match your specific configuration
+
+.. tab:: Run
+
+  .. code-block:: bash
+
+    $ roq-kraken-futures \
+          --name "kraken-futures" \
+          --config_file "$CONFIG_FILE_PATH" \
+          --client_listen_address "$UNIX_SOCKET_PATH" \
+          --service_listen_address "$TCP_LISTEN_PORT" \
+          --flagfile "$FLAG_FILE"
+
+
+Config
+------
+
+* :ref:`Common Config <gateway-config>`
+
+
+Flags
+-----
+
+* :ref:`Using Flags <abseil-cpp>`
+* :ref:`Common Flags <gateway-flags>`
+
+.. code-block:: bash
+
+   $ roq-kraken-futures --help
+
+.. tab:: Flags
+
+   .. include:: flags/flags.rstinc
+
+.. tab:: Common
+
+   .. include:: flags/common.rstinc
+
+.. tab:: REST
+
+   .. include:: flags/rest.rstinc
+
+.. tab:: WS
+
+   .. include:: flags/ws.rstinc
+
+
+Environments
+------------
+
+.. code-block:: bash
+
+  $ $CONDA_PREFIX/share/roq-kraken-futures/flags
+
+.. tab:: Prod
+
+   .. include:: flags/prod/flags.cfg
+     :code: ini
+
+.. tab:: Test
+
+   .. include:: flags/test/flags.cfg
+     :code: ini
+
+
+Market Data
+-----------
+
+.. tab:: Live
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::ReferenceData`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::MarketStatus`
+      - MarketData
+      - ticker
+      -
+
+    * - :cpp:class:`roq::TopOfBook`
+      - MarketData
+      - ticker
+      -
+
+    * - :cpp:class:`roq::MarketByPriceUpdate`
+      - MarketData
+      - book
+      -
+
+    * - :cpp:class:`roq::MarketByOrderUpdate`
+      -
+      -
+      - Unavailable
+
+    * - :cpp:class:`roq::TradeSummary`
+      - MarketData
+      - trade
+      -
+
+    * - :cpp:class:`roq::StatisticsUpdate`
+      - MarketData
+      - ticker
+      -
+
+.. tab:: Download
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::ReferenceData`
+      - Rest
+      - instruments
+      -
+
+    * - :cpp:class:`roq::MarketStatus`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::TopOfBook`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::MarketByPriceUpdate`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::MarketByOrderUpdate`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::TradeSummary`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::StatisticsUpdate`
+      -
+      -
+      -
+
+Statistics
+~~~~~~~~~~
+
+.. list-table::
+  :header-rows: 1
+  :widths: auto
+
+  * - Type
+    - Comments
+
+  * - :cpp:class:`INDEX_VALUE`
+    - (ticker) :code:`index`
+
+  * - :cpp:class:`SETTLEMENT_PRICE`
+    - (ticker) :code:`markPrice`
+
+  * - :cpp:class:`FUNDING_RATE`
+    - (ticker) :code:`relative_funding_rate`
+
+  * - :cpp:class:`FUNDING_RATE_PREDICTION`
+    - (ticker) :code:`relative_funding_rate_prediction`
+
+
+Order Management
+----------------
+
+.. tab:: Live
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::OrderUpdate`
+      - DropCopy
+      - open_orders
+      -
+
+    * - :cpp:class:`roq::TradeUpdate`
+      - DropCopy
+      - fills
+      -
+
+.. tab:: Download
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::OrderUpdate`
+      - DropCopy
+      - open_orders_snapshot
+      -
+
+    * - :cpp:class:`roq::TradeUpdate`
+      - DropCopy
+      - fills_snapshot
+      -
+
+.. tab:: Request
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::CreateOrder`
+      - OrderEntry
+      - /api/v3/sendorder
+      -
+
+    * - :cpp:class:`roq::ModifyOrder`
+      - OrderEntry
+      - /api/v3/editorder
+      -
+
+    * - :cpp:class:`roq::CancelOrder`
+      - OrderEntry
+      - /api/v3/cancelorder
+      -
+
+    * - :cpp:class:`roq::CancelAllOrders`
+      - OrderEntry
+      - /api/v3/canceallorders
+      -
+
+.. tab:: Response
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::OrderAck`
+      -
+      -
+      -
+
+Order Types
+~~~~~~~~~~~
+
+.. list-table::
+  :header-rows: 1
+  :widths: auto
+
+  * - Type
+    - Comments
+
+  * - :cpp:class:`MARKET`
+    - Mapped to :code:`mkt` (JSON)
+
+  * - :cpp:class:`LIMIT`
+    - Mapped to :code:`lmt` (JSON)
+
+
+Time in Force
+~~~~~~~~~~~~~
+
+.. list-table::
+  :header-rows: 1
+  :widths: auto
+
+  * - Type
+    - Comments
+
+  * - :cpp:class:`GTC`
+    - Mapped to :code:`ioc=false` (JSON)
+
+  * - :cpp:class:`IOC`
+    - Mapped to :code:`ioc=true` (JSON)
+
+
+Position Effect
+~~~~~~~~~~~~~~~
+
+.. note::
+
+  Not supported
+
+
+
+Execution Instructions
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+  :header-rows: 1
+  :widths: auto
+
+  * - Type
+    - Comments
+
+  * - :cpp:class:`DO_NOT_INCREASE`
+    - Mapped to :code:`reduce_only=true` (JSON)
+
+
+Account Management
+------------------
+
+.. tab:: Live
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::PositionUpdate`
+      - DropCopy
+      - open_positions
+      -
+
+    * - :cpp:class:`roq::FundsUpdate`
+      - DropCopy
+      - account_balances_and_margins
+      -
+
+.. tab:: Download
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Event
+      - Stream
+      - Messages
+      - Comments
+
+    * - :cpp:class:`roq::PositionUpdate`
+      -
+      -
+      -
+
+    * - :cpp:class:`roq::FundsUpdate`
+      -
+      -
+      -
+
+
+Streams
+-------
+
+.. tab:: Rest
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Type
+      - Comments
+
+    * - REST
+      - Primary purpose
+
+        * Download instruments
+
+.. tab:: MarketData
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Type
+      - Comments
+
+    * - WebSocket
+      - Primary purpose
+
+        * live market data (top of book + market status)
+
+        Each connection
+
+        * supports a slice of the symbols
+
+.. tab:: OrderEntry
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Type
+      - Comments
+
+    * - REST
+      - Primary purpose
+
+        * support order management
+
+        Each connection
+
+        * supports a single account
+
+.. tab:: DropCopy
+
+  .. list-table::
+    :header-rows: 1
+    :widths: auto
+
+    * - Type
+      - Comments
+
+    * - WebSocket
+      - Primary purpose
+
+        * live account updates, including positions and funds
+
+        Each connection
+
+        * supports a single account
+
+
+Constraints
+-----------
+
+* The field :code:`cliOrdId` is a string containing only web-safe characters.
+
+Comments
+--------
+
+* Order updates has no information about last traded price/quantity and total
+  average price
+
+* There is a race between REST (ack) and WebSocket (update) for order actions
+
+* Some uncertainty around edit/cancel order and execution response
+
+* Statistics are using relative funding rates to be compatible with other exchanges
