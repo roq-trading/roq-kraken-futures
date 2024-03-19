@@ -364,9 +364,9 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
       };
       result.emplace_back(std::move(mbp_update));
     };
-    for (const auto &item : book_snapshot.bids)
+    for (auto const &item : book_snapshot.bids)
       emplace_back(shared_.bids, item);
-    for (const auto &item : book_snapshot.asks)
+    for (auto const &item : book_snapshot.asks)
       emplace_back(shared_.asks, item);
     auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,

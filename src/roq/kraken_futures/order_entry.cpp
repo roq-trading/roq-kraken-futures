@@ -388,9 +388,7 @@ void OrderEntry::create_order_ack(
                 Trace event_2{event, response};
                 (*this)(event_2, user_id, order_id, order_update);
               },
-              [&](auto error, auto text) {
-                throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text};
-              });
+              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
           break;
         }
       }
@@ -495,9 +493,7 @@ void OrderEntry::modify_order_ack(
                 Trace event_2{event, response};
                 (*this)(event_2, user_id, order_id, order_update);
               },
-              [&](auto error, auto text) {
-                throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text};
-              });
+              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
           break;
         }
       }
@@ -595,9 +591,7 @@ void OrderEntry::cancel_order_ack(
                 Trace event_2{event, response};
                 (*this)(event_2, user_id, order_id, order_update);
               },
-              [&](auto error, auto text) {
-                throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text};
-              });
+              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
           break;
         }
       }
