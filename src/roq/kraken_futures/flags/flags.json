@@ -7,7 +7,7 @@
       "type": "std::string",
       "required": true,
       "default": "kraken-futures",
-      "description": "exchange identifier (string)"
+      "description": "Exchange identifier"
     }
   ]
 }
