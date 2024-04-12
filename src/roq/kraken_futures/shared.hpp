@@ -10,6 +10,7 @@
 
 #include "roq/core/symbols.hpp"
 
+#include "roq/kraken_futures/api.hpp"
 #include "roq/kraken_futures/settings.hpp"
 
 namespace roq {
@@ -46,6 +47,7 @@ struct Shared final {
 
  public:
   Settings const &settings;
+  API const api;
   core::Symbols symbols;
 };
 

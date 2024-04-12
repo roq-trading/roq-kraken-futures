@@ -296,7 +296,7 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
     // note! using *relative* funding rate to be compatible with other exchanges
-    auto statistics = std::array<Statistics, 4>{{
+    std::array<Statistics, 4> statistics{{
         {
             .type = StatisticsType::INDEX_VALUE,
             .value = ticker.index,
@@ -364,9 +364,9 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
       };
       result.emplace_back(std::move(mbp_update));
     };
-    for (auto const &item : book_snapshot.bids)
+    for (auto &item : book_snapshot.bids)
       emplace_back(shared_.bids, item);
-    for (auto const &item : book_snapshot.asks)
+    for (auto &item : book_snapshot.asks)
       emplace_back(shared_.asks, item);
     auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,

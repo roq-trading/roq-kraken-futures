@@ -180,10 +180,10 @@ uint32_t Rest::download(RestState state) {
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 // instruments
@@ -192,7 +192,7 @@ void Rest::get_instruments() {
   profile_.instruments([&]() {
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = "/api/v3/instruments"sv,
+        .path = shared_.api.market_data.instruments,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -302,7 +302,6 @@ void Rest::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx

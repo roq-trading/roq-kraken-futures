@@ -18,9 +18,6 @@ struct Account final {
   Account(Account &&) = delete;
   Account(Account const &) = delete;
 
-  std::string_view get_name() const { return name_; }
-  std::string_view get_key() const { return key_; }
-
   std::string create_headers(std::string_view const &path, std::string_view const &body);
 
   std::string signed_challenge(std::string_view const &original_challenge);
@@ -28,9 +25,11 @@ struct Account final {
  protected:
   std::chrono::milliseconds get_nonce();
 
+ public:
+  std::string const name;
+  std::string const key;
+
  private:
-  std::string const name_;
-  std::string const key_;
   tools::Crypto crypto_;
   std::chrono::milliseconds nonce_ = {};
   bool const use_nonce_;

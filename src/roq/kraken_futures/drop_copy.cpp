@@ -35,7 +35,7 @@ auto const SUPPORTS = Mask{
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -74,7 +74,7 @@ struct create_metrics final : public core::metrics::Factory {
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -138,8 +138,7 @@ void DropCopy::get_challenge() {
       R"("event":"challenge",)"
       R"("api_key":"{}")"
       R"(}})"sv,
-      account_.get_key());
-  log::debug(R"(request="{}")"sv, message);
+      account_.key);
   log::info<2>(R"(request="{}")"sv, message);
   (*connection_).send_text(message);
 }
@@ -161,10 +160,9 @@ void DropCopy::subscribe(std::string_view const &feed) {
       R"("signed_challenge":"{}")"
       R"(}})"sv,
       feed,
-      account_.get_key(),
+      account_.key,
       original_challenge_,
       signed_challenge_);
-  log::debug(R"(request="{}")"sv, message);
   log::info<2>(R"(request="{}")"sv, message);
   (*connection_).send_text(message);
 }
@@ -195,7 +193,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -215,7 +213,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -243,39 +241,35 @@ uint32_t DropCopy::download(DropCopyState state) {
       return 1;
     case SUBSCRIBE:
       subscribe();
-      return {};
+      return 0;
     case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 void DropCopy::operator()(Trace<json::Info> const &event) {
   auto &[trace_info, info] = event;
-  log::debug("info={}"sv, info);
   log::info<2>("info={}"sv, info);
 }
 
 void DropCopy::operator()(Trace<json::Alert> const &event) {
   auto &[trace_info, alert] = event;
-  log::debug("alert={}"sv, alert);
   log::warn<1>("alert={}"sv, alert);
 }
 
 void DropCopy::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
-  log::debug("error={}"sv, error);
   log::warn("error={}"sv, error);
 }
 
 void DropCopy::operator()(Trace<json::Challenge> const &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
-    log::debug("challenge={}"sv, challenge);
     log::info<2>("challenge={}"sv, challenge);
     assert(std::empty(original_challenge_));
     assert(std::empty(signed_challenge_));
@@ -287,14 +281,12 @@ void DropCopy::operator()(Trace<json::Challenge> const &event) {
 
 void DropCopy::operator()(Trace<json::Subscribed> const &event) {
   auto &[trace_info, subscribed] = event;
-  log::debug("subscribed={}"sv, subscribed);
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
 void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
-    log::debug("heartbeat={}"sv, heartbeat);
     log::info<2>("heartbeat={}"sv, heartbeat);
   });
 }
@@ -308,7 +300,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
       std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .currency = currency,
           .margin_mode = {},
           .balance = item.balance,
@@ -332,7 +324,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
       auto short_quantity = std::max(0.0, -item.balance);
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.instrument,
           .margin_mode = {},
@@ -352,7 +344,7 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
-    OrderUpdate{shared_, stream_id_, account_.get_name()}(open_orders_snapshot, trace_info);
+    OrderUpdate{shared_, stream_id_, account_.name}(open_orders_snapshot, trace_info);
   });
 }
 
@@ -360,7 +352,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
-    OrderUpdate{shared_, stream_id_, account_.get_name()}(open_orders, trace_info);
+    OrderUpdate{shared_, stream_id_, account_.name}(open_orders, trace_info);
   });
 }
 
@@ -381,7 +373,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
           .symbol = symbol,
@@ -423,7 +415,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
           .symbol = symbol,

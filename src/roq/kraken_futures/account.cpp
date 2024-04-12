@@ -14,11 +14,11 @@ namespace kraken_futures {
 // === IMPLEMENTATION ===
 
 Account::Account(Config const &config, std::string_view const &name, bool use_nonce)
-    : name_{name}, key_{config.get_access_key(name)}, crypto_{config.get_access_secret(name)}, use_nonce_{use_nonce} {
+    : name{name}, key{config.get_access_key(name)}, crypto_{config.get_access_secret(name)}, use_nonce_{use_nonce} {
 }
 
 std::string Account::create_headers(std::string_view const &path, std::string_view const &query) {
-  return crypto_.create_headers(path, query, key_, get_nonce());
+  return crypto_.create_headers(path, query, key, get_nonce());
 }
 
 std::string Account::signed_challenge(std::string_view const &original_challenge) {

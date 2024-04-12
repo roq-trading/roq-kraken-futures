@@ -47,7 +47,7 @@ auto const SUPPORTS = Mask{
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -91,12 +91,37 @@ struct create_metrics final : public core::metrics::Factory {
 auto get_quality_of_service(auto &settings) {
   return settings.rest.allow_order_request_pipeline ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
+
+json::OrderEventOrderType compute_order_type(
+    auto const &order_type, auto const &time_in_force, auto const &execution_instructions, auto const &stop_price) {
+  if (time_in_force == TimeInForce::IOC)
+    return json::OrderEventOrderType::IOC;
+  switch (order_type) {
+    using enum roq::OrderType;
+    case UNDEFINED:
+      break;
+    case MARKET:
+      return json::OrderEventOrderType::MKT;
+    case LIMIT:
+      if (std::isnan(stop_price))
+        return json::OrderEventOrderType::LMT;
+      else
+        return json::OrderEventOrderType::STP;
+      break;
+  }
+  throw RuntimeError{
+      "Unexpected combination of order_type={}, time_in_force={}, execution_instructions={}, stop_price={}"sv,
+      order_type,
+      time_in_force,
+      execution_instructions,
+      stop_price};
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -154,33 +179,6 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::Type::LATENCY);
 }
 
-namespace {
-json::OrderEventOrderType compute_order_type(
-    auto const &order_type, auto const &time_in_force, auto const &execution_instructions, auto const &stop_price) {
-  if (time_in_force == TimeInForce::IOC)
-    return json::OrderEventOrderType::IOC;
-  switch (order_type) {
-    using enum roq::OrderType;
-    case UNDEFINED:
-      break;
-    case MARKET:
-      return json::OrderEventOrderType::MKT;
-    case LIMIT:
-      if (std::isnan(stop_price))
-        return json::OrderEventOrderType::LMT;
-      else
-        return json::OrderEventOrderType::STP;
-      break;
-  }
-  throw RuntimeError{
-      "Unexpected combination of order_type={}, time_in_force={}, execution_instructions={}, stop_price={}"sv,
-      order_type,
-      time_in_force,
-      execution_instructions,
-      stop_price};
-}
-}  // namespace
-
 uint16_t OrderEntry::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   create_order(event, order, request_id);
@@ -215,7 +213,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -252,7 +250,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -326,8 +324,7 @@ void OrderEntry::create_order(
           request_id,
           reduce_only);
     }
-    log::debug(R"(query="{}")"sv, query);
-    auto path = "/api/v3/sendorder"sv;
+    auto path = shared_.api.order_management.send_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -369,11 +366,10 @@ void OrderEntry::create_order_ack(
           break;
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.get_name()}(
+          OrderUpdate{shared_, stream_id_, account_.name}(
               order_id,
               send_order,
               [&](auto &order_update) {
-                log::debug("order_update={}"sv, order_update);
                 server::oms::Response response{
                     .request_type = RequestType::CREATE_ORDER,
                     .origin = Origin::EXCHANGE,
@@ -431,8 +427,7 @@ void OrderEntry::modify_order(
         order.external_order_id,
         modify_order.quantity,
         modify_order.price);
-    log::debug(R"(query="{}")"sv, query);
-    auto path = "/api/v3/editorder"sv;
+    auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -474,11 +469,10 @@ void OrderEntry::modify_order_ack(
           break;
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.get_name()}(
+          OrderUpdate{shared_, stream_id_, account_.name}(
               order_id,
               edit_order,
               [&](auto &order_update) {
-                log::debug("order_update={}"sv, order_update);
                 auto response = server::oms::Response{
                     .request_type = RequestType::MODIFY_ORDER,
                     .origin = Origin::EXCHANGE,
@@ -529,8 +523,7 @@ void OrderEntry::cancel_order(
       throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
     auto query = fmt::format("?order_id={}"sv, order.external_order_id);
-    log::debug(R"(query="{}")"sv, query);
-    auto path = "/api/v3/cancelorder"sv;
+    auto path = shared_.api.order_management.cancel_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -572,11 +565,10 @@ void OrderEntry::cancel_order_ack(
           break;
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.get_name()}(
+          OrderUpdate{shared_, stream_id_, account_.name}(
               order_id,
               cancel_order,
               [&](auto &order_update) {
-                log::debug("order_update={}"sv, order_update);
                 auto response = server::oms::Response{
                     .request_type = RequestType::CANCEL_ORDER,
                     .origin = Origin::EXCHANGE,
@@ -625,7 +617,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = cancel_all_orders.order_id,
           .exchange = cancel_all_orders.exchange,
           .symbol = cancel_all_orders.symbol,
@@ -645,7 +637,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       Trace event_2{trace_info, cancel_all_orders_ack};
       shared_(event_2);
     };
-    auto path = "/api/v3/cancelallorders"sv;
+    auto path = shared_.api.order_management.cancel_all_orders;
     auto headers = account_.create_headers(path, {});
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -672,7 +664,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     auto send_ack = [&](auto origin, auto status, Error error, std::string_view const &text) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = {},
           .exchange = {},
           .symbol = {},
@@ -709,7 +701,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
   auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
   auto query = fmt::format("?timeout={}"sv, value.count());
-  auto path = "/api/v3/cancelallordersafter"sv;
+  auto path = shared_.api.order_management.cancel_all_orders_after;
   auto headers = account_.create_headers(path, query);
   auto request = web::rest::Request{
       .method = web::http::Method::POST,
@@ -726,14 +718,13 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
     Trace event{trace_info, response};
     cancel_all_orders_after_ack(event);
   };
-  (*connection_)("cancel_all_orders_after"sv, request, callback);
+  (*connection_)("cancel-all-orders-after"sv, request, callback);
 }
 
 void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
-      log::debug("cancel_all_after_ack={}"sv, cancel_all_after_ack);
       log::info<2>("cancel_all_after_ack={}"sv, cancel_all_after_ack);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
@@ -752,10 +743,10 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       break;
     case DONE:
       (*this)(ConnectionStatus::READY);
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 template <typename SuccessHandler, typename ErrorHandler>
@@ -763,7 +754,6 @@ void OrderEntry::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx
