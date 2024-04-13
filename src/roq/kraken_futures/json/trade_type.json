@@ -13,6 +13,9 @@
     },
     {
       "name": "unwind"
+    },
+    {
+      "name": "coveredLiquidation"
     }
   ]
 }
