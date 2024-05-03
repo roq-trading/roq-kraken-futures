@@ -417,6 +417,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .liquidity = json::map(item.fill_type),
           .quote_quantity = NaN,
           .commission_quantity = NaN,
+          .commission_currency = {},
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
