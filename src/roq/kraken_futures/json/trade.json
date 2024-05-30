@@ -8,11 +8,11 @@
     },
     {
       "name": "product_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "uid",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "side",
@@ -24,20 +24,20 @@
     },
     {
       "name": "seq",
-      "type": "uint64_t",
+      "type": "std/uint64",
       "comment": "subscription specific"
     },
     {
       "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "qty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

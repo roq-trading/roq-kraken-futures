@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "name",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "type",
@@ -12,31 +12,31 @@
     },
     {
       "name": "balance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "funding",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pv",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "am",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "im",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "mm",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

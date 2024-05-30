@@ -8,11 +8,11 @@
     },
     {
       "name": "order_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "cli_ord_id",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "required": false
     },
     {
@@ -21,7 +21,7 @@
     },
     {
       "name": "is_cancel",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "reason",

@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "orderId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "cliOrdId",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "required": false
     },
     {
@@ -17,11 +17,12 @@
     },
     {
       "name": "receivedTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "orderEvents",
-      "type": "std::span<OrderEvent const>"
+      "type": "OrderEvent",
+      "array": "std/span"
     }
   ]
 }

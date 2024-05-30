@@ -12,7 +12,7 @@
     },
     {
       "name": "serverTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

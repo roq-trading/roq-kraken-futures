@@ -8,17 +8,18 @@
     },
     {
       "name": "error",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "required": false
     },
     {
       "name": "instruments",
-      "type": "std::span<InstrumentsItem const>",
+      "type": "InstrumentsItem",
+      "array": "std/span",
       "required": false
     },
     {
       "name": "serverTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

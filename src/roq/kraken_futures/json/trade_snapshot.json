@@ -8,11 +8,12 @@
     },
     {
       "name": "product_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "trades",
-      "type": "std::span<Trade const>"
+      "type": "Trade",
+      "array": "std/span"
     }
   ]
 }

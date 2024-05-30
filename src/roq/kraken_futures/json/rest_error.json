@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "path",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "status",
@@ -16,27 +16,28 @@
     },
     {
       "name": "error",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "message",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "requestId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "result",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "errors",
-      "type": "std::span<RestErrorItem const>"
+      "type": "RestErrorItem",
+      "array": "std/span"
     },
     {
       "name": "serverTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

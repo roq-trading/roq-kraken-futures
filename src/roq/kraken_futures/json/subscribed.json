@@ -12,7 +12,8 @@
     },
     {
       "name": "product_ids",
-      "type": "std::span<ProductID const>"
+      "type": "ProductID",
+      "array": "std/span"
     }
   ]
 }

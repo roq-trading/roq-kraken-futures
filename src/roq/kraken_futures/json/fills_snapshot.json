@@ -8,11 +8,12 @@
     },
     {
       "name": "account",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "fills",
-      "type": "std::span<Fill const>"
+      "type": "Fill",
+      "array": "std/span"
     }
   ]
 }

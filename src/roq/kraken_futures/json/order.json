@@ -4,31 +4,31 @@
   "values": [
     {
       "name": "instrument",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "last_update_time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "qty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "filled",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "limit_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "stop_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "type",
@@ -36,20 +36,20 @@
     },
     {
       "name": "order_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "cli_ord_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "direction",
-      "type": "int32_t",
+      "type": "std/int32",
       "default": "-1"
     },
     {
       "name": "reduce_only",
-      "type": "bool"
+      "type": "std/bool"
     }
   ]
 }

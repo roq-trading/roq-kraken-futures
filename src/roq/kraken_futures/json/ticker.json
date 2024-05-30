@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "feed",
@@ -12,64 +12,64 @@
     },
     {
       "name": "product_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "bid",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ask",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bid_size",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ask_size",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "volume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "dtm",
-      "type": "double",
+      "type": "std/double",
       "comment": "XXX what is this?"
     },
     {
       "name": "leverage",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "index",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "premium",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "last",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "change",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "funding_rate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "funding_rate_prediction",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "suspended",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "tag",
@@ -77,39 +77,39 @@
     },
     {
       "name": "pair",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "openInterest",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "markPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maturityTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "relative_funding_rate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "relative_funding_rate_prediction",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "next_funding_rate_time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "post_only",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "volumeQuote",
-      "type": "int32_t"
+      "type": "std/int32"
     }
   ]
 }

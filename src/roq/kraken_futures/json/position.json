@@ -4,43 +4,43 @@
   "values": [
     {
       "name": "instrument",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "balance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "entry_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "mark_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "index_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "pnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "liquidation_threshold",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "effective_leverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "return_on_equity",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealized_funding",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

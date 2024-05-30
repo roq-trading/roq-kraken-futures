@@ -8,19 +8,20 @@
     },
     {
       "name": "account",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "positions",
-      "type": "std::span<Position const>"
+      "type": "Position",
+      "array": "std/span"
     },
     {
       "name": "seq",
-      "type": "int64_t"
+      "type": "std/int64"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

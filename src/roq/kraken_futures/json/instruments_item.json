@@ -4,55 +4,55 @@
   "values": [
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "type",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "XXX can't use enum due to space"
     },
     {
       "name": "underlying",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "lastTradingTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "tickSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "contractSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "tradeable",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "marginLevels"
     },
     {
       "name": "fundingRateCoefficient",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxRelativeFundingRate",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "retailMarginLevels"
     },
     {
       "name": "isin",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "undoc"
     },
     {
       "name": "category",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "undoc"
     },
     {
@@ -61,28 +61,28 @@
     },
     {
       "name": "contractValueTradePrecision",
-      "type": "int32_t",
+      "type": "std/int32",
       "comment": "undoc"
     },
     {
       "name": "postOnly",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "impactMidSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxPositionSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "openingDate",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "feeScheduleUid",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }

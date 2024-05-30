@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "receivedTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "cancelOnly",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "status",
@@ -19,7 +19,8 @@
     },
     {
       "name": "orderEvents",
-      "type": "std::span<OrderEvent const>"
+      "type": "OrderEvent",
+      "array": "std/span"
     }
   ]
 }

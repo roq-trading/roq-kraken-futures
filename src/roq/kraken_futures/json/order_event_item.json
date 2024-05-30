@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "orderId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "cliOrdId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "type",
@@ -16,7 +16,7 @@
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "side",
@@ -24,27 +24,27 @@
     },
     {
       "name": "quantity",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "filled",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "limitPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "reduceOnly",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "lastUpdateTimestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

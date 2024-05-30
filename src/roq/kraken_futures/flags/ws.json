@@ -12,21 +12,21 @@
     },
     {
       "name": "ping_freq",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "Ping frequency"
     },
     {
       "name": "request_timeout",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
       "description": "Request timeout"
     },
     {
       "name": "max_subscriptions_per_stream",
-      "type": "uint32_t",
+      "type": "std/uint32",
       "required": true,
       "default": 128,
       "description": "Maximum number of symbols per connection"

@@ -8,27 +8,29 @@
     },
     {
       "name": "product_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "seq",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "name": "tickSize",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bids",
-      "type": "std::span<BookItem const>"
+      "type": "BookItem",
+      "array": "std/span"
     },
     {
       "name": "asks",
-      "type": "std::span<BookItem const>"
+      "type": "BookItem",
+      "array": "std/span"
     }
   ]
 }

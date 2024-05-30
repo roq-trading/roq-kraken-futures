@@ -17,7 +17,7 @@
     },
     {
       "name": "reducedQuantity",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "type",
@@ -25,27 +25,27 @@
     },
     {
       "name": "uid",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "cancelorder"
     },
     {
       "name": "reason",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "editorder"
     },
     {
       "name": "executionId",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "execution"
     },
     {
       "name": "amount",
-      "type": "double",
+      "type": "std/double",
       "comment": "execution"
     },
     {
       "name": "price",
-      "type": "double",
+      "type": "std/double",
       "comment": "execution"
     },
     {
@@ -58,7 +58,7 @@
     },
     {
       "name": "takerReducedQuantity",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

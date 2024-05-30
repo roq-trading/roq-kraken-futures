@@ -8,7 +8,7 @@
     },
     {
       "name": "product_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "side",
@@ -16,19 +16,19 @@
     },
     {
       "name": "seq",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "name": "qty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }
