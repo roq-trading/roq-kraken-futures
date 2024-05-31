@@ -1,10 +1,10 @@
 {
-  "name": "Heartbeat",
+  "name": "roq/kraken_futures/fix/Heartbeat",
   "type": "item",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "time",

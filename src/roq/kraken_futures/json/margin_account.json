@@ -1,5 +1,5 @@
 {
-  "name": "MarginAccount",
+  "name": "roq/kraken_futures/fix/MarginAccount",
   "type": "item",
   "values": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "name": "type",
-      "type": "MarginAccountType"
+      "type": "roq/kraken_futures/json/MarginAccountType"
     },
     {
       "name": "balance",

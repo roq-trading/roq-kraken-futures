@@ -1,10 +1,10 @@
 {
-  "name": "OpenPositions",
+  "name": "roq/kraken_futures/fix/OpenPositions",
   "type": "comp",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "account",
@@ -12,7 +12,7 @@
     },
     {
       "name": "positions",
-      "type": "Position",
+      "type": "roq/kraken_futures/json/Position",
       "array": "std/span"
     },
     {

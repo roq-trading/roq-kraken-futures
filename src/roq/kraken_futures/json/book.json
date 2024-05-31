@@ -1,10 +1,10 @@
 {
-  "name": "Book",
+  "name": "roq/kraken_futures/fix/Book",
   "type": "item",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "product_id",
@@ -12,7 +12,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/kraken_futures/json/Side"
     },
     {
       "name": "seq",

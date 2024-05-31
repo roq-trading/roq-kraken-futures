@@ -1,5 +1,5 @@
 {
-  "name": "RestError",
+  "name": "roq/kraken_futures/fix/RestError",
   "type": "comp",
   "values": [
     {
@@ -32,7 +32,7 @@
     },
     {
       "name": "errors",
-      "type": "RestErrorItem",
+      "type": "roq/kraken_futures/json/RestErrorItem",
       "array": "std/span"
     },
     {

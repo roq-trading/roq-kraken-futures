@@ -1,10 +1,10 @@
 {
-  "name": "FillsSnapshot",
+  "name": "roq/kraken_futures/fix/FillsSnapshot",
   "type": "comp",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "account",
@@ -12,7 +12,7 @@
     },
     {
       "name": "fills",
-      "type": "Fill",
+      "type": "roq/kraken_futures/json/Fill",
       "array": "std/span"
     }
   ]

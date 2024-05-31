@@ -1,10 +1,10 @@
 {
-  "name": "EditOrder",
+  "name": "roq/kraken_futures/fix/EditOrder",
   "type": "comp",
   "values": [
     {
       "name": "result",
-      "type": "Result"
+      "type": "roq/kraken_futures/json/Result"
     },
     {
       "name": "error",
@@ -12,7 +12,7 @@
     },
     {
       "name": "editStatus",
-      "type": "EditStatus"
+      "type": "roq/kraken_futures/json/EditStatus"
     },
     {
       "name": "serverTime",

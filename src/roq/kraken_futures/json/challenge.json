@@ -1,10 +1,10 @@
 {
-  "name": "Challenge",
+  "name": "roq/kraken_futures/fix/Challenge",
   "type": "item",
   "values": [
     {
       "name": "event",
-      "type": "Event"
+      "type": "roq/kraken_futures/json/Event"
     },
     {
       "name": "message",

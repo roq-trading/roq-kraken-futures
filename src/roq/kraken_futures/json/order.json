@@ -1,5 +1,5 @@
 {
-  "name": "Order",
+  "name": "roq/kraken_futures/fix/Order",
   "type": "item",
   "values": [
     {
@@ -32,7 +32,7 @@
     },
     {
       "name": "type",
-      "type": "OrderType"
+      "type": "roq/kraken_futures/json/OrderType"
     },
     {
       "name": "order_id",

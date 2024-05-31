@@ -1,5 +1,5 @@
 {
-  "name": "TradeType",
+  "name": "roq/kraken_futures/fix/TradeType",
   "type": "enum",
   "values": [
     {

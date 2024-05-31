@@ -1,5 +1,5 @@
 {
-  "name": "Ticker",
+  "name": "roq/kraken_futures/fix/Ticker",
   "type": "item",
   "values": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "product_id",
@@ -73,7 +73,7 @@
     },
     {
       "name": "tag",
-      "type": "Tag"
+      "type": "roq/kraken_futures/json/Tag"
     },
     {
       "name": "pair",

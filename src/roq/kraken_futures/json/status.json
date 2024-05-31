@@ -1,5 +1,5 @@
 {
-  "name": "Status",
+  "name": "roq/kraken_futures/fix/Status",
   "type": "enum",
   "values": [
     {

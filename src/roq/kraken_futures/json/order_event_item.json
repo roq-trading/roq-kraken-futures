@@ -1,5 +1,5 @@
 {
-  "name": "OrderEventItem",
+  "name": "roq/kraken_futures/fix/OrderEventItem",
   "type": "item",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "type",
-      "type": "OrderEventOrderType"
+      "type": "roq/kraken_futures/json/OrderEventOrderType"
     },
     {
       "name": "symbol",
@@ -20,7 +20,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/kraken_futures/json/Side"
     },
     {
       "name": "quantity",

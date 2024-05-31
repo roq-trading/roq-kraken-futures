@@ -1,5 +1,5 @@
 {
-  "name": "RestState",
+  "name": "roq/kraken_futures/RestState",
   "type": "enum",
   "values": [
     {

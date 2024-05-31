@@ -1,10 +1,10 @@
 {
-  "name": "OpenOrdersSnapshot",
+  "name": "roq/kraken_futures/fix/OpenOrdersSnapshot",
   "type": "comp",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "account",
@@ -12,7 +12,7 @@
     },
     {
       "name": "orders",
-      "type": "Order",
+      "type": "roq/kraken_futures/json/Order",
       "array": "std/span"
     }
   ]

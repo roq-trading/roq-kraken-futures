@@ -1,14 +1,14 @@
 {
-  "name": "CancelAllAfterAck",
+  "name": "roq/kraken_futures/fix/CancelAllAfterAck",
   "type": "comp",
   "values": [
     {
       "name": "result",
-      "type": "Result"
+      "type": "roq/kraken_futures/json/Result"
     },
     {
       "name": "status",
-      "type": "CancelAllAfterAckStatus"
+      "type": "roq/kraken_futures/json/CancelAllAfterAckStatus"
     },
     {
       "name": "serverTime",

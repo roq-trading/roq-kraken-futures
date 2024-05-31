@@ -1,19 +1,19 @@
 {
-  "name": "OrderEvent",
+  "name": "roq/kraken_futures/fix/OrderEvent",
   "type": "item",
   "values": [
     {
       "name": "order",
-      "type": "OrderEventItem"
+      "type": "roq/kraken_futures/json/OrderEventItem"
     },
     {
       "name": "old",
-      "type": "OrderEventItem"
+      "type": "roq/kraken_futures/json/OrderEventItem"
     },
     {
       "raw": "new",
       "name": "new_",
-      "type": "OrderEventItem"
+      "type": "roq/kraken_futures/json/OrderEventItem"
     },
     {
       "name": "reducedQuantity",
@@ -21,7 +21,7 @@
     },
     {
       "name": "type",
-      "type": "OrderEventType"
+      "type": "roq/kraken_futures/json/OrderEventType"
     },
     {
       "name": "uid",
@@ -50,11 +50,11 @@
     },
     {
       "name": "orderPriorExecution",
-      "type": "OrderEventItem"
+      "type": "roq/kraken_futures/json/OrderEventItem"
     },
     {
       "name": "orderPriorEdit",
-      "type": "OrderEventItem"
+      "type": "roq/kraken_futures/json/OrderEventItem"
     },
     {
       "name": "takerReducedQuantity",

@@ -1,5 +1,5 @@
 {
-  "name": "FillType",
+  "name": "roq/kraken_futures/fix/FillType",
   "type": "enum",
   "values": [
     {

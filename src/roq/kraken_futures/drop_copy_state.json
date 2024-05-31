@@ -1,5 +1,5 @@
 {
-  "name": "DropCopyState",
+  "name": "roq/kraken_futures/DropCopyState",
   "type": "enum",
   "values": [
     {

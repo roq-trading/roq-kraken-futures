@@ -1,5 +1,5 @@
 {
-  "name": "EditStatus",
+  "name": "roq/kraken_futures/fix/EditStatus",
   "type": "comp",
   "values": [
     {
@@ -13,7 +13,7 @@
     },
     {
       "name": "status",
-      "type": "Status"
+      "type": "roq/kraken_futures/json/Status"
     },
     {
       "name": "receivedTime",
@@ -21,7 +21,7 @@
     },
     {
       "name": "orderEvents",
-      "type": "OrderEvent",
+      "type": "roq/kraken_futures/json/OrderEvent",
       "array": "std/span"
     }
   ]

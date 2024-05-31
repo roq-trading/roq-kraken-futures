@@ -1,14 +1,14 @@
 {
-  "name": "CancelAllOrders",
+  "name": "roq/kraken_futures/fix/CancelAllOrders",
   "type": "comp",
   "values": [
     {
       "name": "result",
-      "type": "Result"
+      "type": "roq/kraken_futures/json/Result"
     },
     {
       "name": "cancelStatus",
-      "type": "CancelAllStatus"
+      "type": "roq/kraken_futures/json/CancelAllStatus"
     },
     {
       "name": "serverTime",

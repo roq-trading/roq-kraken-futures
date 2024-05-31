@@ -1,10 +1,10 @@
 {
-  "name": "SendOrder",
+  "name": "roq/kraken_futures/fix/SendOrder",
   "type": "comp",
   "values": [
     {
       "name": "result",
-      "type": "Result"
+      "type": "roq/kraken_futures/json/Result"
     },
     {
       "name": "error",
@@ -12,7 +12,7 @@
     },
     {
       "name": "sendStatus",
-      "type": "SendStatus"
+      "type": "roq/kraken_futures/json/SendStatus"
     },
     {
       "name": "serverTime",

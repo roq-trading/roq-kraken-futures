@@ -1,10 +1,10 @@
 {
-  "name": "AccountBalancesAndMargins",
+  "name": "roq/kraken_futures/fix/AccountBalancesAndMargins",
   "type": "comp",
   "values": [
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "account",
@@ -12,7 +12,7 @@
     },
     {
       "name": "margin_accounts",
-      "type": "MarginAccount",
+      "type": "roq/kraken_futures/json/MarginAccount",
       "array": "std/span"
     },
     {

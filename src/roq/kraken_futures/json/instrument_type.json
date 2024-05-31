@@ -1,5 +1,5 @@
 {
-  "name": "InstrumentType",
+  "name": "roq/kraken_futures/fix/InstrumentType",
   "type": "enum",
   "values": [
     {

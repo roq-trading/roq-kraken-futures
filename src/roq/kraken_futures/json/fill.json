@@ -1,5 +1,5 @@
 {
-  "name": "Fill",
+  "name": "roq/kraken_futures/fix/Fill",
   "type": "item",
   "values": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "name": "fill_type",
-      "type": "FillType"
+      "type": "roq/kraken_futures/json/FillType"
     },
     {
       "name": "fee_paid",

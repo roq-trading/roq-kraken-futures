@@ -1,18 +1,18 @@
 {
-  "name": "Subscribed",
+  "name": "roq/kraken_futures/fix/Subscribed",
   "type": "comp",
   "values": [
     {
       "name": "event",
-      "type": "Event"
+      "type": "roq/kraken_futures/json/Event"
     },
     {
       "name": "feed",
-      "type": "Feed"
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "product_ids",
-      "type": "ProductID",
+      "type": "roq/kraken_futures/json/ProductID",
       "array": "std/span"
     }
   ]
