@@ -34,11 +34,7 @@ R create_hmac(auto const &secret) {
 Crypto::Crypto(std::string_view const &secret) : mac_{create_hmac<decltype(mac_)>(secret)} {
 }
 
-std::string Crypto::create_headers(
-    std::string_view const &path,
-    std::string_view const &query,
-    std::string_view const &key,
-    std::chrono::milliseconds nonce) {
+std::string Crypto::create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &key, std::chrono::milliseconds nonce) {
   assert(!std::empty(path));
   if (nonce.count()) {
     auto nonce_ = fmt::format("{}"sv, nonce.count());

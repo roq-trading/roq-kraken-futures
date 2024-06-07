@@ -26,8 +26,7 @@ namespace roq {
 namespace kraken_futures {
 
 struct OrderUpdate final {
-  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account)
-      : shared_(shared), stream_id_(stream_id), account_(account) {}
+  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_(shared), stream_id_(stream_id), account_(account) {}
 
   OrderUpdate(OrderUpdate &&) = delete;
   OrderUpdate(OrderUpdate const &) = delete;
@@ -276,8 +275,7 @@ struct OrderUpdate final {
             break;
           }
           case REJECT: {
-            auto error =
-                order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0 ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
+            auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0 ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
             reject(error, order_event.reason);
             break;
           }
@@ -288,8 +286,7 @@ struct OrderUpdate final {
   }
 
   template <typename Accept, typename Reject>
-  void operator()(
-      [[maybe_unused]] uint64_t order_id, json::CancelOrder const &cancel_order, Accept accept, Reject reject) {
+  void operator()([[maybe_unused]] uint64_t order_id, json::CancelOrder const &cancel_order, Accept accept, Reject reject) {
     using namespace std::literals;
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {

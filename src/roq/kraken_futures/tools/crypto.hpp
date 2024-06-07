@@ -23,11 +23,7 @@ struct Crypto final {
   Crypto(Crypto &&) = delete;
   Crypto(Crypto const &) = delete;
 
-  std::string create_headers(
-      std::string_view const &path,
-      std::string_view const &query,
-      std::string_view const &key,
-      std::chrono::milliseconds nonce);
+  std::string create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &key, std::chrono::milliseconds nonce);
 
   std::string signed_challenge(std::string_view const &original_challenge);
 

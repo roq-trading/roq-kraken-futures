@@ -51,8 +51,7 @@ struct ParserPrivate final {
     virtual void operator()(Trace<Fills> const &) = 0;
   };
 
-  static bool dispatch(
-      Handler &, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &);
 };
 
 }  // namespace json

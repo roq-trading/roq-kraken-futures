@@ -52,8 +52,7 @@ TEST_CASE("crypto_test_url_encoded", "[crypto]") {
   auto const KEY = "zO4Zjh5GO+Zy2n4QwIyWEKb/EAgxSjOdtA+W1zZvOBYU3na2pE/p/nwx"sv;
   auto const SECRET = "DuWQ3317vPm8tlOoylWmhfQJwGkKiR+ABuNNocaPxU2DA5H9aZAKkGO0sYBSGKirtdlkm8dL9DAp6husEABgWyOr"sv;
   auto const PATH = "/api/v3/sendorder"sv;
-  auto const QUERY =
-      R"(?orderType=lmt&symbol=PI_XBTUSD&side=buy&size=1&limitPrice=44587.5&cliOrdId=123%2B%2F%3D&reduceOnly=false)"sv;
+  auto const QUERY = R"(?orderType=lmt&symbol=PI_XBTUSD&side=buy&size=1&limitPrice=44587.5&cliOrdId=123%2B%2F%3D&reduceOnly=false)"sv;
   tools::Crypto crypto{SECRET};
   auto result = crypto.create_headers(PATH, QUERY, KEY, 1629361663947ms);
   CHECK(

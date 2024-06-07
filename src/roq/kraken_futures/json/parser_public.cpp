@@ -26,11 +26,7 @@ void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_inf
 
 // === IMPLEMENTATION ===
 
-bool ParserPublic::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    TraceInfo const &trace_info) {
+bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
