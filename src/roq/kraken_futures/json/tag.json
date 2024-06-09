@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/Tag",
+  "name": "roq/kraken_futures/json/Tag",
   "type": "enum",
   "values": [
     {

@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/CancelOrder",
+  "name": "roq/kraken_futures/json/CancelOrder",
   "type": "comp",
   "values": [
     {

@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/OrderEventOrderType",
+  "name": "roq/kraken_futures/json/OrderEventOrderType",
   "type": "enum",
   "values": [
     {

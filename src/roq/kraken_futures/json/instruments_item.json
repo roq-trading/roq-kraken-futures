@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/InstrumentsItem",
+  "name": "roq/kraken_futures/json/InstrumentsItem",
   "type": "item",
   "values": [
     {

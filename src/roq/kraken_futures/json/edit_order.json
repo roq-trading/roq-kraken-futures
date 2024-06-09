@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/EditOrder",
+  "name": "roq/kraken_futures/json/EditOrder",
   "type": "comp",
   "values": [
     {

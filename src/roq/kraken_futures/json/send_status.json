@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/SendStatus",
+  "name": "roq/kraken_futures/json/SendStatus",
   "type": "comp",
   "values": [
     {

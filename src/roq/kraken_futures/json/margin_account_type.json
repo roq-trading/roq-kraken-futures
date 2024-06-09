@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/MarginAccountType",
+  "name": "roq/kraken_futures/json/MarginAccountType",
   "type": "enum",
   "values": [
     {

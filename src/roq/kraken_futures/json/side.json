@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/Side",
+  "name": "roq/kraken_futures/json/Side",
   "type": "enum",
   "values": [
     {

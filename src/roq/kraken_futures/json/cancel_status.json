@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/CancelStatus",
+  "name": "roq/kraken_futures/json/CancelStatus",
   "type": "comp",
   "values": [
     {

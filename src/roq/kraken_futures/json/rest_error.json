@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/RestError",
+  "name": "roq/kraken_futures/json/RestError",
   "type": "comp",
   "values": [
     {

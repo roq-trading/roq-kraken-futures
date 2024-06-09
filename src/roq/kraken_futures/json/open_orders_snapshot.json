@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/OpenOrdersSnapshot",
+  "name": "roq/kraken_futures/json/OpenOrdersSnapshot",
   "type": "comp",
   "values": [
     {

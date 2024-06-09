@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/BookItem",
+  "name": "roq/kraken_futures/json/BookItem",
   "type": "item",
   "values": [
     {

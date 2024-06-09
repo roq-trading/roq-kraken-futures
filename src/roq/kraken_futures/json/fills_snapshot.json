@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/FillsSnapshot",
+  "name": "roq/kraken_futures/json/FillsSnapshot",
   "type": "comp",
   "values": [
     {

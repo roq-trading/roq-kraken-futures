@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken_futures/fix/OrderEventItem",
+  "name": "roq/kraken_futures/json/OrderEventItem",
   "type": "item",
   "values": [
     {
