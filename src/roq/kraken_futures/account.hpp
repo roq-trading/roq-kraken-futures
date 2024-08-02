@@ -15,7 +15,7 @@ namespace kraken_futures {
 struct Account final {
   Account(Config const &, std::string_view const &name, bool use_nonce);
 
-  Account(Account &&) = delete;
+  Account(Account &&) = default;
   Account(Account const &) = delete;
 
   std::string create_headers(std::string_view const &path, std::string_view const &body);

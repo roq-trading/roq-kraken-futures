@@ -27,6 +27,9 @@ namespace kraken_futures {
 struct Gateway final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
   Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
+  Gateway(Gateway &&) = default;
+  Gateway(Gateway const &) = delete;
+
  protected:
   // server::Handler
 
