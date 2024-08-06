@@ -14,6 +14,7 @@
 
 #include "roq/web/socket/client.hpp"
 
+#include "roq/kraken_futures/json/map.hpp"
 #include "roq/kraken_futures/json/utils.hpp"
 
 using namespace std::literals;
@@ -443,7 +444,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
     auto trade_2 = Trade{
-        .side = json::map(trade.side),
+        .side = json::Map{trade.side},
         .price = trade.price,
         .quantity = trade.qty,
         .trade_id = trade.uid,

@@ -10,11 +10,6 @@
 
 #include "roq/core/charconv/datetime.hpp"
 
-#include "roq/kraken_futures/json/fill_type.hpp"
-#include "roq/kraken_futures/json/order_event_order_type.hpp"
-#include "roq/kraken_futures/json/order_type.hpp"
-#include "roq/kraken_futures/json/side.hpp"
-
 namespace roq {
 namespace kraken_futures {
 namespace json {
@@ -37,93 +32,6 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
           [](core::json::Array const &) { throw std::bad_cast{}; },
       },
       value);
-}
-
-inline roq::Liquidity map(json::FillType value) {
-  switch (value) {
-    using enum json::FillType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case MAKER:
-      return Liquidity::MAKER;
-    case TAKER:
-      return Liquidity::TAKER;
-    case LIQUIDATION:
-      break;
-    case ASSIGNEE:
-      break;
-    case ASSIGNOR:
-      break;
-    case UNWIND_BANKRUPT:
-      break;
-    case UNWIND_COUNTERPARTY:
-      break;
-    case TAKER_AFTER_EDIT:
-      break;
-  }
-  return {};
-}
-
-inline roq::OrderType map(json::OrderEventOrderType value) {
-  switch (value) {
-    using enum json::OrderEventOrderType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case LMT:
-      return roq::OrderType::LIMIT;
-    case MKT:
-      return roq::OrderType::MARKET;
-    case STP:
-      break;
-    case TAKE_PROFIT:
-      break;
-    case IOC:
-      return roq::OrderType::LIMIT;
-  }
-  return {};
-}
-
-inline roq::OrderType map(json::OrderType value) {
-  switch (value) {
-    using enum json::OrderType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case LIMIT:
-      return roq::OrderType::LIMIT;
-    case STOP:
-      return roq::OrderType::LIMIT;  // XXX could also be market ???
-  }
-  return {};
-}
-
-inline roq::Side map(json::Side value) {
-  switch (value) {
-    using enum json::Side::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case BUY:
-      return roq::Side::BUY;
-    case SELL:
-      return roq::Side::SELL;
-  }
-  return {};
-}
-
-inline json::Side map(roq::Side value) {
-  switch (value) {
-    using enum roq::Side;
-    case UNDEFINED:
-      break;
-    case BUY:
-      return json::Side::BUY;
-    case SELL:
-      return json::Side::SELL;
-  }
-  return {};
 }
 
 }  // namespace json

@@ -18,6 +18,8 @@
 #include "roq/kraken_futures/json/open_orders_snapshot.hpp"
 #include "roq/kraken_futures/json/send_order.hpp"
 
+#include "roq/kraken_futures/json/map.hpp"
+
 // new
 
 #include "roq/kraken_futures/json/utils.hpp"
@@ -82,19 +84,17 @@ struct OrderUpdate final {
             auto &order_ = order_event.order;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            auto side = json::map(order_.side);
-            auto order_type = json::map(order_.type);
             auto status = compute_order_status(send_status.status);
             // XXX HANS should we use reduced_quantity to log a warning ???
             auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
-                .side = side,
+                .side = json::Map{order_.side},
                 .position_effect = {},
                 .margin_mode = {},
                 .max_show_quantity = NaN,
-                .order_type = order_type,
+                .order_type = json::Map{order_.type},
                 .time_in_force = {},
                 .execution_instructions = {},
                 .create_time_utc = {},
@@ -126,8 +126,6 @@ struct OrderUpdate final {
             auto &order_ = order_event.order_prior_execution;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            auto side = json::map(order_.side);
-            auto order_type = json::map(order_.type);
             auto status = compute_order_status(send_status.status, order_.quantity, order_event.amount);
             auto traded_quantity = order_event.amount;
             auto remaining_quantity = order_.quantity - traded_quantity;
@@ -136,11 +134,11 @@ struct OrderUpdate final {
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
-                .side = side,
+                .side = json::Map{order_.side},
                 .position_effect = {},
                 .margin_mode = {},
                 .max_show_quantity = NaN,
-                .order_type = order_type,
+                .order_type = json::Map{order_.type},
                 .time_in_force = {},
                 .execution_instructions = {},
                 .create_time_utc = {},
@@ -227,19 +225,17 @@ struct OrderUpdate final {
             auto &new_order = order_event.new_;
             auto symbol = std::string{new_order.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            auto side = json::map(new_order.side);
-            auto order_type = json::map(new_order.type);
             auto status = compute_order_status(edit_status.status);
             // XXX HANS should we use reduced_quantity to compute remaining quantity ???
             auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
-                .side = side,
+                .side = json::Map{new_order.side},
                 .position_effect = {},
                 .margin_mode = {},
                 .max_show_quantity = NaN,
-                .order_type = order_type,
+                .order_type = json::Map{new_order.type},
                 .time_in_force = {},
                 .execution_instructions = {},
                 .create_time_utc = {},
@@ -332,18 +328,16 @@ struct OrderUpdate final {
             auto &order_ = order_event.new_;
             auto symbol = std::string{order_.symbol};
             std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-            auto side = json::map(order_.side);
-            auto order_type = json::map(order_.type);
             auto status = compute_order_status(cancel_status.status);
             auto order_update = server::oms::OrderUpdate{
                 .account = account_,
                 .exchange = {},
                 .symbol = symbol,
-                .side = side,
+                .side = json::Map{order_.side},
                 .position_effect = {},
                 .margin_mode = {},
                 .max_show_quantity = NaN,
-                .order_type = order_type,
+                .order_type = json::Map{order_.type},
                 .time_in_force = {},
                 .execution_instructions = {},
                 .create_time_utc = {},

@@ -14,6 +14,8 @@
 
 #include "roq/kraken_futures/order_update.hpp"
 
+#include "roq/kraken_futures/json/map.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -366,7 +368,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
           .price = item.price,
-          .liquidity = json::map(item.fill_type),
+          .liquidity = json::Map{item.fill_type},
           .quote_quantity = NaN,
           .commission_quantity = NaN,
           .commission_currency = {},
@@ -411,7 +413,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
           .price = item.price,
-          .liquidity = json::map(item.fill_type),
+          .liquidity = json::Map{item.fill_type},
           .quote_quantity = NaN,
           .commission_quantity = NaN,
           .commission_currency = {},

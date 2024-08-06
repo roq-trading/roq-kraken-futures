@@ -141,7 +141,6 @@ void OrderUpdate::operator()(
     TraceInfo const &trace_info,
     bool is_download) {
   auto side = compute_side(order.direction);
-  auto order_type = json::map(order.type);
   auto order_status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
   auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto order_update = server::oms::OrderUpdate{
@@ -152,7 +151,7 @@ void OrderUpdate::operator()(
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
+      .order_type = json::Map{order.type},
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
