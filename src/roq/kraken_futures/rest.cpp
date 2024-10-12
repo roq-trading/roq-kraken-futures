@@ -257,6 +257,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .security_type = {},
         .base_currency = {},
         .quote_currency = {},
+        .settlement_currency = {},
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.tick_size,
