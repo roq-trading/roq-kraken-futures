@@ -32,7 +32,7 @@ TEST_CASE("json_instruments_item_simple", "[json_instruments_item]") {
                  R"(})";
   json::InstrumentsItem obj{message};
   CHECK(obj.symbol == "pi_xbtusd"sv);
-  CHECK(obj.type == "futures_inverse"sv);
+  CHECK(obj.type == json::InstrumentType::FUTURES_INVERSE);
   CHECK(obj.underlying == "rr_xbtusd"sv);
   CHECK(obj.tick_size == 0.5_a);
   CHECK(obj.contract_size == 1_a);
