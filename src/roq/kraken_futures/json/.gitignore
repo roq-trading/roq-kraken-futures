@@ -23,8 +23,9 @@ fills.hpp
 fills_snapshot.hpp
 heartbeat.hpp
 info.hpp
-instruments.hpp
 instruments_item.hpp
+instruments.hpp
+instrument_type.hpp
 margin_account.hpp
 margin_account_type.hpp
 open_orders.hpp
@@ -76,8 +77,9 @@ fills.cpp
 fills_snapshot.cpp
 heartbeat.cpp
 info.cpp
-instruments.cpp
 instruments_item.cpp
+instruments.cpp
+instrument_type.cpp
 margin_account.cpp
 margin_account_type.cpp
 open_orders.cpp

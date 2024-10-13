@@ -8,8 +8,7 @@
     },
     {
       "name": "type",
-      "type": "std/string_view",
-      "comment": "XXX can't use enum due to space"
+      "type": "roq/kraken_futures/json/InstrumentType"
     },
     {
       "name": "underlying",
@@ -83,6 +82,9 @@
     {
       "name": "feeScheduleUid",
       "type": "std/string_view"
+    },
+    {
+      "name": "marginSchedules"
     }
   ]
 }

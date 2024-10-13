@@ -110,6 +110,18 @@
     {
       "name": "volumeQuote",
       "type": "std/int32"
+    },
+    {
+      "name": "open",
+      "type": "std/double"
+    },
+    {
+      "name": "high",
+      "type": "std/double"
+    },
+    {
+      "name": "low",
+      "type": "std/double"
     }
   ]
 }

@@ -9,6 +9,7 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
@@ -249,12 +250,31 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     std::string symbol{item.symbol};  // note! we need the upper-case version
     std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
     auto discard = shared_.discard_symbol(symbol);
+    auto security_type = [&]() -> SecurityType {
+      switch (item.type) {
+        using enum json::InstrumentType::type_t;
+        case UNDEFINED__:
+          break;
+        case UNKNOWN__:
+          assert(false);
+          break;
+        case FUTURES_INVERSE:
+        case FLEXIBLE_FUTURES:
+          if (item.last_trading_time.count())
+            return SecurityType::FUTURES;
+          return SecurityType::SWAP;
+        case SPOT_INDEX:
+          // XXX FIXME we don't have a SecurityType::INDEX ???
+          break;
+      }
+      return {};
+    }();
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = symbol,
         .description = {},
-        .security_type = {},
+        .security_type = security_type,
         .base_currency = {},
         .quote_currency = {},
         .settlement_currency = {},
@@ -269,12 +289,12 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .option_type = {},
         .strike_currency = {},
         .strike_price = NaN,
-        .underlying = {},
+        .underlying = item.underlying,
         .time_zone = {},
-        .issue_date = {},
+        .issue_date = utils::safe_cast{item.opening_date},
         .settlement_date = {},
         .expiry_datetime = {},
-        .expiry_datetime_utc = {},
+        .expiry_datetime_utc = utils::safe_cast{item.last_trading_time},
         .exchange_time_utc = {},
         .exchange_sequence = {},
         .sending_time_utc = {},

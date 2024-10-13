@@ -28,8 +28,9 @@ set(AUTOGEN_SCHEMAS
     fills_snapshot.json
     heartbeat.json
     info.json
-    instruments.json
     instruments_item.json
+    instruments.json
+    instrument_type.json
     margin_account.json
     margin_account_type.json
     open_orders.json
