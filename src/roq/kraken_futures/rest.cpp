@@ -275,6 +275,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .symbol = symbol,
         .description = {},
         .security_type = security_type,
+        .cfi_code = {},
         .base_currency = {},
         .quote_currency = {},
         .settlement_currency = {},
