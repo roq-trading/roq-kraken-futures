@@ -282,6 +282,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.tick_size,
+        .tick_size_steps = {},
         .multiplier = item.contract_size,
         .min_notional = NaN,
         .min_trade_vol = 1.0,
