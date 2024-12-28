@@ -94,7 +94,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/stable \
            roq-kraken-futures
 
@@ -102,7 +102,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/unstable \
            roq-kraken-futures
 
