@@ -66,7 +66,7 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, send_status.status.as_text());
+        reject(Error::UNKNOWN, send_status.status.as_raw_text());
         break;
       case PLACED: {
         if (std::size(send_status.order_events) != 1)
@@ -207,7 +207,7 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, edit_status.status.as_text());
+        reject(Error::UNKNOWN, edit_status.status.as_raw_text());
         break;
       case EDITED: {
         if (std::size(edit_status.order_events) != 1)
@@ -310,7 +310,7 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, cancel_status.status.as_text());
+        reject(Error::UNKNOWN, cancel_status.status.as_raw_text());
         break;
       case CANCELLED: {
         if (std::size(cancel_status.order_events) != 1)
