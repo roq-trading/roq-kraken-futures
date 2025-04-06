@@ -255,7 +255,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
       throw server::oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
     auto order_type = compute_order_type(create_order.order_type, create_order.time_in_force, create_order.execution_instructions, create_order.stop_price);
-    auto side = json::map<json::Side>(create_order.side);
+    auto side = map(create_order.side).template get<json::Side>();
     auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
     std::string query;
     if (!std::isnan(create_order.price)) {

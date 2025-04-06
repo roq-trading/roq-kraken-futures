@@ -444,7 +444,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
     auto trade_2 = Trade{
-        .side = json::Map{trade.side},
+        .side = map(trade.side),
         .price = trade.price,
         .quantity = trade.qty,
         .trade_id = trade.uid,

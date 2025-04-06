@@ -2,38 +2,39 @@
 
 #pragma once
 
-#include <tuple>
-
-#include "roq/api.hpp"
-
 #include "roq/kraken_futures/json/fill_type.hpp"
 #include "roq/kraken_futures/json/order_event_order_type.hpp"
 #include "roq/kraken_futures/json/order_type.hpp"
 #include "roq/kraken_futures/json/side.hpp"
 
+#include "roq/liquidity.hpp"
+#include "roq/order_type.hpp"
+#include "roq/side.hpp"
+
+#include "roq/map.hpp"
+
 namespace roq {
-namespace kraken_futures {
-namespace json {
 
-template <typename... Args>
-struct Map final {
-  explicit Map(Args &&...args) : args_{std::forward<Args>(args)...} {}
-  explicit Map(Args const &...args) : args_{args...} {}
+template <>
+template <>
+std::optional<Liquidity> Map<kraken_futures::json::FillType>::helper() const;
 
-  Map(Map const &) = delete;
+template <>
+template <>
+std::optional<OrderType> Map<kraken_futures::json::OrderEventOrderType>::helper() const;
 
-  template <typename R>
-  operator R();
+template <>
+template <>
+std::optional<OrderType> Map<kraken_futures::json::OrderType>::helper() const;
 
- private:
-  std::tuple<Args...> const args_;
-};
+template <>
+template <>
+std::optional<Side> Map<kraken_futures::json::Side>::helper() const;
 
-template <typename R, typename... Args>
-inline R map(Args &&...args) {
-  return static_cast<R>(Map{std::forward<Args>(args)...});
-}
+// ===
 
-}  // namespace json
-}  // namespace kraken_futures
+template <>
+template <>
+std::optional<kraken_futures::json::Side> Map<Side>::helper() const;
+
 }  // namespace roq

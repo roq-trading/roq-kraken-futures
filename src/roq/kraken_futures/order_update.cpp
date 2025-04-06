@@ -151,7 +151,7 @@ void OrderUpdate::operator()(
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = json::Map{order.type},
+      .order_type = map(order.type),
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
