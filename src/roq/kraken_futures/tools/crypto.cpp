@@ -2,7 +2,7 @@
 
 #include "roq/kraken_futures/tools/crypto.hpp"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <cassert>
 #include <iterator>
