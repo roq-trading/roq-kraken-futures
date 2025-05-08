@@ -450,8 +450,9 @@ void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     TraceInfo trace_info;
     auto result = json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info);
-    if (!result)
+    if (!result) {
       log::warn(R"(Unexpected: message="{}")"sv, message);
+    }
   });
 }
 

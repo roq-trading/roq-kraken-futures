@@ -126,8 +126,9 @@ void MarketData::operator()(metrics::Writer &writer) {
 }
 
 void MarketData::subscribe(size_t start_from) {
-  if (ready())
+  if (ready()) {
     subscribe(shared_.symbols.get_slice(index_, start_from));
+  }
 }
 
 void MarketData::operator()(web::socket::Client::Connected const &) {
@@ -241,8 +242,9 @@ void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     TraceInfo trace_info;
     auto result = json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info);
-    if (!result) [[unlikely]]
+    if (!result) [[unlikely]] {
       log::warn(R"(Unexpected: message="{}")"sv, message);
+    }
   });
 }
 
@@ -363,10 +365,12 @@ void MarketData::operator()(Trace<json::BookSnapshot> const &event) {
       };
       result.emplace_back(std::move(mbp_update));
     };
-    for (auto &item : book_snapshot.bids)
+    for (auto &item : book_snapshot.bids) {
       emplace_back(shared_.bids, item);
-    for (auto &item : book_snapshot.asks)
+    }
+    for (auto &item : book_snapshot.asks) {
       emplace_back(shared_.asks, item);
+    }
     auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
@@ -392,8 +396,9 @@ void MarketData::operator()(Trace<json::Book> const &event) {
     log::info<4>("book={}"sv, book);
     (*connection_).touch(trace_info.source_receive_time);
     auto &symbol = book.product_id;
-    if (latch_.find(symbol) != std::end(latch_))
+    if (latch_.find(symbol) != std::end(latch_)) {
       return;  //  waiting for snapshot
+    }
     auto mbp_update = MBPUpdate{
         .price = book.price,
         .quantity = book.qty,

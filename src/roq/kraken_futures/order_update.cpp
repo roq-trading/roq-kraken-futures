@@ -19,8 +19,9 @@ namespace kraken_futures {
 // === IMPLEMENTATION ===
 
 void OrderUpdate::operator()(json::OpenOrdersSnapshot const &open_orders_snapshot, TraceInfo const &trace_info) {
-  for (auto &order : open_orders_snapshot.orders)
+  for (auto &order : open_orders_snapshot.orders) {
     (*this)(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
+  }
 }
 
 void OrderUpdate::operator()(json::OpenOrders const &open_orders, TraceInfo const &trace_info) {
@@ -123,11 +124,13 @@ OrderStatus compute_order_status_2(json::Reason reason, bool is_cancel, double q
     case EDITED_BY_USER:
       break;
   }
-  if (utils::is_equal(quantity, filled))
+  if (utils::is_equal(quantity, filled)) {
     return OrderStatus::COMPLETED;
+  }
   // note! is_cancel is also true when completed -- so wait until other options have been exhausted
-  if (is_cancel)
+  if (is_cancel) {
     return OrderStatus::CANCELED;
+  }
   return OrderStatus::WORKING;
 }
 }  // namespace

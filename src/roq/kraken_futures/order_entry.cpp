@@ -94,8 +94,9 @@ auto get_quality_of_service(auto &settings) {
 }
 
 json::OrderEventOrderType compute_order_type(auto const &order_type, auto const &time_in_force, auto const &execution_instructions, auto const &stop_price) {
-  if (time_in_force == TimeInForce::IOC)
+  if (time_in_force == TimeInForce::IOC) {
     return json::OrderEventOrderType::IOC;
+  }
   switch (order_type) {
     using enum roq::OrderType;
     case UNDEFINED:
@@ -103,10 +104,11 @@ json::OrderEventOrderType compute_order_type(auto const &order_type, auto const 
     case MARKET:
       return json::OrderEventOrderType::MKT;
     case LIMIT:
-      if (std::isnan(stop_price))
+      if (std::isnan(stop_price)) {
         return json::OrderEventOrderType::LMT;
-      else
+      } else {
         return json::OrderEventOrderType::STP;
+      }
       break;
   }
   throw RuntimeError{
@@ -232,8 +234,9 @@ void OrderEntry::operator()(Trace<web::rest::Client::Connected> const &) {
 void OrderEntry::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading())
+  if (!download_.downloading()) {
     download_.reset();
+  }
 }
 
 void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
@@ -251,8 +254,9 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
 
 void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &, std::string_view const &request_id) {
   profile_.create_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, create_order] = event;
     auto order_type = compute_order_type(create_order.order_type, create_order.time_in_force, create_order.execution_instructions, create_order.stop_price);
     auto side = map(create_order.side).template get<json::Side>();
@@ -399,8 +403,9 @@ void OrderEntry::modify_order(
     std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, modify_order] = event;
     // note! price has max 2 decimals, size is integer
     auto query = fmt::format(
@@ -500,8 +505,9 @@ void OrderEntry::cancel_order(
     std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, cancel_order] = event;
     auto query = fmt::format("?order_id={}"sv, order.external_order_id);
     auto path = shared_.api.order_management.cancel_order;
@@ -590,8 +596,9 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
 
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
-    if (!ready()) [[unlikely]]
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &cancel_all_orders = event.value;
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{

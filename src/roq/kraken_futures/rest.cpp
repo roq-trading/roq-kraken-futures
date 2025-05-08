@@ -153,8 +153,9 @@ void Rest::operator()(Trace<web::rest::Client::Connected> const &) {
 void Rest::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading())
+  if (!download_.downloading()) {
     download_.reset();
+  }
 }
 
 void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
@@ -260,8 +261,9 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
           break;
         case FUTURES_INVERSE:
         case FLEXIBLE_FUTURES:
-          if (item.last_trading_time.count())
+          if (item.last_trading_time.count()) {
             return SecurityType::FUTURES;
+          }
           return SecurityType::SWAP;
         case SPOT_INDEX:
           // XXX FIXME we don't have a SecurityType::INDEX ???
@@ -303,10 +305,12 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
-    if (discard)
+    if (discard) {
       continue;
-    if (all_symbols_.emplace(symbol).second)  // only include new
+    }
+    if (all_symbols_.emplace(symbol).second) {  // only include new
       symbols.emplace_back(symbol);
+    }
     ++counter;
   }
   log::info("Instruments {} / {}"sv, counter, std::size(instruments.instruments));

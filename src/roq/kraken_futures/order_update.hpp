@@ -69,8 +69,9 @@ struct OrderUpdate final {
         reject(Error::UNKNOWN, send_status.status.as_raw_text());
         break;
       case PLACED: {
-        if (std::size(send_status.order_events) != 1)
+        if (std::size(send_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(send_status.order_events)};
+        }
         auto &order_event = send_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -210,8 +211,9 @@ struct OrderUpdate final {
         reject(Error::UNKNOWN, edit_status.status.as_raw_text());
         break;
       case EDITED: {
-        if (std::size(edit_status.order_events) != 1)
+        if (std::size(edit_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(edit_status.order_events)};
+        }
         auto &order_event = edit_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -313,8 +315,9 @@ struct OrderUpdate final {
         reject(Error::UNKNOWN, cancel_status.status.as_raw_text());
         break;
       case CANCELLED: {
-        if (std::size(cancel_status.order_events) != 1)
+        if (std::size(cancel_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(cancel_status.order_events)};
+        }
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
@@ -447,8 +450,9 @@ struct OrderUpdate final {
   }
 
   OrderStatus compute_order_status(json::Status status, double quantity, double filled) {
-    if (utils::is_equal(quantity, filled))
+    if (utils::is_equal(quantity, filled)) {
       return OrderStatus::COMPLETED;
+    }
     return compute_order_status(status);
   }
 
