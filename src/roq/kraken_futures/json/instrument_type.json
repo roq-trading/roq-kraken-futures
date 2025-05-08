@@ -11,6 +11,9 @@
     {
       "raw": "spot index",
       "name": "spot_index"
+    },
+    {
+      "name": "options"
     }
   ]
 }

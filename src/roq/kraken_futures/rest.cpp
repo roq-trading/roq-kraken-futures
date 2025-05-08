@@ -268,6 +268,8 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         case SPOT_INDEX:
           // XXX FIXME we don't have a SecurityType::INDEX ???
           break;
+        case OPTIONS:
+          return SecurityType::OPTION;
       }
       return {};
     }();

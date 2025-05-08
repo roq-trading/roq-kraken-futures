@@ -85,6 +85,38 @@
     },
     {
       "name": "marginSchedules"
+    },
+    {
+      "name": "mtf",
+      "type": "std/bool"
+    },
+    {
+      "name": "base",
+      "type": "std/string_view"
+    },
+    {
+      "name": "quote",
+      "type": "std/string_view"
+    },
+    {
+      "name": "pair",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tradfi",
+      "type": "std/bool"
+    },
+    {
+      "name": "underlyingFuture",
+      "type": "std/string_view"
+    },
+    {
+      "name": "optionType",
+      "type": "roq/kraken_futures/json/OptionType"
+    },
+    {
+      "name": "strikePrice",
+      "type": "std/double"
     }
   ]
 }

@@ -122,6 +122,25 @@
     {
       "name": "low",
       "type": "std/double"
+    },
+    {
+      "name": "greeks"
+    },
+    {
+      "name": "bid_iv",
+      "type": "std/double"
+    },
+    {
+      "name": "ask_iv",
+      "type": "std/double"
+    },
+    {
+      "name": "mark_iv",
+      "type": "std/double"
+    },
+    {
+      "name": "extrinsic_value",
+      "type": "std/double"
     }
   ]
 }
