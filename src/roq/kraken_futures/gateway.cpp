@@ -16,7 +16,7 @@ namespace kraken_futures {
 namespace {
 template <typename R>
 R create_accounts(auto &settings, auto &config) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   auto use_nonce = settings.rest.use_nonce;
   for (auto &[_, account] : config.accounts) {
@@ -27,7 +27,7 @@ R create_accounts(auto &settings, auto &config) {
 
 template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
@@ -37,7 +37,7 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
 
 template <typename R>
 R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));

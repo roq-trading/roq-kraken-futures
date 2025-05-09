@@ -3,15 +3,26 @@
   "type": "item",
   "values": [
     {
-      "name": "symbol",
+      "name": "category",
       "type": "std/string_view"
     },
     {
-      "name": "type",
-      "type": "roq/kraken_futures/json/InstrumentType"
+      "name": "contractSize",
+      "type": "std/double",
+      "comment": "number"
     },
     {
-      "name": "underlying",
+      "name": "contractValueTradePrecision",
+      "type": "std/int32",
+      "comment": "number"
+    },
+    {
+      "name": "fundingRateCoefficient",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "isin",
       "type": "std/string_view"
     },
     {
@@ -19,76 +30,43 @@
       "type": "std/milliseconds"
     },
     {
-      "name": "tickSize",
-      "type": "std/double"
-    },
-    {
-      "name": "contractSize",
-      "type": "std/double"
-    },
-    {
-      "name": "tradeable",
-      "type": "std/bool"
-    },
-    {
-      "name": "marginLevels"
-    },
-    {
-      "name": "fundingRateCoefficient",
-      "type": "std/double"
-    },
-    {
-      "name": "maxRelativeFundingRate",
-      "type": "std/double"
+      "name": "marginSchedules"
     },
     {
       "name": "retailMarginLevels"
     },
     {
-      "name": "isin",
-      "type": "std/string_view",
-      "comment": "undoc"
-    },
-    {
-      "name": "category",
-      "type": "std/string_view",
-      "comment": "undoc"
-    },
-    {
-      "name": "tags",
-      "comment": "undoc"
-    },
-    {
-      "name": "contractValueTradePrecision",
-      "type": "std/int32",
-      "comment": "undoc"
-    },
-    {
-      "name": "postOnly",
-      "type": "std/bool"
-    },
-    {
-      "name": "impactMidSize",
-      "type": "std/double"
+      "name": "marginLevels"
     },
     {
       "name": "maxPositionSize",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "maxRelativeFundingRate",
+      "type": "std/double",
+      "comment": "number"
     },
     {
       "name": "openingDate",
       "type": "std/milliseconds"
     },
     {
+      "name": "postOnly",
+      "type": "std/bool"
+    },
+    {
       "name": "feeScheduleUid",
       "type": "std/string_view"
     },
     {
-      "name": "marginSchedules"
+      "name": "symbol",
+      "type": "std/string_view"
     },
     {
-      "name": "mtf",
-      "type": "std/bool"
+      "name": "pair",
+      "type": "std/string_view"
     },
     {
       "name": "base",
@@ -99,7 +77,27 @@
       "type": "std/string_view"
     },
     {
-      "name": "pair",
+      "name": "tags"
+    },
+    {
+      "name": "tickSize",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "tradeable",
+      "type": "std/bool"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/json/InstrumentType"
+    },
+    {
+      "name": "underlying",
+      "type": "std/string_view"
+    },
+    {
+      "name": "underlyingFuture",
       "type": "std/string_view"
     },
     {
@@ -107,16 +105,23 @@
       "type": "std/bool"
     },
     {
-      "name": "underlyingFuture",
-      "type": "std/string_view"
+      "name": "mtf",
+      "type": "std/bool"
     },
     {
       "name": "optionType",
-      "type": "roq/kraken_futures/json/OptionType"
+      "type": "roq/kraken_futures/json/OptionType",
+      "comment": "undoc"
     },
     {
       "name": "strikePrice",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "undoc"
+    },
+    {
+      "name": "impactMidSize",
+      "type": "std/double",
+      "comment": "undoc"
     }
   ]
 }

@@ -248,9 +248,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
   size_t counter = {};
   for (auto &item : instruments.instruments) {
     log::info<2>("item={}"sv, item);
-    std::string symbol{item.symbol};  // note! we need the upper-case version
-    std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
-    auto discard = shared_.discard_symbol(symbol);
+    auto discard = shared_.discard_symbol(item.symbol);
     auto security_type = [&]() -> SecurityType {
       switch (item.type) {
         using enum json::InstrumentType::type_t;
@@ -259,29 +257,51 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         case UNKNOWN__:
           assert(false);
           break;
-        case FUTURES_INVERSE:
         case FLEXIBLE_FUTURES:
-          if (item.last_trading_time.count()) {
+        case FUTURES_INVERSE:
+        case FUTURES_VANILLA:
+          if (item.last_trading_time.count() != 0) {
             return SecurityType::FUTURES;
           }
           return SecurityType::SWAP;
+        case OPTIONS:
+          return SecurityType::OPTION;
         case SPOT_INDEX:
           // XXX FIXME we don't have a SecurityType::INDEX ???
           break;
-        case OPTIONS:
-          return SecurityType::OPTION;
       }
       return {};
+    }();
+    auto option_type = [&]() -> OptionType {
+      switch (item.option_type) {
+        using enum json::OptionType::type_t;
+        case UNDEFINED__:
+          break;
+        case UNKNOWN__:
+          assert(false);
+          break;
+        case CALL:
+          return OptionType::CALL;
+        case PUT:
+          return OptionType::PUT;
+      }
+      return {};
+    }();
+    auto underlying = [&]() {
+      if (std::empty(item.underlying_future)) {
+        return item.underlying;
+      }
+      return item.underlying_future;
     }();
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
-        .symbol = symbol,
+        .symbol = item.symbol,
         .description = {},
         .security_type = security_type,
         .cfi_code = {},
-        .base_currency = {},
-        .quote_currency = {},
+        .base_currency = item.base,
+        .quote_currency = item.quote,
         .settlement_currency = {},
         .margin_currency = {},
         .commission_currency = {},
@@ -292,15 +312,15 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .min_trade_vol = 1.0,
         .max_trade_vol = NaN,
         .trade_vol_step_size = 1.0,
-        .option_type = {},
+        .option_type = option_type,
         .strike_currency = {},
-        .strike_price = NaN,
-        .underlying = item.underlying,
+        .strike_price = item.strike_price,
+        .underlying = underlying,
         .time_zone = {},
-        .issue_date = utils::safe_cast{item.opening_date},
+        .issue_date = utils::safe_cast(item.opening_date),
         .settlement_date = {},
-        .expiry_datetime = {},
-        .expiry_datetime_utc = utils::safe_cast{item.last_trading_time},
+        .expiry_datetime = {},  // ???
+        .expiry_datetime_utc = utils::safe_cast(item.last_trading_time),
         .exchange_time_utc = {},
         .exchange_sequence = {},
         .sending_time_utc = {},
@@ -310,8 +330,19 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     if (discard) {
       continue;
     }
-    if (all_symbols_.emplace(symbol).second) {  // only include new
-      symbols.emplace_back(symbol);
+    auto trading_status = [&]() -> TradingStatus { return item.tradeable ? TradingStatus::OPEN : TradingStatus::CLOSE; }();
+    auto market_status = MarketStatus{
+        .stream_id = stream_id_,
+        .exchange = shared_.settings.exchange,
+        .symbol = item.symbol,
+        .trading_status = trading_status,
+        .exchange_time_utc = instruments.server_time,  // XXX FIXME TODO not sure about this...
+        .exchange_sequence = {},
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, market_status, true);
+    if (all_symbols_.emplace(item.symbol).second) {  // only include new
+      symbols.emplace_back(item.symbol);
     }
     ++counter;
   }

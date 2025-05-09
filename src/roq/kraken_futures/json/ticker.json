@@ -7,12 +7,32 @@
       "type": "std/milliseconds"
     },
     {
-      "name": "feed",
-      "type": "roq/kraken_futures/json/Feed"
-    },
-    {
       "name": "product_id",
       "type": "std/string_view"
+    },
+    {
+      "name": "funding_rate",
+      "type": "std/double"
+    },
+    {
+      "name": "funding_rate_prediction",
+      "type": "std/double"
+    },
+    {
+      "name": "relative_funding_rate",
+      "type": "std/double"
+    },
+    {
+      "name": "relative_funding_rate_prediction",
+      "type": "std/double"
+    },
+    {
+      "name": "next_funding_rate_time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "feed",
+      "type": "roq/kraken_futures/json/Feed"
     },
     {
       "name": "bid",
@@ -36,8 +56,8 @@
     },
     {
       "name": "dtm",
-      "type": "std/double",
-      "comment": "XXX what is this?"
+      "type": "std/int32",
+      "comment": "days until maturity"
     },
     {
       "name": "leverage",
@@ -48,23 +68,12 @@
       "type": "std/double"
     },
     {
-      "name": "premium",
-      "type": "std/double"
-    },
-    {
       "name": "last",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "price of last fill"
     },
     {
       "name": "change",
-      "type": "std/double"
-    },
-    {
-      "name": "funding_rate",
-      "type": "std/double"
-    },
-    {
-      "name": "funding_rate_prediction",
       "type": "std/double"
     },
     {
@@ -92,18 +101,6 @@
       "type": "std/milliseconds"
     },
     {
-      "name": "relative_funding_rate",
-      "type": "std/double"
-    },
-    {
-      "name": "relative_funding_rate_prediction",
-      "type": "std/double"
-    },
-    {
-      "name": "next_funding_rate_time",
-      "type": "std/milliseconds"
-    },
-    {
       "name": "post_only",
       "type": "std/bool"
     },
@@ -127,20 +124,29 @@
       "name": "greeks"
     },
     {
+      "name": "premium",
+      "type": "std/double",
+      "comment": "undoc"
+    },
+    {
       "name": "bid_iv",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "undoc"
     },
     {
       "name": "ask_iv",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "undoc"
     },
     {
       "name": "mark_iv",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "undoc"
     },
     {
       "name": "extrinsic_value",
-      "type": "std/double"
+      "type": "std/double",
+      "comment": "undoc"
     }
   ]
 }

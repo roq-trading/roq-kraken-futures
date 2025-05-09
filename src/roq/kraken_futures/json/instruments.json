@@ -3,8 +3,14 @@
   "type": "comp",
   "values": [
     {
-      "name": "result",
-      "type": "roq/kraken_futures/json/Result"
+      "name": "instruments",
+      "type": "roq/kraken_futures/json/InstrumentsItem",
+      "array": "std/span",
+      "required": false
+    },
+    {
+      "name": "errors",
+      "required": false
     },
     {
       "name": "error",
@@ -12,10 +18,8 @@
       "required": false
     },
     {
-      "name": "instruments",
-      "type": "roq/kraken_futures/json/InstrumentsItem",
-      "array": "std/span",
-      "required": false
+      "name": "result",
+      "type": "roq/kraken_futures/json/Result"
     },
     {
       "name": "serverTime",

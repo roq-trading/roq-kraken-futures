@@ -296,11 +296,10 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
-    // note! using *relative* funding rate to be compatible with other exchanges
-    std::array<Statistics, 4> statistics{{
+    std::array<Statistics, 8> statistics{{
         {
-            .type = StatisticsType::INDEX_VALUE,
-            .value = ticker.index,
+            .type = StatisticsType::OPEN_PRICE,
+            .value = ticker.open,
             .begin_time_utc = {},
             .end_time_utc = {},
         },
@@ -311,8 +310,26 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
             .end_time_utc = {},
         },
         {
+            .type = StatisticsType::OPEN_INTEREST,
+            .value = ticker.open_interest,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::HIGHEST_TRADED_PRICE,
+            .value = ticker.high,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::LOWEST_TRADED_PRICE,
+            .value = ticker.low,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
             .type = StatisticsType::FUNDING_RATE,
-            .value = ticker.relative_funding_rate,
+            .value = ticker.relative_funding_rate,  // note! using *relative* funding rate to be compatible with other exchanges
             .begin_time_utc = {},
             .end_time_utc = {},
         },
@@ -320,6 +337,12 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
             .type = StatisticsType::FUNDING_RATE_PREDICTION,
             .value = ticker.relative_funding_rate_prediction,
             .begin_time_utc = utils::safe_cast(ticker.next_funding_rate_time),
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::TRADE_VOLUME,
+            .value = ticker.volume,  // XXX FIXME TODO or ... volume_quote ???
+            .begin_time_utc = {},
             .end_time_utc = {},
         },
     }};
@@ -334,12 +357,15 @@ void MarketData::operator()(Trace<json::Ticker> const &event) {
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
-    auto trading_status = ticker.suspended ? TradingStatus::HALT : TradingStatus::OPEN;
+    auto trading_status = ticker.suspended ? TradingStatus::CLOSE : TradingStatus::OPEN;
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = ticker.product_id,
         .trading_status = trading_status,
+        .exchange_time_utc = {},
+        .exchange_sequence = {},
+        .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
   });
