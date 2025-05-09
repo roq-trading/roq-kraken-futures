@@ -11,12 +11,12 @@
       "type": "std/string_view"
     },
     {
-      "name": "timestamp",
-      "type": "std/milliseconds"
-    },
-    {
       "name": "seq",
       "type": "std/uint64"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
     },
     {
       "name": "tickSize",

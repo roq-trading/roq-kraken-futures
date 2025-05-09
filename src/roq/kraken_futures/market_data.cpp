@@ -487,7 +487,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
         .symbol = trade.product_id,
         .trades = {&trade_2, 1},
         .exchange_time_utc = trade.time,
-        .exchange_sequence = {},
+        .exchange_sequence = trade.seq,
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_summary, true);

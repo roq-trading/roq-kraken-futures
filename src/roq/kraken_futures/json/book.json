@@ -11,24 +11,24 @@
       "type": "std/string_view"
     },
     {
-      "name": "side",
-      "type": "roq/kraken_futures/json/Side"
-    },
-    {
       "name": "seq",
       "type": "std/uint64"
     },
     {
-      "name": "qty",
-      "type": "std/double"
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "side",
+      "type": "roq/kraken_futures/json/Side"
     },
     {
       "name": "price",
       "type": "std/double"
     },
     {
-      "name": "timestamp",
-      "type": "std/milliseconds"
+      "name": "qty",
+      "type": "std/double"
     }
   ]
 }
