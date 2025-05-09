@@ -17,7 +17,7 @@ struct Account final {
 
   Account(Account const &) = delete;
 
-  std::string create_headers(std::string_view const &path, std::string_view const &body);
+  std::string create_headers(std::string_view const &path, std::string_view const &query);
 
   std::string signed_challenge(std::string_view const &original_challenge);
 

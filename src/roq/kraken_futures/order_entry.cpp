@@ -27,6 +27,7 @@
 #include "roq/kraken_futures/json/send_order.hpp"
 
 #include "roq/kraken_futures/json/map.hpp"
+#include "roq/kraken_futures/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -92,32 +93,6 @@ struct create_metrics final : public utils::metrics::Factory {
 auto get_quality_of_service(auto &settings) {
   return settings.rest.allow_order_request_pipeline ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
 }
-
-json::OrderEventOrderType compute_order_type(auto const &order_type, auto const &time_in_force, auto const &execution_instructions, auto const &stop_price) {
-  if (time_in_force == TimeInForce::IOC) {
-    return json::OrderEventOrderType::IOC;
-  }
-  switch (order_type) {
-    using enum roq::OrderType;
-    case UNDEFINED:
-      break;
-    case MARKET:
-      return json::OrderEventOrderType::MKT;
-    case LIMIT:
-      if (std::isnan(stop_price)) {
-        return json::OrderEventOrderType::LMT;
-      } else {
-        return json::OrderEventOrderType::STP;
-      }
-      break;
-  }
-  throw RuntimeError{
-      "Unexpected combination of order_type={}, time_in_force={}, execution_instructions={}, stop_price={}"sv,
-      order_type,
-      time_in_force,
-      execution_instructions,
-      stop_price};
-}
 }  // namespace
 
 // === IMPLEMENTATION ===
@@ -155,8 +130,8 @@ void OrderEntry::operator()(Event<Stop> const &) {
 void OrderEntry::operator()(Event<Timer> const &event) {
   auto now = event.value.now;
   (*connection_).refresh(now);
-  if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() && ready() && next_cancel_all_timer_ < now) {
-    next_cancel_all_timer_ = now + shared_.settings.rest.cancel_all_after / 4;
+  if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < now) {
+    next_cancel_all_timer_ = now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
     cancel_all_orders_after(shared_.settings.rest.cancel_all_after);
   }
 }
@@ -252,67 +227,13 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
 
 // create-order
 
-void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &, std::string_view const &request_id) {
+void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, create_order] = event;
-    auto order_type = compute_order_type(create_order.order_type, create_order.time_in_force, create_order.execution_instructions, create_order.stop_price);
-    auto side = map(create_order.side).template get<json::Side>();
-    auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
-    std::string query;
-    if (!std::isnan(create_order.price)) {
-      if (std::isnan(create_order.stop_price)) {
-        query = fmt::format(  // limit
-            "?orderType={}"
-            "&symbol={}"
-            "&side={}"
-            "&size={}"
-            "&limitPrice={}"
-            "&cliOrdId={}"
-            "&reduceOnly={}"sv,
-            order_type.as_raw_text(),
-            create_order.symbol,
-            side.as_raw_text(),
-            create_order.quantity,
-            create_order.price,
-            request_id,
-            reduce_only);
-      } else {
-        query = fmt::format(  // limit + stop
-            "?orderType={}"
-            "&symbol={}"
-            "&side={}"
-            "&size={}"
-            "&limitPrice={}"
-            "&stopPrice={}"
-            "&cliOrdId={}"
-            "&reduceOnly={}"sv,
-            order_type.as_raw_text(),
-            create_order.symbol,
-            side.as_raw_text(),
-            create_order.quantity,
-            create_order.price,
-            create_order.stop_price,
-            request_id,
-            reduce_only);
-      }
-    } else {
-      query = fmt::format(  // market
-          "?orderType={}"
-          "&symbol={}"
-          "&side={}"
-          "&size={}"
-          "&cliOrdId={}"
-          "&reduceOnly={}"sv,
-          order_type.as_raw_text(),
-          create_order.symbol,
-          side.as_raw_text(),
-          create_order.quantity,
-          request_id,
-          reduce_only);
-    }
+    auto query = json::send_order(encode_buffer_, create_order, order, request_id);
     auto path = shared_.api.order_management.send_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -353,30 +274,28 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           break;
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.name}(
-              order_id,
-              send_order,
-              [&](auto &order_update) {
-                server::oms::Response response{
-                    .request_type = RequestType::CREATE_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .request_status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                Trace event_2{event, response};
-                (*this)(event_2, user_id, order_id, order_update);
-              },
-              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
+          auto accept_handler = [&](auto &order_update) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::CREATE_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::ACCEPTED,
+                .error = {},
+                .text = {},
+                .version = version,
+                .request_id = request_id,
+                .quantity = NaN,
+                .price = NaN,
+            };
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id, order_update);
+          };
+          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          OrderUpdate{shared_, stream_id_, account_.name}(order_id, send_order, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
@@ -398,23 +317,13 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
 // modify-order
 
 void OrderEntry::modify_order(
-    Event<ModifyOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, modify_order] = event;
-    // note! price has max 2 decimals, size is integer
-    auto query = fmt::format(
-        "?orderId={}"
-        "&size={}"
-        "&limitPrice={}"sv,
-        order.external_order_id,
-        modify_order.quantity,
-        modify_order.price);
+    auto query = json::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -455,25 +364,23 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           break;
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.name}(
-              order_id,
-              edit_order,
-              [&](auto &order_update) {
-                auto response = server::oms::Response{
-                    .request_type = RequestType::MODIFY_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .request_status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                Trace event_2{event, response};
-                (*this)(event_2, user_id, order_id, order_update);
-              },
-              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
+          auto accept_handler = [&](auto &order_update) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::MODIFY_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::ACCEPTED,
+                .error = {},
+                .text = {},
+                .version = version,
+                .request_id = request_id,
+                .quantity = NaN,
+                .price = NaN,
+            };
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id, order_update);
+          };
+          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          OrderUpdate{shared_, stream_id_, account_.name}(order_id, edit_order, accept_handler, reject_handler);
           break;
         }
       }
@@ -500,16 +407,13 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
 // cancel-order
 
 void OrderEntry::cancel_order(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
-    auto query = fmt::format("?order_id={}"sv, order.external_order_id);
+    auto query = json::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
     auto path = shared_.api.order_management.cancel_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -550,25 +454,23 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           break;
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
-          OrderUpdate{shared_, stream_id_, account_.name}(
-              order_id,
-              cancel_order,
-              [&](auto &order_update) {
-                auto response = server::oms::Response{
-                    .request_type = RequestType::CANCEL_ORDER,
-                    .origin = Origin::EXCHANGE,
-                    .request_status = RequestStatus::ACCEPTED,
-                    .error = {},
-                    .text = {},
-                    .version = version,
-                    .request_id = request_id,
-                    .quantity = NaN,
-                    .price = NaN,
-                };
-                Trace event_2{event, response};
-                (*this)(event_2, user_id, order_id, order_update);
-              },
-              [&](auto error, auto text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; });
+          auto accept_handler = [&](auto &order_update) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::CANCEL_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::ACCEPTED,
+                .error = {},
+                .text = {},
+                .version = version,
+                .request_id = request_id,
+                .quantity = NaN,
+                .price = NaN,
+            };
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id, order_update);
+          };
+          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          OrderUpdate{shared_, stream_id_, account_.name}(order_id, cancel_order, accept_handler, reject_handler);
           break;
         }
       }
@@ -685,7 +587,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 // cancel-all-orders-after
 
 void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
-  auto value = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
+  auto value = std::chrono::duration_cast<std::chrono::seconds>(timeout);
   auto query = fmt::format("?timeout={}"sv, value.count());
   auto path = shared_.api.order_management.cancel_all_orders_after;
   auto headers = account_.create_headers(path, query);
@@ -760,14 +662,17 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
         response.expect(web::http::Status::OK);  // throws
     }
   } catch (server::oms::Exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-    error_handler(e.origin, e.status, e.error, e.what());
+    std::string_view const what{e.what()};
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), what);
+    error_handler(e.origin, e.status, e.error, what);
   } catch (NetworkError &e) {
-    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-    error_handler(Origin::GATEWAY, e.request_status(), e.error(), e.what());
+    std::string_view const what{e.what()};
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), what);
+    error_handler(Origin::GATEWAY, e.request_status(), e.error(), what);
   } catch (std::exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-    error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, e.what());
+    std::string_view const what{e.what()};
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), what);
+    error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, what);
   }
 }
 

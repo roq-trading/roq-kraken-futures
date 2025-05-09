@@ -112,6 +112,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   core::Download<OrderEntryState> download_;
   // cancel all
   std::chrono::nanoseconds next_cancel_all_timer_ = {};
+  //
+  std::vector<char> encode_buffer_;
 };
 
 }  // namespace kraken_futures

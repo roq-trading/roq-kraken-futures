@@ -10,6 +10,8 @@
 
 #include "roq/core/json/parser.hpp"
 
+#include "roq/server/oms/order.hpp"
+
 namespace roq {
 namespace kraken_futures {
 namespace json {
@@ -35,6 +37,22 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
       },
       value);
 }
+
+extern std::string_view send_order(std::vector<char> &buffer, CreateOrder const &, server::oms::Order const &, std::string_view const &request_id);
+
+extern std::string_view edit_order(
+    std::vector<char> &buffer,
+    ModifyOrder const &,
+    server::oms::Order const &,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id);
+
+extern std::string_view cancel_order(
+    std::vector<char> &buffer,
+    roq::CancelOrder const &,
+    server::oms::Order const &,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id);
 
 }  // namespace json
 }  // namespace kraken_futures

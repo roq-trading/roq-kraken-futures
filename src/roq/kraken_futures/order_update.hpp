@@ -65,9 +65,11 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, send_status.status.as_raw_text());
+      case WOULD_NOT_REDUCE_POSITION: {
+        std::string_view const text{send_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
+      }
       case PLACED: {
         if (std::size(send_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(send_status.order_events)};
@@ -207,9 +209,11 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, edit_status.status.as_raw_text());
+      case WOULD_NOT_REDUCE_POSITION: {
+        std::string_view const text{edit_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
+      }
       case EDITED: {
         if (std::size(edit_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(edit_status.order_events)};
@@ -311,9 +315,11 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-        reject(Error::UNKNOWN, cancel_status.status.as_raw_text());
+      case WOULD_NOT_REDUCE_POSITION: {
+        std::string_view const text{cancel_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
+      }
       case CANCELLED: {
         if (std::size(cancel_status.order_events) != 1) {
           throw RuntimeError{"Unexpected: size={}"sv, std::size(cancel_status.order_events)};
@@ -381,9 +387,11 @@ struct OrderUpdate final {
         }
         break;
       }
-      case NOT_FOUND:
-        reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, ""sv);
+      case NOT_FOUND: {
+        std::string_view const text;
+        reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, text);
         break;
+      }
     }
   }
 
