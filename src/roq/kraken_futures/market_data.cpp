@@ -459,6 +459,7 @@ void MarketData::operator()(Trace<json::Book> const &event) {
   });
 }
 
+// note! we don't collect the snapshot
 void MarketData::operator()(Trace<json::TradeSnapshot> const &event) {
   profile_.trade_snapshot([&]() {
     auto &[trace_info, trade_snapshot] = event;
@@ -469,9 +470,7 @@ void MarketData::operator()(Trace<json::TradeSnapshot> const &event) {
 
 void MarketData::operator()(Trace<json::Trade> const &event) {
   profile_.trade([&]() {
-    // auto &[trace_info, trade] = event;
-    auto &trace_info = event.trace_info;
-    auto &trade = event.value;
+    auto &[trace_info, trade] = event;
     log::info<4>("trade={}"sv, trade);
     (*connection_).touch(trace_info.source_receive_time);
     auto trade_2 = Trade{
@@ -486,7 +485,7 @@ void MarketData::operator()(Trace<json::Trade> const &event) {
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = trade.product_id,
-        .trades = {&trade_2, 1u},
+        .trades = {&trade_2, 1},
         .exchange_time_utc = trade.time,
         .exchange_sequence = {},
         .sending_time_utc = {},

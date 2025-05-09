@@ -13,7 +13,8 @@
     {
       "name": "trades",
       "type": "roq/kraken_futures/json/Trade",
-      "array": "std/span"
+      "array": "std/span",
+      "comment": "feed and product_id are not repeated on Trade"
     }
   ]
 }
