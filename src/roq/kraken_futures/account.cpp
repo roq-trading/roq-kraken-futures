@@ -6,7 +6,7 @@
 
 #include "roq/clock.hpp"
 
-using namespace std::chrono_literals;  // NOLINT
+using namespace std::chrono_literals;
 
 namespace roq {
 namespace kraken_futures {
