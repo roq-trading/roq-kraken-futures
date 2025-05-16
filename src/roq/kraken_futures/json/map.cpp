@@ -20,9 +20,9 @@ template <>
 constexpr Helper<kraken_futures::json::FillType>::operator std::optional<roq::Liquidity>() const {
   switch (std::get<0>(args_)) {
     using enum kraken_futures::json::FillType::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return Liquidity::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return Liquidity::UNDEFINED;
     case MAKER:
       return Liquidity::MAKER;
@@ -44,7 +44,7 @@ constexpr Helper<kraken_futures::json::FillType>::operator std::optional<roq::Li
   return {};
 }
 
-static_assert(Helper{kraken_futures::json::FillType{kraken_futures::json::FillType::UNDEFINED__}} == roq::Liquidity::UNDEFINED);
+static_assert(Helper{kraken_futures::json::FillType{kraken_futures::json::FillType::_UNDEFINED}} == roq::Liquidity::UNDEFINED);
 static_assert(Helper{kraken_futures::json::FillType{kraken_futures::json::FillType::MAKER}} == roq::Liquidity::MAKER);
 static_assert(Helper{kraken_futures::json::FillType{kraken_futures::json::FillType::TAKER}} == roq::Liquidity::TAKER);
 static_assert(Helper{kraken_futures::json::FillType{kraken_futures::json::FillType::LIQUIDATION}} == roq::Liquidity::UNDEFINED);
@@ -67,9 +67,9 @@ template <>
 constexpr Helper<kraken_futures::json::OrderEventOrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum kraken_futures::json::OrderEventOrderType::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::OrderType::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::OrderType::UNDEFINED;
     case LMT:
       return roq::OrderType::LIMIT;
@@ -85,7 +85,7 @@ constexpr Helper<kraken_futures::json::OrderEventOrderType>::operator std::optio
   return {};
 }
 
-static_assert(Helper{kraken_futures::json::OrderEventOrderType{kraken_futures::json::OrderEventOrderType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{kraken_futures::json::OrderEventOrderType{kraken_futures::json::OrderEventOrderType::_UNDEFINED}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{kraken_futures::json::OrderEventOrderType{kraken_futures::json::OrderEventOrderType::LMT}} == roq::OrderType::LIMIT);
 static_assert(Helper{kraken_futures::json::OrderEventOrderType{kraken_futures::json::OrderEventOrderType::MKT}} == roq::OrderType::MARKET);
 static_assert(Helper{kraken_futures::json::OrderEventOrderType{kraken_futures::json::OrderEventOrderType::STP}} == roq::OrderType::UNDEFINED);
@@ -105,9 +105,9 @@ template <>
 constexpr Helper<kraken_futures::json::OrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum kraken_futures::json::OrderType::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::OrderType::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::OrderType::UNDEFINED;
     case LIMIT:
       return roq::OrderType::LIMIT;
@@ -117,7 +117,7 @@ constexpr Helper<kraken_futures::json::OrderType>::operator std::optional<roq::O
   return {};
 }
 
-static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::_UNDEFINED}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
 static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::STOP}} == roq::OrderType::LIMIT);
 
@@ -134,9 +134,9 @@ template <>
 constexpr Helper<kraken_futures::json::Side>::operator std::optional<roq::Side>() const {
   switch (std::get<0>(args_)) {
     using enum kraken_futures::json::Side::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::Side::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::Side::UNDEFINED;
     case BUY:
       return roq::Side::BUY;
@@ -146,7 +146,7 @@ constexpr Helper<kraken_futures::json::Side>::operator std::optional<roq::Side>(
   return {};
 }
 
-static_assert(Helper{kraken_futures::json::Side{kraken_futures::json::Side::UNDEFINED__}} == roq::Side::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Side{kraken_futures::json::Side::_UNDEFINED}} == roq::Side::UNDEFINED);
 static_assert(Helper{kraken_futures::json::Side{kraken_futures::json::Side::BUY}} == roq::Side::BUY);
 static_assert(Helper{kraken_futures::json::Side{kraken_futures::json::Side::SELL}} == roq::Side::SELL);
 
@@ -166,7 +166,7 @@ constexpr Helper<roq::Side>::operator std::optional<kraken_futures::json::Side>(
   switch (std::get<0>(args_)) {
     using enum roq::Side;
     case UNDEFINED:
-      return kraken_futures::json::Side::UNDEFINED__;
+      return kraken_futures::json::Side::_UNDEFINED;
     case BUY:
       return kraken_futures::json::Side::BUY;
     case SELL:
@@ -175,7 +175,7 @@ constexpr Helper<roq::Side>::operator std::optional<kraken_futures::json::Side>(
   return {};
 }
 
-static_assert(Helper{roq::Side::UNDEFINED} == kraken_futures::json::Side{kraken_futures::json::Side::UNDEFINED__});
+static_assert(Helper{roq::Side::UNDEFINED} == kraken_futures::json::Side{kraken_futures::json::Side::_UNDEFINED});
 static_assert(Helper{roq::Side::BUY} == kraken_futures::json::Side{kraken_futures::json::Side::BUY});
 static_assert(Helper{roq::Side::SELL} == kraken_futures::json::Side{kraken_futures::json::Side::SELL});
 

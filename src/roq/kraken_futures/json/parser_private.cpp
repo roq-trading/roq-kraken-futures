@@ -35,10 +35,10 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
       Event event{value};
       switch (event) {
         using enum Event::type_t;
-        case UNDEFINED__:
+        case _UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case UNKNOWN__:
+        case _UNKNOWN:
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
@@ -65,10 +65,10 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
       Feed feed{value};
       switch (feed) {
         using enum Feed::type_t;
-        case UNDEFINED__:
+        case _UNDEFINED:
           assert(false);
           [[fallthrough]];
-        case UNKNOWN__:
+        case _UNKNOWN:
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:
