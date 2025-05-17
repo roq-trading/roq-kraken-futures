@@ -35,10 +35,10 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
       Event event{value};
       switch (event) {
         using enum Event::type_t;
-        case _UNDEFINED:
+        case UNDEFINED_INTERNAL:
           assert(false);
           [[fallthrough]];
-        case _UNKNOWN:
+        case UNKNOWN_INTERNAL:
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
@@ -65,10 +65,10 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
       Feed feed(value);
       switch (feed) {
         using enum Feed::type_t;
-        case _UNDEFINED:
+        case UNDEFINED_INTERNAL:
           assert(false);
           [[fallthrough]];
-        case _UNKNOWN:
+        case UNKNOWN_INTERNAL:
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:

@@ -41,8 +41,8 @@ struct OrderUpdate final {
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
       using enum json::Status::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
       case EDITED:
       case FILLED:  // note! have only seen event type execution
       case CANCELLED:
@@ -77,8 +77,8 @@ struct OrderUpdate final {
         auto &order_event = send_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
-          case _UNDEFINED:
-          case _UNKNOWN:
+          case UNDEFINED_INTERNAL:
+          case UNKNOWN_INTERNAL:
           case EDIT:
           case CANCEL:
             throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
@@ -185,8 +185,8 @@ struct OrderUpdate final {
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
       using enum json::Status::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
       case PLACED:
       case FILLED:
       case CANCELLED:
@@ -221,8 +221,8 @@ struct OrderUpdate final {
         auto &order_event = edit_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
-          case _UNDEFINED:
-          case _UNKNOWN:
+          case UNDEFINED_INTERNAL:
+          case UNKNOWN_INTERNAL:
           case PLACE:
           case CANCEL:
             throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
@@ -292,8 +292,8 @@ struct OrderUpdate final {
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
       using enum json::Status::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
       case PLACED:
       case EDITED:
       case FILLED:
@@ -327,8 +327,8 @@ struct OrderUpdate final {
         auto &order_event = cancel_status.order_events[0];
         switch (order_event.type) {
           using enum json::OrderEventType::type_t;
-          case _UNDEFINED:
-          case _UNKNOWN:
+          case UNDEFINED_INTERNAL:
+          case UNKNOWN_INTERNAL:
           case PLACE:
           case EDIT:
             throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
@@ -422,8 +422,8 @@ struct OrderUpdate final {
   OrderStatus compute_order_status(json::Status status) {
     switch (status) {
       using enum json::Status::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
         break;
       case PLACED:
         return OrderStatus::WORKING;

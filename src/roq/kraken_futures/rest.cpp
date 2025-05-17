@@ -252,9 +252,9 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     auto security_type = [&]() -> SecurityType {
       switch (item.type) {
         using enum json::InstrumentType::type_t;
-        case _UNDEFINED:
+        case UNDEFINED_INTERNAL:
           break;
-        case _UNKNOWN:
+        case UNKNOWN_INTERNAL:
           assert(false);
           break;
         case FLEXIBLE_FUTURES:
@@ -275,9 +275,9 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     auto option_type = [&]() -> OptionType {
       switch (item.option_type) {
         using enum json::OptionType::type_t;
-        case _UNDEFINED:
+        case UNDEFINED_INTERNAL:
           break;
-        case _UNKNOWN:
+        case UNKNOWN_INTERNAL:
           assert(false);
           break;
         case CALL:
