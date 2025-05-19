@@ -296,7 +296,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto currency = std::string{item.name};
-      std::transform(std::begin(currency), std::end(currency), std::begin(currency), ::toupper);
+      std::ranges::transform(currency, std::begin(currency), ::toupper);
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = account_.name,

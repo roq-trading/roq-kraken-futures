@@ -90,7 +90,6 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
 
   void reset();
 
- private:
   Handler &handler_;
   // config
   uint16_t const stream_id_;

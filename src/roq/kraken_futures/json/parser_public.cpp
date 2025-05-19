@@ -31,7 +31,7 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
     // event
-    if (key.compare("event"sv) == 0) {
+    if (key == "event"sv) {
       Event event{value};
       switch (event) {
         using enum Event::type_t;
@@ -61,7 +61,7 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
       }
     }
     // feed
-    if (key.compare("feed"sv) == 0) {
+    if (key == "feed"sv) {
       Feed feed(value);
       switch (feed) {
         using enum Feed::type_t;

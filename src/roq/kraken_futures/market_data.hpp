@@ -69,11 +69,11 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
 
   template <typename T>
   void subscribe(std::string_view const &feed, std::span<T> const &product_ids);
-  void subscribe(std::string_view const &feed, std::string_view const &symbol) { return subscribe(feed, std::span{&symbol, 1}); }
+  void subscribe(std::string_view const &feed, std::string_view const &symbol) { subscribe(feed, std::span{&symbol, 1}); }
 
   template <typename T>
   void unsubscribe(std::string_view const &feed, std::span<T> const &product_ids);
-  void unsubscribe(std::string_view const &feed, std::string_view const &symbol) { return unsubscribe(feed, std::span{&symbol, 1}); }
+  void unsubscribe(std::string_view const &feed, std::string_view const &symbol) { unsubscribe(feed, std::span{&symbol, 1}); }
 
   // json::ParserPublic::Handler
 
@@ -98,7 +98,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
 
   void resubscribe(TraceInfo const &, std::string_view const &symbol);
 
- private:
   Handler &handler_;
   // config
   uint16_t const stream_id_;

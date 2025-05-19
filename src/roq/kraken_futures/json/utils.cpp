@@ -121,7 +121,7 @@ std::string_view edit_order(
     ModifyOrder const &modify_order,
     server::oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previousrequest_id) {
+    [[maybe_unused]] std::string_view const &previous_request_id) {
   buffer.clear();
   // note! price has max 2 decimals, size is integer
   fmt::format_to(
@@ -141,7 +141,7 @@ std::string_view cancel_order(
     roq::CancelOrder const &,
     server::oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previousrequest_id) {
+    [[maybe_unused]] std::string_view const &previous_request_id) {
   buffer.clear();
   // note! price has max 2 decimals, size is integer
   fmt::format_to(std::back_inserter(buffer), "?order_id={}"sv, order.external_order_id);
