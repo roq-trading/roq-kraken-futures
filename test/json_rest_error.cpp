@@ -51,6 +51,6 @@ TEST_CASE("json_rest_error_error_404", "[json_rest_error]") {
   CHECK(obj.timestamp == 1627618268981ms);
   // CHECK(obj.status == 404);
   CHECK(obj.error == "Not Found"sv);
-  CHECK(obj.message == ""sv);
+  CHECK(std::empty(obj.message));
   CHECK(obj.request_id == "7ad2fe97-69108954"sv);
 }

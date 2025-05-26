@@ -36,7 +36,7 @@ Crypto::Crypto(std::string_view const &secret) : mac_{create_hmac<decltype(mac_)
 
 std::string Crypto::create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &key, std::chrono::milliseconds nonce) {
   assert(!std::empty(path));
-  if (nonce.count()) {
+  if (nonce.count() != 0) {
     auto nonce_ = fmt::format("{}"sv, nonce.count());
     hash_.clear();
     if (!std::empty(query)) {
@@ -60,27 +60,26 @@ std::string Crypto::create_headers(std::string_view const &path, std::string_vie
         key,
         nonce_,
         authent);
-  } else {
-    hash_.clear();
-    if (!std::empty(query)) {
-      assert(query[0] == '?');
-      auto raw = query.substr(1);  // note! not including '?'
-      hash_.update(raw);
-    }
-    hash_.update(path);
-    std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
-    auto digest_1 = hash_.final(buffer_1);
-    mac_.clear();
-    mac_.update(digest_1);
-    auto digest_2 = mac_.final(digest_);
-    std::string authent;
-    utils::codec::Base64::encode(authent, digest_2, false, false);
-    return fmt::format(
-        "APIKey: {}\r\n"
-        "Authent: {}\r\n"sv,
-        key,
-        authent);
   }
+  hash_.clear();
+  if (!std::empty(query)) {
+    assert(query[0] == '?');
+    auto raw = query.substr(1);  // note! not including '?'
+    hash_.update(raw);
+  }
+  hash_.update(path);
+  std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
+  auto digest_1 = hash_.final(buffer_1);
+  mac_.clear();
+  mac_.update(digest_1);
+  auto digest_2 = mac_.final(digest_);
+  std::string authent;
+  utils::codec::Base64::encode(authent, digest_2, false, false);
+  return fmt::format(
+      "APIKey: {}\r\n"
+      "Authent: {}\r\n"sv,
+      key,
+      authent);
 }
 
 std::string Crypto::signed_challenge(std::string_view const &original_challenge) {

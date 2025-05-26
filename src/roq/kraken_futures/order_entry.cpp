@@ -385,7 +385,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
@@ -475,7 +475,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,

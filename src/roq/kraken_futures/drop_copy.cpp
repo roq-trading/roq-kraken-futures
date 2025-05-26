@@ -362,7 +362,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
     log::info<2>("fills_snapshot={}"sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
       auto symbol = std::string{item.instrument};
-      std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{
           .external_trade_id = item.fill_id,
@@ -408,7 +408,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
       auto symbol = std::string{item.instrument};
-      std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{
           .external_trade_id = item.fill_id,

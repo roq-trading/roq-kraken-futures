@@ -86,7 +86,7 @@ struct OrderUpdate final {
           case PLACE: {
             auto &order_ = order_event.order;
             auto symbol = std::string{order_.symbol};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
             auto status = compute_order_status(send_status.status);
             // XXX HANS should we use reduced_quantity to log a warning ???
             auto order_update = server::oms::OrderUpdate{
@@ -128,7 +128,7 @@ struct OrderUpdate final {
           case EXECUTION: {
             auto &order_ = order_event.order_prior_execution;
             auto symbol = std::string{order_.symbol};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
             auto status = compute_order_status(send_status.status, order_.quantity, order_event.amount);
             auto traded_quantity = order_event.amount;
             auto remaining_quantity = order_.quantity - traded_quantity;
@@ -230,7 +230,7 @@ struct OrderUpdate final {
           case EDIT: {
             auto &new_order = order_event.new_;
             auto symbol = std::string{new_order.symbol};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
             auto status = compute_order_status(edit_status.status);
             // XXX HANS should we use reduced_quantity to compute remaining quantity ???
             auto order_update = server::oms::OrderUpdate{
@@ -276,7 +276,7 @@ struct OrderUpdate final {
             break;
           }
           case REJECT: {
-            auto error = order_event.reason.compare("EDIT_HAS_NO_EFFECT"sv) == 0 ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
+            auto error = order_event.reason == "EDIT_HAS_NO_EFFECT"sv ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
             reject(error, order_event.reason);
             break;
           }
@@ -336,7 +336,7 @@ struct OrderUpdate final {
           case CANCEL: {
             auto &order_ = order_event.new_;
             auto symbol = std::string{order_.symbol};
-            std::transform(std::begin(symbol), std::end(symbol), std::begin(symbol), ::toupper);
+            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
             auto status = compute_order_status(cancel_status.status);
             auto order_update = server::oms::OrderUpdate{
                 .account = account_,
@@ -400,7 +400,7 @@ struct OrderUpdate final {
       json::Order const &,
       std::string_view const &order_id,
       std::string_view const &cli_ord_id,
-      json::Reason const,
+      json::Reason,
       bool is_cancel,
       TraceInfo const &,
       bool is_download);
