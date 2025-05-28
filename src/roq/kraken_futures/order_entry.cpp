@@ -269,11 +269,12 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           log::fatal("Unexpected"sv);
           break;
         case ERROR:
+          // XXX FIXME when does this happen?
           log::warn("send_order={}"sv, send_order);
           throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, send_order.error};
           break;
         case SUCCESS: {
-          auto request_id = send_order.send_status.cli_ord_id;
+          auto request_id = send_order.send_status.cli_ord_id;  // note! could be missing
           auto accept_handler = [&](auto &order_update) {
             auto response = server::oms::Response{
                 .request_type = RequestType::CREATE_ORDER,
@@ -289,7 +290,21 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          auto reject_handler = [&](auto error, auto &text) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::CREATE_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::REJECTED,
+                .error = error,
+                .text = text,
+                .version = 1,
+                .request_id = request_id,
+                .quantity = NaN,
+                .price = NaN,
+            };
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id);
+          };
           OrderUpdate{shared_, stream_id_, account_.name}(order_id, send_order, accept_handler, reject_handler);
           break;
         }
@@ -359,6 +374,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           log::fatal("Unexpected"sv);
           break;
         case ERROR:
+          // XXX FIXME when does this happen?
           log::warn("edit_order={}"sv, edit_order);
           throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, edit_order.error};
           break;
@@ -449,6 +465,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           log::fatal("Unexpected"sv);
           break;
         case ERROR:
+          // XXX FIXME when does this happen?
           log::warn("cancel_order={}"sv, cancel_order);
           throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, cancel_order.error};
           break;
