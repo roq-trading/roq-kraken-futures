@@ -143,7 +143,7 @@ void DropCopy::get_challenge() {
 }
 
 void DropCopy::subscribe() {
-  subscribe("account_balances_and_margins"sv);
+  subscribe("account_balances_and_margins"sv);  // XXX FIXME TODO doesn't appear to exist anymore
   subscribe("open_positions"sv);
   subscribe("open_orders"sv);
   subscribe("fills"sv);
@@ -320,6 +320,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
     for (auto &item : open_positions.positions) {
+      fill_symbols_[item.instrument] = true;  // note!
       auto long_quantity = std::max(0.0, item.balance);
       auto short_quantity = std::max(0.0, -item.balance);
       auto position_update = PositionUpdate{
@@ -337,6 +338,26 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
       };
       create_trace_and_dispatch(handler_, trace_info, position_update, true);
     }
+    // note! workaround because zero-positions aren't reported
+    for (auto &[symbol, found] : fill_symbols_) {
+      if (!found) {
+        auto position_update = PositionUpdate{
+            .stream_id = stream_id_,
+            .account = account_.name,
+            .exchange = shared_.settings.exchange,
+            .symbol = symbol,
+            .margin_mode = {},
+            .external_account = {},
+            .long_quantity = 0.0,
+            .short_quantity = 0.0,
+            .update_type = UpdateType::INCREMENTAL,
+            .exchange_time_utc = {},
+            .sending_time_utc = {},
+        };
+        create_trace_and_dispatch(handler_, trace_info, position_update, true);
+      }
+      found = false;
+    }
   });
 }
 
@@ -352,6 +373,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
+    log::warn("DEBUG open_orders={}"sv, open_orders);
     OrderUpdate{shared_, stream_id_, account_.name}(open_orders, trace_info);
   });
 }
@@ -364,6 +386,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
     for (auto &item : fills_snapshot.fills) {
       auto symbol = std::string{item.instrument};
       std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+      fill_symbols_.try_emplace(symbol);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{
           .external_trade_id = item.fill_id,
@@ -406,9 +429,11 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
     log::info<2>("fills={}"sv, fills);
+    log::warn("DEBUG fills={}"sv, fills);
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
       auto symbol = std::string{item.instrument};
+      fill_symbols_.try_emplace(symbol);  // note!
       std::ranges::transform(symbol, std::begin(symbol), ::toupper);
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{

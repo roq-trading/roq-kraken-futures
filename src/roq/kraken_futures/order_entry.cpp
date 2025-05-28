@@ -259,6 +259,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::SendOrder send_order{body, decode_buffer_};
       switch (send_order.result) {
         using enum json::Result::type_t;
@@ -364,6 +365,7 @@ void OrderEntry::modify_order(
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::EditOrder edit_order{body, decode_buffer_};
       switch (edit_order.result) {
         using enum json::Result::type_t;
@@ -455,6 +457,7 @@ void OrderEntry::cancel_order(
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelOrder cancel_order{body, decode_buffer_};
       switch (cancel_order.result) {
         using enum json::Result::type_t;
@@ -589,6 +592,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
+      log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});

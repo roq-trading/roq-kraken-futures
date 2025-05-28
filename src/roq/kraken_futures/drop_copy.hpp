@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "roq/utils/container.hpp"
+
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
 #include "roq/utils/metrics/profile.hpp"
@@ -121,6 +123,8 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // challenge
   std::string original_challenge_;
   std::string signed_challenge_;
+  // workaround
+  utils::unordered_map<std::string, bool> fill_symbols_;
 };
 
 }  // namespace kraken_futures
