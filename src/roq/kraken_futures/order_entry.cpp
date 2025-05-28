@@ -261,6 +261,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::SendOrder send_order{body, decode_buffer_};
+      log::warn(R"(DEBUG send_order={})"sv, send_order);
       switch (send_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:
@@ -367,6 +368,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::EditOrder edit_order{body, decode_buffer_};
+      log::warn(R"(DEBUG edit_order={})"sv, edit_order);
       switch (edit_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:
@@ -459,6 +461,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelOrder cancel_order{body, decode_buffer_};
+      log::warn(R"(DEBUG cancel_order={})"sv, cancel_order);
       switch (cancel_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:

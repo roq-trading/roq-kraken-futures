@@ -356,7 +356,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
         };
         create_trace_and_dispatch(handler_, trace_info, position_update, true);
       }
-      found = false;
+      found = false;  // note!
     }
   });
 }
