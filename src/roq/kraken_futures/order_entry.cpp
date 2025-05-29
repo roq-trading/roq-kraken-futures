@@ -312,7 +312,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto &text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
@@ -600,7 +600,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
       send_ack(origin, status, error, text);
     };
@@ -639,7 +639,7 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &e
       json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
       log::info<2>("cancel_all_after_ack={}"sv, cancel_all_after_ack);
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto const &text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
       // note! no response required
     };
@@ -673,7 +673,15 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
       case CLIENT_ERROR: {  // 4xx
         json::RestError rest_error{body, decode_buffer_};
         log::warn("error={}"sv, rest_error);
-        auto text = std::size(rest_error.errors) > 0 ? rest_error.errors[0].message : rest_error.message;
+        auto text = [&]() {
+          if (!std::empty(rest_error.errors)) {
+            return rest_error.errors[0].message;
+          }
+          if (!std::empty(rest_error.error)) {
+            return rest_error.error;
+          }
+          return rest_error.message;
+        }();
         error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);
         break;
       }

@@ -66,9 +66,10 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION: {
-        std::string_view const text{send_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
-        break;
+        case ORDER_FOR_EDIT_NOT_FOUND:
+          std::string_view const text{send_status.status.as_raw_text()};
+          reject(Error::UNKNOWN, text);
+          break;
       }
       case PLACED: {
         if (std::size(send_status.order_events) != 1) {
@@ -210,9 +211,10 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION: {
-        std::string_view const text{edit_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
-        break;
+        case ORDER_FOR_EDIT_NOT_FOUND:
+          std::string_view const text{edit_status.status.as_raw_text()};
+          reject(Error::UNKNOWN, text);
+          break;
       }
       case EDITED: {
         if (std::size(edit_status.order_events) != 1) {
@@ -316,9 +318,10 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION: {
-        std::string_view const text{cancel_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
-        break;
+        case ORDER_FOR_EDIT_NOT_FOUND:
+          std::string_view const text{cancel_status.status.as_raw_text()};
+          reject(Error::UNKNOWN, text);
+          break;
       }
       case CANCELLED: {
         if (std::size(cancel_status.order_events) != 1) {
@@ -452,6 +455,7 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
+      case ORDER_FOR_EDIT_NOT_FOUND:
         return OrderStatus::REJECTED;
     }
     return {};
