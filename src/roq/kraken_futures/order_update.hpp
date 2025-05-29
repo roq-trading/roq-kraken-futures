@@ -44,11 +44,13 @@ struct OrderUpdate final {
       case UNDEFINED_INTERNAL:
       case UNKNOWN_INTERNAL:
       case EDITED:
-      case FILLED:  // note! have only seen event type execution
-      case CANCELLED:
-      case NO_ORDERS_TO_CANCEL:
-      case NOT_FOUND:
-        throw RuntimeError{"Unexpected: status={}"sv, send_status.status};
+      case NO_ORDERS_TO_CANCEL:  // ???
+      case NOT_FOUND:            // ???
+      case ORDER_FOR_EDIT_NOT_FOUND:
+        reject(Error::UNKNOWN, send_status.status.as_raw_text());
+        break;
+      case CANCELLED:  // XXX FIXME TODO possible ???
+        reject(Error::UNKNOWN, send_status.status.as_raw_text());
         break;
       case INVALID_ORDER_TYPE:
       case INVALID_SIDE:
@@ -66,117 +68,16 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION: {
-        case ORDER_FOR_EDIT_NOT_FOUND:
-          std::string_view const text{send_status.status.as_raw_text()};
-          reject(Error::UNKNOWN, text);
-          break;
-      }
-      case PLACED: {
-        if (std::size(send_status.order_events) != 1) {
-          throw RuntimeError{"Unexpected: size={}"sv, std::size(send_status.order_events)};
-        }
-        auto &order_event = send_status.order_events[0];
-        switch (order_event.type) {
-          using enum json::OrderEventType::type_t;
-          case UNDEFINED_INTERNAL:
-          case UNKNOWN_INTERNAL:
-          case EDIT:
-          case CANCEL:
-            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
-            break;
-          case PLACE: {
-            auto &order_ = order_event.order;
-            auto symbol = std::string{order_.symbol};
-            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-            auto status = compute_order_status(send_status.status);
-            // XXX HANS should we use reduced_quantity to log a warning ???
-            auto order_update = server::oms::OrderUpdate{
-                .account = account_,
-                .exchange = {},
-                .symbol = symbol,
-                .side = map(order_.side),
-                .position_effect = {},
-                .margin_mode = {},
-                .max_show_quantity = NaN,
-                .order_type = map(order_.type),
-                .time_in_force = {},
-                .execution_instructions = {},
-                .create_time_utc = {},
-                .update_time_utc = send_status.received_time,
-                .external_account = {},
-                .external_order_id = send_status.order_id,
-                .client_order_id = {},
-                .order_status = status,
-                .quantity = order_.quantity,
-                .price = order_.limit_price,
-                .stop_price = NaN,
-                .remaining_quantity = NaN,
-                .traded_quantity = order_.filled,
-                .average_traded_price = NaN,
-                .last_traded_quantity = NaN,
-                .last_traded_price = NaN,
-                .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            accept(std::as_const(order_update));
-            break;
-          }
-          case EXECUTION: {
-            auto &order_ = order_event.order_prior_execution;
-            auto symbol = std::string{order_.symbol};
-            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-            auto status = compute_order_status(send_status.status, order_.quantity, order_event.amount);
-            auto traded_quantity = order_event.amount;
-            auto remaining_quantity = order_.quantity - traded_quantity;
-            // XXX HANS should we use reduced_quantity to log a warning ???
-            auto order_update = server::oms::OrderUpdate{
-                .account = account_,
-                .exchange = {},
-                .symbol = symbol,
-                .side = map(order_.side),
-                .position_effect = {},
-                .margin_mode = {},
-                .max_show_quantity = NaN,
-                .order_type = map(order_.type),
-                .time_in_force = {},
-                .execution_instructions = {},
-                .create_time_utc = {},
-                .update_time_utc = send_status.received_time,
-                .external_account = {},
-                .external_order_id = send_status.order_id,
-                .client_order_id = {},
-                .order_status = status,
-                .quantity = order_.quantity,
-                .price = order_.limit_price,
-                .stop_price = NaN,
-                .remaining_quantity = remaining_quantity,
-                .traded_quantity = traded_quantity,
-                .average_traded_price = NaN,
-                .last_traded_quantity = NaN,
-                .last_traded_price = NaN,
-                .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            accept(std::as_const(order_update));
-            break;
-          }
-          case REJECT: {
-            reject(Error::UNKNOWN, order_event.reason);
-            break;
-          }
-        }
+        std::string_view const text{send_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
       }
+      case PLACED:
+        process_order(send_status, json::OrderEventType::PLACE, accept);
+        break;
+      case FILLED:
+        process_execution(send_status, accept);
+        break;
     }
   }
 
@@ -189,10 +90,11 @@ struct OrderUpdate final {
       case UNDEFINED_INTERNAL:
       case UNKNOWN_INTERNAL:
       case PLACED:
-      case FILLED:
-      case CANCELLED:
       case NO_ORDERS_TO_CANCEL:
-        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status};
+        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status.as_raw_text()};
+        break;
+      case CANCELLED:  // XXX FIXME TODO possible ???
+        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status.as_raw_text()};
         break;
       case NOT_FOUND:
       case INVALID_ORDER_TYPE:
@@ -210,81 +112,18 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION: {
-        case ORDER_FOR_EDIT_NOT_FOUND:
-          std::string_view const text{edit_status.status.as_raw_text()};
-          reject(Error::UNKNOWN, text);
-          break;
-      }
-      case EDITED: {
-        if (std::size(edit_status.order_events) != 1) {
-          throw RuntimeError{"Unexpected: size={}"sv, std::size(edit_status.order_events)};
-        }
-        auto &order_event = edit_status.order_events[0];
-        switch (order_event.type) {
-          using enum json::OrderEventType::type_t;
-          case UNDEFINED_INTERNAL:
-          case UNKNOWN_INTERNAL:
-          case PLACE:
-          case CANCEL:
-            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
-            break;
-          case EDIT: {
-            auto &new_order = order_event.new_;
-            auto symbol = std::string{new_order.symbol};
-            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-            auto status = compute_order_status(edit_status.status);
-            // XXX HANS should we use reduced_quantity to compute remaining quantity ???
-            auto order_update = server::oms::OrderUpdate{
-                .account = account_,
-                .exchange = {},
-                .symbol = symbol,
-                .side = map(new_order.side),
-                .position_effect = {},
-                .margin_mode = {},
-                .max_show_quantity = NaN,
-                .order_type = map(new_order.type),
-                .time_in_force = {},
-                .execution_instructions = {},
-                .create_time_utc = {},
-                .update_time_utc = edit_status.received_time,
-                .external_account = {},
-                .external_order_id = edit_status.order_id,
-                .client_order_id = {},
-                .order_status = status,
-                .quantity = new_order.quantity,
-                .price = new_order.limit_price,
-                .stop_price = NaN,
-                .remaining_quantity = NaN,
-                .traded_quantity = new_order.filled,
-                .average_traded_price = NaN,
-                .last_traded_quantity = NaN,
-                .last_traded_price = NaN,
-                .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            accept(std::as_const(order_update));
-            break;
-          }
-          case EXECUTION: {
-            // XXX HANS FIX THIS
-            log::warn("order_event={}"sv, order_event);
-            log::fatal("Unexpected"sv);
-            break;
-          }
-          case REJECT: {
-            auto error = order_event.reason == "EDIT_HAS_NO_EFFECT"sv ? Error::MODIFY_HAS_NO_EFFECT : Error::UNKNOWN;
-            reject(error, order_event.reason);
-            break;
-          }
-        }
+      case WOULD_NOT_REDUCE_POSITION:
+      case ORDER_FOR_EDIT_NOT_FOUND: {
+        std::string_view const text{edit_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
       }
+      case EDITED:
+        process_order(edit_status, json::OrderEventType::EDIT, accept);
+        break;
+      case FILLED:
+        process_execution(edit_status, accept);
+        break;
     }
   }
 
@@ -298,10 +137,10 @@ struct OrderUpdate final {
       case UNKNOWN_INTERNAL:
       case PLACED:
       case EDITED:
-      case FILLED:
-        throw RuntimeError{"Unexpected: status={}"sv, cancel_status.status};
+      case ORDER_FOR_EDIT_NOT_FOUND:
+        reject(Error::UNKNOWN, cancel_status.status.as_raw_text());
         break;
-      case NO_ORDERS_TO_CANCEL:
+      case NO_ORDERS_TO_CANCEL:  // XXX FIXME TODO what does this really mean ???
       case INVALID_ORDER_TYPE:
       case INVALID_SIDE:
       case INVALID_PRICE:
@@ -317,84 +156,18 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION: {
-        case ORDER_FOR_EDIT_NOT_FOUND:
-          std::string_view const text{cancel_status.status.as_raw_text()};
-          reject(Error::UNKNOWN, text);
-          break;
-      }
-      case CANCELLED: {
-        if (std::size(cancel_status.order_events) != 1) {
-          throw RuntimeError{"Unexpected: size={}"sv, std::size(cancel_status.order_events)};
-        }
-        auto &order_event = cancel_status.order_events[0];
-        switch (order_event.type) {
-          using enum json::OrderEventType::type_t;
-          case UNDEFINED_INTERNAL:
-          case UNKNOWN_INTERNAL:
-          case PLACE:
-          case EDIT:
-            throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
-            break;
-          case CANCEL: {
-            auto &order_ = order_event.new_;
-            auto symbol = std::string{order_.symbol};
-            std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-            auto status = compute_order_status(cancel_status.status);
-            auto order_update = server::oms::OrderUpdate{
-                .account = account_,
-                .exchange = {},
-                .symbol = symbol,
-                .side = map(order_.side),
-                .position_effect = {},
-                .margin_mode = {},
-                .max_show_quantity = NaN,
-                .order_type = map(order_.type),
-                .time_in_force = {},
-                .execution_instructions = {},
-                .create_time_utc = {},
-                .update_time_utc = cancel_status.received_time,
-                .external_account = {},
-                .external_order_id = cancel_status.order_id,
-                .client_order_id = {},
-                .order_status = status,
-                .quantity = order_.quantity,
-                .price = order_.limit_price,
-                .stop_price = NaN,
-                .remaining_quantity = NaN,
-                .traded_quantity = order_.filled,
-                .average_traded_price = NaN,
-                .last_traded_quantity = NaN,
-                .last_traded_price = NaN,
-                .last_liquidity = {},
-                .routing_id = {},
-                .max_request_version = {},
-                .max_response_version = {},
-                .max_accepted_version = {},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            accept(std::as_const(order_update));
-            break;
-          }
-          case EXECUTION: {
-            // XXX HANS FIX THIS
-            log::warn("order_event={}"sv, order_event);
-            log::fatal("Unexpected"sv);
-            break;
-          }
-          case REJECT: {
-            reject(Error::UNKNOWN, order_event.reason);
-            break;
-          }
-        }
-        break;
-      }
+      case WOULD_NOT_REDUCE_POSITION:
       case NOT_FOUND: {
-        std::string_view const text;
-        reject(Error::TOO_LATE_TO_MODIFY_OR_CANCEL, text);
+        std::string_view const text{cancel_status.status.as_raw_text()};
+        reject(Error::UNKNOWN, text);
         break;
       }
+      case CANCELLED:
+        process_order(cancel_status, json::OrderEventType::CANCEL, accept);
+        break;
+      case FILLED:  // XXX FIXME TODO is this actually possible ???
+        process_execution(cancel_status, accept);
+        break;
     }
   }
 
@@ -461,11 +234,140 @@ struct OrderUpdate final {
     return {};
   }
 
-  OrderStatus compute_order_status(json::Status status, double quantity, double filled) {
-    if (utils::is_equal(quantity, filled)) {
+  OrderStatus compute_order_status(json::Status status, double remaining_quantity) {
+    if (utils::is_zero(remaining_quantity)) {
       return OrderStatus::COMPLETED;
     }
     return compute_order_status(status);
+  }
+
+  template <typename Callback>
+  void process_order(auto &request_status, auto expected_event_type, Callback callback) {
+    using namespace std::literals;
+    if (std::size(request_status.order_events) != 1) {
+      throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+    }
+    auto &order_event = request_status.order_events[0];
+    if (order_event.type == json::OrderEventType::EXECUTION) {
+      process_execution(request_status, callback);
+      return;  // note!
+    }
+    // XXX FIXME TODO can REJECT also happen ???
+    if (order_event.type != expected_event_type) {
+      throw RuntimeError{"Unexpected: type={} (expected type={})"sv, order_event.type, expected_event_type};
+    }
+    auto &order_ = order_event.order;
+    auto symbol = std::string{order_.symbol};
+    std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+    auto remaining_quantity = order_.quantity;
+    auto traded_quantity = order_.filled;
+    auto quantity = remaining_quantity + traded_quantity;
+    auto order_status = compute_order_status(request_status.status, remaining_quantity);
+    auto order_update = server::oms::OrderUpdate{
+        .account = account_,
+        .exchange = {},
+        .symbol = symbol,
+        .side = map(order_.side),
+        .position_effect = {},
+        .margin_mode = {},
+        .max_show_quantity = NaN,
+        .order_type = map(order_.type),
+        .time_in_force = {},
+        .execution_instructions = {},
+        .create_time_utc = {},
+        .update_time_utc = request_status.received_time,
+        .external_account = {},
+        .external_order_id = request_status.order_id,
+        .client_order_id = {},
+        .order_status = order_status,
+        .quantity = quantity,         // note!
+        .price = order_.limit_price,  // note!
+        .stop_price = NaN,
+        .remaining_quantity = remaining_quantity,  // note!
+        .traded_quantity = traded_quantity,        // note!
+        .average_traded_price = NaN,
+        .last_traded_quantity = NaN,
+        .last_traded_price = NaN,
+        .last_liquidity = {},
+        .routing_id = {},
+        .max_request_version = {},
+        .max_response_version = {},
+        .max_accepted_version = {},
+        .update_type = {},
+        .sending_time_utc = {},
+    };
+    callback(std::as_const(order_update));
+  }
+
+  template <typename Callback>
+  void process_execution(auto &request_status, Callback callback) {
+    using namespace std::literals;
+    if (std::empty(request_status.order_events)) {
+      throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+    }
+    std::string symbol;
+    OrderType order_type = {};
+    Side side = {};
+    double price = NaN;
+    double prior_quantity = NaN;
+    double prior_filled = NaN;
+    double last_traded_quantity = 0.0;
+    double sum_product = 0.0;
+    for (auto &order_event : request_status.order_events) {
+      if (order_event.type != json::OrderEventType::EXECUTION) {
+        throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
+      }
+      auto &order_prior_execution = order_event.order_prior_execution;
+      if (std::empty(symbol)) {
+        symbol = std::string{order_prior_execution.symbol};
+        std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+      }
+      order_type = map(order_prior_execution.type);
+      side = map(order_prior_execution.side);
+      price = order_prior_execution.limit_price;
+      prior_quantity = order_prior_execution.quantity;
+      prior_filled = order_prior_execution.filled;
+      last_traded_quantity += order_event.amount;
+      sum_product += order_event.amount * order_event.price;
+    }
+    auto last_traded_price = utils::is_zero(last_traded_quantity) ? NaN : (sum_product / last_traded_quantity);
+    auto remaining_quantity = prior_quantity - last_traded_quantity;  // ???
+    auto traded_quantity = prior_filled + last_traded_quantity;
+    auto order_status = compute_order_status(request_status.status, remaining_quantity);
+    auto order_update = server::oms::OrderUpdate{
+        .account = account_,
+        .exchange = {},
+        .symbol = symbol,
+        .side = side,
+        .position_effect = {},
+        .margin_mode = {},
+        .max_show_quantity = NaN,
+        .order_type = order_type,
+        .time_in_force = {},
+        .execution_instructions = {},
+        .create_time_utc = {},
+        .update_time_utc = request_status.received_time,
+        .external_account = {},
+        .external_order_id = request_status.order_id,
+        .client_order_id = {},
+        .order_status = order_status,
+        .quantity = NaN,  // note!
+        .price = price,   // note!
+        .stop_price = NaN,
+        .remaining_quantity = remaining_quantity,  // note!
+        .traded_quantity = traded_quantity,        // note!
+        .average_traded_price = NaN,
+        .last_traded_quantity = last_traded_quantity,  // note!
+        .last_traded_price = last_traded_price,        // note!
+        .last_liquidity = Liquidity::TAKER,
+        .routing_id = {},
+        .max_request_version = {},
+        .max_response_version = {},
+        .max_accepted_version = {},
+        .update_type = {},
+        .sending_time_utc = {},
+    };
+    callback(std::as_const(order_update));  // XXX FIXME TODO include the fills
   }
 
  private:

@@ -26,9 +26,18 @@ void OrderUpdate::operator()(json::OpenOrdersSnapshot const &open_orders_snapsho
 
 void OrderUpdate::operator()(json::OpenOrders const &open_orders, TraceInfo const &trace_info) {
   auto &order = open_orders.order;
-  // ... just confusing
-  auto order_id = std::empty(open_orders.order_id) ? order.order_id : open_orders.order_id;
-  auto cli_ord_id = std::empty(open_orders.cli_ord_id) ? order.cli_ord_id : open_orders.cli_ord_id;
+  auto order_id = [&]() {
+    if (std::empty(open_orders.order_id)) {
+      return order.order_id;
+    }
+    return open_orders.order_id;
+  }();
+  auto cli_ord_id = [&]() {
+    if (std::empty(open_orders.cli_ord_id)) {
+      return order.cli_ord_id;
+    }
+    return open_orders.cli_ord_id;
+  }();
   (*this)(order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
 }
 
@@ -166,7 +175,7 @@ void OrderUpdate::operator()(
       .quantity = NaN,
       .price = order.limit_price,
       .stop_price = NaN,
-      .remaining_quantity = order.qty,
+      .remaining_quantity = order.qty,  // note!
       .traded_quantity = order.filled,
       .average_traded_price = NaN,
       .last_traded_quantity = NaN,

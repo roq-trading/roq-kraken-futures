@@ -270,14 +270,27 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("send_order={}"sv, send_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR:
-          // XXX FIXME when does this happen?
-          log::warn("send_order={}"sv, send_order);
-          throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, send_order.error};
+        case ERROR: {
+          auto response = server::oms::Response{
+              .request_type = RequestType::CREATE_ORDER,
+              .origin = Origin::EXCHANGE,
+              .request_status = RequestStatus::REJECTED,
+              .error = Error::UNKNOWN,  // XXX FIXME TODO
+              .text = send_order.error,
+              .version = version,
+              .request_id = {},
+              .quantity = NaN,
+              .price = NaN,
+          };
+          log::warn("DEBUG response={}"sv, response);
+          Trace event_2{event, response};
+          (*this)(event_2, user_id, order_id);
           break;
+        }
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;  // note! could be missing
           auto accept_handler = [&](auto &order_update) {
+            log::warn("DEBUG order_update={}"sv, order_update);
             auto response = server::oms::Response{
                 .request_type = RequestType::CREATE_ORDER,
                 .origin = Origin::EXCHANGE,
@@ -289,21 +302,23 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
                 .quantity = NaN,
                 .price = NaN,
             };
+            log::warn("DEBUG response={}"sv, response);
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto &text) {
+          auto reject_handler = [&](auto error, auto const &text) {
             auto response = server::oms::Response{
                 .request_type = RequestType::CREATE_ORDER,
                 .origin = Origin::EXCHANGE,
                 .request_status = RequestStatus::REJECTED,
                 .error = error,
                 .text = text,
-                .version = 1,
+                .version = version,
                 .request_id = request_id,
                 .quantity = NaN,
                 .price = NaN,
             };
+            log::warn("DEBUG response={}"sv, response);
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id);
           };
@@ -312,11 +327,11 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
-          .request_status = status,
+          .request_status = request_status,
           .error = error,
           .text = text,
           .version = version,
@@ -324,6 +339,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
+      log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
@@ -377,14 +393,27 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("edit_order={}"sv, edit_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR:
-          // XXX FIXME when does this happen?
-          log::warn("edit_order={}"sv, edit_order);
-          throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, edit_order.error};
+        case ERROR: {
+          auto response = server::oms::Response{
+              .request_type = RequestType::MODIFY_ORDER,
+              .origin = Origin::EXCHANGE,
+              .request_status = RequestStatus::REJECTED,
+              .error = Error::UNKNOWN,  // XXX FIXME TODO
+              .text = edit_order.error,
+              .version = version,
+              .request_id = {},
+              .quantity = NaN,
+              .price = NaN,
+          };
+          log::warn("DEBUG response={}"sv, response);
+          Trace event_2{event, response};
+          (*this)(event_2, user_id, order_id);
           break;
+        }
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
+            log::warn("DEBUG order_update={}"sv, order_update);
             auto response = server::oms::Response{
                 .request_type = RequestType::MODIFY_ORDER,
                 .origin = Origin::EXCHANGE,
@@ -396,20 +425,36 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
                 .quantity = NaN,
                 .price = NaN,
             };
+            log::warn("DEBUG response={}"sv, response);
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          auto reject_handler = [&](auto error, auto const &text) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::MODIFY_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::REJECTED,
+                .error = error,
+                .text = text,
+                .version = version,
+                .request_id = {},
+                .quantity = NaN,
+                .price = NaN,
+            };
+            log::warn("DEBUG response={}"sv, response);
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id);
+          };
           OrderUpdate{shared_, stream_id_, account_.name}(order_id, edit_order, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
-          .request_status = status,
+          .request_status = request_status,
           .error = error,
           .text = text,
           .version = version,
@@ -417,6 +462,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
+      log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
@@ -470,14 +516,27 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("cancel_order={}"sv, cancel_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR:
-          // XXX FIXME when does this happen?
-          log::warn("cancel_order={}"sv, cancel_order);
-          throw server::oms::Rejected{Origin::EXCHANGE, Error::UNKNOWN, "{}"sv, cancel_order.error};
+        case ERROR: {
+          auto response = server::oms::Response{
+              .request_type = RequestType::CANCEL_ORDER,
+              .origin = Origin::EXCHANGE,
+              .request_status = RequestStatus::REJECTED,
+              .error = Error::UNKNOWN,  // XXX FIXME TODO
+              .text = cancel_order.error,
+              .version = version,
+              .request_id = {},
+              .quantity = NaN,
+              .price = NaN,
+          };
+          log::warn("DEBUG response={}"sv, response);
+          Trace event_2{event, response};
+          (*this)(event_2, user_id, order_id);
           break;
+        }
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
+            log::warn("DEBUG order_update={}"sv, order_update);
             auto response = server::oms::Response{
                 .request_type = RequestType::CANCEL_ORDER,
                 .origin = Origin::EXCHANGE,
@@ -489,20 +548,36 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
                 .quantity = NaN,
                 .price = NaN,
             };
+            log::warn("DEBUG response={}"sv, response);
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto &text) { throw server::oms::Rejected{Origin::EXCHANGE, error, "{}"sv, text}; };
+          auto reject_handler = [&](auto error, auto const &text) {
+            auto response = server::oms::Response{
+                .request_type = RequestType::CANCEL_ORDER,
+                .origin = Origin::EXCHANGE,
+                .request_status = RequestStatus::REJECTED,
+                .error = error,
+                .text = text,
+                .version = version,
+                .request_id = {},
+                .quantity = NaN,
+                .price = NaN,
+            };
+            log::warn("DEBUG response={}"sv, response);
+            Trace event_2{event, response};
+            (*this)(event_2, user_id, order_id);
+          };
           OrderUpdate{shared_, stream_id_, account_.name}(order_id, cancel_order, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
-          .request_status = status,
+          .request_status = request_status,
           .error = error,
           .text = text,
           .version = version,
@@ -510,6 +585,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
+      log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
