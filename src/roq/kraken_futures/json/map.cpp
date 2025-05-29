@@ -156,6 +156,98 @@ std::optional<roq::Side> Map<kraken_futures::json::Side>::helper() const {
   return Helper{args_};
 }
 
+// kraken_futures::json::Status => roq::Error
+
+template <>
+template <>
+constexpr Helper<kraken_futures::json::Status>::operator std::optional<roq::Error>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken_futures::json::Status::type_t;
+    case UNDEFINED_INTERNAL:
+      return Error::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return Error::UNDEFINED;
+    case PLACED:
+      return Error::UNDEFINED;
+    case EDITED:
+      return Error::UNDEFINED;
+    case FILLED:
+      return Error::UNDEFINED;
+    case CANCELLED:
+      return Error::UNDEFINED;
+    case NO_ORDERS_TO_CANCEL:
+      return Error::UNKNOWN;
+    case NOT_FOUND:
+      return Error::UNKNOWN_ORDER_ID;
+    case INVALID_ORDER_TYPE:
+      return Error::INVALID_ORDER_TYPE;
+    case INVALID_SIDE:
+      return Error::INVALID_SIDE;
+    case INVALID_PRICE:
+      return Error::INVALID_PRICE;
+    case INSUFFICIENT_AVAILABLE_FUNDS:
+      return Error::INSUFFICIENT_FUNDS;
+    case SELF_FILL:
+      return Error::UNKNOWN;
+    case TOO_MANY_SMALL_ORDERS:
+      return Error::UNKNOWN;
+    case MAX_POSITION_VIOLATION:
+      return Error::UNKNOWN;
+    case MARKET_SUSPENDED:
+      return Error::UNKNOWN;
+    case MARKET_INACTIVE:
+      return Error::UNKNOWN;
+    case CLIENT_ORDER_ID_ALREADY_EXIST:
+      return Error::UNKNOWN;
+    case CLIENT_ORDER_ID_TOO_LONG:
+      return Error::UNKNOWN;
+    case OUTSIDE_PRICE_COLLAR:
+      return Error::UNKNOWN;
+    case POST_WOULD_EXECUTE:
+      return Error::UNKNOWN;
+    case IOC_WOULD_NOT_EXECUTE:
+      return Error::UNKNOWN;
+    case WOULD_CAUSE_LIQUIDATION:
+      return Error::UNKNOWN;
+    case WOULD_NOT_REDUCE_POSITION:
+      return Error::UNKNOWN;
+    case ORDER_FOR_EDIT_NOT_FOUND:
+      return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::UNDEFINED_INTERNAL}} == roq::Error::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::PLACED}} == roq::Error::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::EDITED}} == roq::Error::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::FILLED}} == roq::Error::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::CANCELLED}} == roq::Error::UNDEFINED);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::NO_ORDERS_TO_CANCEL}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::NOT_FOUND}} == roq::Error::UNKNOWN_ORDER_ID);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::INVALID_ORDER_TYPE}} == roq::Error::INVALID_ORDER_TYPE);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::INVALID_SIDE}} == roq::Error::INVALID_SIDE);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::INVALID_PRICE}} == roq::Error::INVALID_PRICE);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::INSUFFICIENT_AVAILABLE_FUNDS}} == roq::Error::INSUFFICIENT_FUNDS);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::SELF_FILL}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::TOO_MANY_SMALL_ORDERS}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::MAX_POSITION_VIOLATION}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::MARKET_SUSPENDED}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::MARKET_INACTIVE}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::CLIENT_ORDER_ID_ALREADY_EXIST}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::CLIENT_ORDER_ID_TOO_LONG}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::OUTSIDE_PRICE_COLLAR}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::POST_WOULD_EXECUTE}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::IOC_WOULD_NOT_EXECUTE}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::WOULD_CAUSE_LIQUIDATION}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::WOULD_NOT_REDUCE_POSITION}} == roq::Error::UNKNOWN);
+static_assert(Helper{kraken_futures::json::Status{kraken_futures::json::Status::ORDER_FOR_EDIT_NOT_FOUND}} == roq::Error::TOO_LATE_TO_MODIFY_OR_CANCEL);
+
+template <>
+template <>
+std::optional<roq::Error> Map<kraken_futures::json::Status>::helper() const {
+  return Helper{args_};
+}
+
 // roq => kraken_futures::json
 
 // roq::Side => kraken_futures::json::Side

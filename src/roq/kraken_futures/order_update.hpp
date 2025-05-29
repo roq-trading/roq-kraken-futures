@@ -47,10 +47,10 @@ struct OrderUpdate final {
       case NO_ORDERS_TO_CANCEL:  // ???
       case NOT_FOUND:            // ???
       case ORDER_FOR_EDIT_NOT_FOUND:
-        reject(Error::UNKNOWN, send_status.status.as_raw_text());
+        reject(map(send_status.status), send_status.status.as_raw_text());
         break;
       case CANCELLED:  // XXX FIXME TODO possible ???
-        reject(Error::UNKNOWN, send_status.status.as_raw_text());
+        reject(map(send_status.status), send_status.status.as_raw_text());
         break;
       case INVALID_ORDER_TYPE:
       case INVALID_SIDE:
@@ -67,11 +67,9 @@ struct OrderUpdate final {
       case POST_WOULD_EXECUTE:
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION: {
-        std::string_view const text{send_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
+      case WOULD_NOT_REDUCE_POSITION:
+        reject(map(send_status.status), send_status.status.as_raw_text());
         break;
-      }
       case PLACED:
         process_order(send_status, json::OrderEventType::PLACE, accept);
         break;
@@ -91,10 +89,10 @@ struct OrderUpdate final {
       case UNKNOWN_INTERNAL:
       case PLACED:
       case NO_ORDERS_TO_CANCEL:
-        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status.as_raw_text()};
+        reject(map(edit_status.status), edit_status.status.as_raw_text());
         break;
       case CANCELLED:  // XXX FIXME TODO possible ???
-        throw RuntimeError{"Unexpected: status={}"sv, edit_status.status.as_raw_text()};
+        reject(map(edit_status.status), edit_status.status.as_raw_text());
         break;
       case NOT_FOUND:
       case INVALID_ORDER_TYPE:
@@ -113,11 +111,9 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
-      case ORDER_FOR_EDIT_NOT_FOUND: {
-        std::string_view const text{edit_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
+      case ORDER_FOR_EDIT_NOT_FOUND:
+        reject(map(edit_status.status), edit_status.status.as_raw_text());
         break;
-      }
       case EDITED:
         process_order(edit_status, json::OrderEventType::EDIT, accept);
         break;
@@ -138,7 +134,7 @@ struct OrderUpdate final {
       case PLACED:
       case EDITED:
       case ORDER_FOR_EDIT_NOT_FOUND:
-        reject(Error::UNKNOWN, cancel_status.status.as_raw_text());
+        reject(map(cancel_status.status), cancel_status.status.as_raw_text());
         break;
       case NO_ORDERS_TO_CANCEL:  // XXX FIXME TODO what does this really mean ???
       case INVALID_ORDER_TYPE:
@@ -157,11 +153,9 @@ struct OrderUpdate final {
       case IOC_WOULD_NOT_EXECUTE:
       case WOULD_CAUSE_LIQUIDATION:
       case WOULD_NOT_REDUCE_POSITION:
-      case NOT_FOUND: {
-        std::string_view const text{cancel_status.status.as_raw_text()};
-        reject(Error::UNKNOWN, text);
+      case NOT_FOUND:
+        reject(map(cancel_status.status), cancel_status.status.as_raw_text());
         break;
-      }
       case CANCELLED:
         process_order(cancel_status, json::OrderEventType::CANCEL, accept);
         break;
