@@ -365,7 +365,8 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
-    OrderUpdate{shared_, stream_id_, account_.name}(open_orders_snapshot, trace_info);
+    log::warn("DEBUG open_orders_snapshot={}"sv, open_orders_snapshot);
+    OrderUpdate{shared_, stream_id_, account_.name}(event);
   });
 }
 
@@ -374,7 +375,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
     log::warn("DEBUG open_orders={}"sv, open_orders);
-    OrderUpdate{shared_, stream_id_, account_.name}(open_orders, trace_info);
+    OrderUpdate{shared_, stream_id_, account_.name}(event);
   });
 }
 
@@ -394,8 +395,8 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .price = item.price,
           .liquidity = map(item.fill_type),
           .quote_quantity = NaN,
-          .commission_quantity = NaN,
-          .commission_currency = {},
+          .commission_quantity = item.fee_paid,
+          .commission_currency = item.fee_currency,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
@@ -433,8 +434,8 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     // XXX HANS should emplace_back and try to group by order_id
     for (auto &item : fills.fills) {
       auto symbol = std::string{item.instrument};
-      fill_symbols_.try_emplace(symbol);  // note!
       std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+      fill_symbols_.try_emplace(symbol);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{
           .external_trade_id = item.fill_id,
@@ -442,8 +443,8 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .price = item.price,
           .liquidity = map(item.fill_type),
           .quote_quantity = NaN,
-          .commission_quantity = NaN,
-          .commission_currency = {},
+          .commission_quantity = item.fee_paid,
+          .commission_currency = item.fee_currency,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,

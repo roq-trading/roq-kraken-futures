@@ -28,12 +28,13 @@ namespace roq {
 namespace kraken_futures {
 
 struct OrderUpdate final {
-  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_(shared), stream_id_(stream_id), account_(account) {}
+  explicit OrderUpdate(Shared &shared, uint16_t stream_id, std::string_view const &account) : shared_{shared}, stream_id_{stream_id}, account_{account} {}
 
+  OrderUpdate(OrderUpdate &&) = default;
   OrderUpdate(OrderUpdate const &) = delete;
 
-  void operator()(json::OpenOrdersSnapshot const &, TraceInfo const &);
-  void operator()(json::OpenOrders const &, TraceInfo const &);
+  void operator()(Trace<json::OpenOrdersSnapshot> const &);
+  void operator()(Trace<json::OpenOrders> const &);
 
   template <typename Accept, typename Reject>
   void operator()([[maybe_unused]] uint64_t order_id, json::SendOrder const &send_order, Accept accept, Reject reject) {
@@ -41,41 +42,15 @@ struct OrderUpdate final {
     auto &send_status = send_order.send_status;
     switch (send_status.status) {
       using enum json::Status::type_t;
-      case UNDEFINED_INTERNAL:
-      case UNKNOWN_INTERNAL:
-      case EDITED:
-      case NO_ORDERS_TO_CANCEL:  // ???
-      case NOT_FOUND:            // ???
-      case ORDER_FOR_EDIT_NOT_FOUND:
-        reject(map(send_status.status), send_status.status.as_raw_text());
-        break;
-      case CANCELLED:  // XXX FIXME TODO possible ???
-        reject(map(send_status.status), send_status.status.as_raw_text());
-        break;
-      case INVALID_ORDER_TYPE:
-      case INVALID_SIDE:
-      case INVALID_PRICE:
-      case INSUFFICIENT_AVAILABLE_FUNDS:
-      case SELF_FILL:
-      case TOO_MANY_SMALL_ORDERS:
-      case MAX_POSITION_VIOLATION:
-      case MARKET_SUSPENDED:
-      case MARKET_INACTIVE:
-      case CLIENT_ORDER_ID_ALREADY_EXIST:
-      case CLIENT_ORDER_ID_TOO_LONG:
-      case OUTSIDE_PRICE_COLLAR:
-      case POST_WOULD_EXECUTE:
-      case IOC_WOULD_NOT_EXECUTE:
-      case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-        reject(map(send_status.status), send_status.status.as_raw_text());
-        break;
       case PLACED:
         process_order(send_status, json::OrderEventType::PLACE, accept);
         break;
+      case PARTIALLY_FILLED:  // note! have not seen this during testing, but found this enum in the docs
       case FILLED:
         process_execution(send_status, accept);
         break;
+      default:
+        reject(map(send_status.status), send_status.status.as_raw_text());
     }
   }
 
@@ -85,41 +60,15 @@ struct OrderUpdate final {
     auto &edit_status = edit_order.edit_status;
     switch (edit_status.status) {
       using enum json::Status::type_t;
-      case UNDEFINED_INTERNAL:
-      case UNKNOWN_INTERNAL:
-      case PLACED:
-      case NO_ORDERS_TO_CANCEL:
-        reject(map(edit_status.status), edit_status.status.as_raw_text());
-        break;
-      case CANCELLED:  // XXX FIXME TODO possible ???
-        reject(map(edit_status.status), edit_status.status.as_raw_text());
-        break;
-      case NOT_FOUND:
-      case INVALID_ORDER_TYPE:
-      case INVALID_SIDE:
-      case INVALID_PRICE:
-      case INSUFFICIENT_AVAILABLE_FUNDS:
-      case SELF_FILL:
-      case TOO_MANY_SMALL_ORDERS:
-      case MAX_POSITION_VIOLATION:
-      case MARKET_SUSPENDED:
-      case MARKET_INACTIVE:
-      case CLIENT_ORDER_ID_ALREADY_EXIST:
-      case CLIENT_ORDER_ID_TOO_LONG:
-      case OUTSIDE_PRICE_COLLAR:
-      case POST_WOULD_EXECUTE:
-      case IOC_WOULD_NOT_EXECUTE:
-      case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-      case ORDER_FOR_EDIT_NOT_FOUND:
-        reject(map(edit_status.status), edit_status.status.as_raw_text());
-        break;
       case EDITED:
         process_order(edit_status, json::OrderEventType::EDIT, accept);
         break;
       case FILLED:
+      case PARTIALLY_FILLED:
         process_execution(edit_status, accept);
         break;
+      default:
+        reject(map(edit_status.status), edit_status.status.as_raw_text());
     }
   }
 
@@ -129,38 +78,15 @@ struct OrderUpdate final {
     auto &cancel_status = cancel_order.cancel_status;
     switch (cancel_status.status) {
       using enum json::Status::type_t;
-      case UNDEFINED_INTERNAL:
-      case UNKNOWN_INTERNAL:
-      case PLACED:
-      case EDITED:
-      case ORDER_FOR_EDIT_NOT_FOUND:
-        reject(map(cancel_status.status), cancel_status.status.as_raw_text());
-        break;
-      case NO_ORDERS_TO_CANCEL:  // XXX FIXME TODO what does this really mean ???
-      case INVALID_ORDER_TYPE:
-      case INVALID_SIDE:
-      case INVALID_PRICE:
-      case INSUFFICIENT_AVAILABLE_FUNDS:
-      case SELF_FILL:
-      case TOO_MANY_SMALL_ORDERS:
-      case MAX_POSITION_VIOLATION:
-      case MARKET_SUSPENDED:
-      case MARKET_INACTIVE:
-      case CLIENT_ORDER_ID_ALREADY_EXIST:
-      case CLIENT_ORDER_ID_TOO_LONG:
-      case OUTSIDE_PRICE_COLLAR:
-      case POST_WOULD_EXECUTE:
-      case IOC_WOULD_NOT_EXECUTE:
-      case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-      case NOT_FOUND:
-        reject(map(cancel_status.status), cancel_status.status.as_raw_text());
-        break;
       case CANCELLED:
         process_order(cancel_status, json::OrderEventType::CANCEL, accept);
         break;
-      case FILLED:  // XXX FIXME TODO is this actually possible ???
+      case PARTIALLY_FILLED:
+      case FILLED:
         process_execution(cancel_status, accept);
+        break;
+      default:
+        reject(map(cancel_status.status), cancel_status.status.as_raw_text());
         break;
     }
   }
@@ -174,66 +100,6 @@ struct OrderUpdate final {
       bool is_cancel,
       TraceInfo const &,
       bool is_download);
-
-  Side compute_side(int32_t direction) {
-    switch (direction) {
-      case -1:
-        break;
-      case 0:
-        return Side::BUY;
-      case 1:
-        return Side::SELL;
-      default:
-        break;
-    }
-    return {};
-  }
-
-  OrderStatus compute_order_status(json::Status status) {
-    switch (status) {
-      using enum json::Status::type_t;
-      case UNDEFINED_INTERNAL:
-      case UNKNOWN_INTERNAL:
-        break;
-      case PLACED:
-        return OrderStatus::WORKING;
-      case EDITED:
-        return OrderStatus::WORKING;
-      case FILLED:
-        return OrderStatus::COMPLETED;
-      case CANCELLED:
-        return OrderStatus::CANCELED;
-      case NO_ORDERS_TO_CANCEL:
-      case NOT_FOUND:
-        break;
-      case INVALID_ORDER_TYPE:
-      case INVALID_SIDE:
-      case INVALID_PRICE:
-      case INSUFFICIENT_AVAILABLE_FUNDS:
-      case SELF_FILL:
-      case TOO_MANY_SMALL_ORDERS:
-      case MAX_POSITION_VIOLATION:
-      case MARKET_SUSPENDED:
-      case MARKET_INACTIVE:
-      case CLIENT_ORDER_ID_ALREADY_EXIST:
-      case CLIENT_ORDER_ID_TOO_LONG:
-      case OUTSIDE_PRICE_COLLAR:
-      case POST_WOULD_EXECUTE:
-      case IOC_WOULD_NOT_EXECUTE:
-      case WOULD_CAUSE_LIQUIDATION:
-      case WOULD_NOT_REDUCE_POSITION:
-      case ORDER_FOR_EDIT_NOT_FOUND:
-        return OrderStatus::REJECTED;
-    }
-    return {};
-  }
-
-  OrderStatus compute_order_status(json::Status status, double remaining_quantity) {
-    if (utils::is_zero(remaining_quantity)) {
-      return OrderStatus::COMPLETED;
-    }
-    return compute_order_status(status);
-  }
 
   template <typename Callback>
   void process_order(auto &request_status, auto expected_event_type, Callback callback) {
@@ -362,6 +228,13 @@ struct OrderUpdate final {
         .sending_time_utc = {},
     };
     callback(std::as_const(order_update));  // XXX FIXME TODO include the fills
+  }
+
+  static OrderStatus compute_order_status(json::Status status, double remaining_quantity) {
+    if (utils::is_zero(remaining_quantity)) {
+      return OrderStatus::COMPLETED;
+    }
+    return map(status);
   }
 
  private:

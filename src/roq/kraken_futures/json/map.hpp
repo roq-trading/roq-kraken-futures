@@ -5,11 +5,13 @@
 #include "roq/kraken_futures/json/fill_type.hpp"
 #include "roq/kraken_futures/json/order_event_order_type.hpp"
 #include "roq/kraken_futures/json/order_type.hpp"
+#include "roq/kraken_futures/json/reason.hpp"
 #include "roq/kraken_futures/json/side.hpp"
 #include "roq/kraken_futures/json/status.hpp"
 
 #include "roq/error.hpp"
 #include "roq/liquidity.hpp"
+#include "roq/order_status.hpp"
 #include "roq/order_type.hpp"
 #include "roq/side.hpp"
 
@@ -31,11 +33,19 @@ std::optional<OrderType> Map<kraken_futures::json::OrderType>::helper() const;
 
 template <>
 template <>
+std::optional<OrderStatus> Map<kraken_futures::json::Reason>::helper() const;
+
+template <>
+template <>
 std::optional<Side> Map<kraken_futures::json::Side>::helper() const;
 
 template <>
 template <>
 std::optional<Error> Map<kraken_futures::json::Status>::helper() const;
+
+template <>
+template <>
+std::optional<OrderStatus> Map<kraken_futures::json::Status>::helper() const;
 
 // ===
 

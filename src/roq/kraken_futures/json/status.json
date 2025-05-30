@@ -6,7 +6,7 @@
       "name": "placed"
     },
     {
-      "name": "edited"
+      "name": "partiallyFilled"
     },
     {
       "name": "filled"
@@ -15,31 +15,7 @@
       "name": "cancelled"
     },
     {
-      "name": "noOrdersToCancel"
-    },
-    {
-      "name": "notFound"
-    },
-    {
-      "name": "invalidOrderType"
-    },
-    {
-      "name": "invalidSide"
-    },
-    {
-      "name": "invalidPrice"
-    },
-    {
-      "name": "insufficientAvailableFunds"
-    },
-    {
-      "name": "selfFill"
-    },
-    {
-      "name": "tooManySmallOrders"
-    },
-    {
-      "name": "maxPositionViolation"
+      "name": "edited"
     },
     {
       "name": "marketSuspended"
@@ -48,13 +24,43 @@
       "name": "marketInactive"
     },
     {
+      "name": "invalidPrice"
+    },
+    {
+      "name": "invalidSize"
+    },
+    {
+      "name": "tooManySmallOrders"
+    },
+    {
+      "name": "insufficientAvailableFunds"
+    },
+    {
+      "name": "wouldCauseLiquidation"
+    },
+    {
       "name": "clientOrderIdAlreadyExist"
     },
     {
-      "name": "clientOrderIdTooLong"
+      "name": "clientOrderIdTooBig"
+    },
+    {
+      "name": "maxPositionViolation"
     },
     {
       "name": "outsidePriceCollar"
+    },
+    {
+      "name": "wouldIncreasePriceDislocation"
+    },
+    {
+      "name": "notFound"
+    },
+    {
+      "name": "orderForEditNotAStop"
+    },
+    {
+      "name": "orderForEditNotFound"
     },
     {
       "name": "postWouldExecute"
@@ -63,13 +69,44 @@
       "name": "iocWouldNotExecute"
     },
     {
-      "name": "wouldCauseLiquidation"
+      "name": "selfFill"
     },
     {
       "name": "wouldNotReducePosition"
     },
     {
-      "name": "orderForEditNotFound"
+      "name": "marketIsPostOnly"
+    },
+    {
+      "name": "tooManyOrders"
+    },
+    {
+      "name": "fixedLeverageTooHigh"
+    },
+    {
+      "name": "clientOrderIdInvalid"
+    },
+    {
+      "name": "cannotEditTriggerPriceOfTrailingStop"
+    },
+    {
+      "name": "cannotEditLimitPriceOfTrailingStop"
+    },
+    {
+      "name": "wouldProcessAfterSpecifiedTime"
+    },
+    {
+      "name": "noOrdersToCancel",
+      "comment": "cancel all"
+    },
+    {
+      "name": "invalidOrderType"
+    },
+    {
+      "name": "invalidSide"
+    },
+    {
+      "name": "clientOrderIdTooLong"
     }
   ]
 }

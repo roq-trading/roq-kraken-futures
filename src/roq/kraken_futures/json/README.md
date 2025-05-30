@@ -1,3 +1,7 @@
+reason ==> uppercase ???
+
+---
+
 Not much consistency... for example:
 Trade updates have orderType in {l,m} and side in {b,s}
 ownTrades have ordertype in {limit, market} and type in {buy, sell}
