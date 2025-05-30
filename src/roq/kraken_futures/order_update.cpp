@@ -33,12 +33,12 @@ auto compute_side(int32_t direction) -> Side {
   return {};
 }
 
-OrderStatus compute_order_status_2(json::Reason reason, bool is_cancel, double quantity, double filled) {
+auto compute_order_status_2(json::Reason reason, bool is_cancel, double remaining_quantity) -> OrderStatus {
   auto result = map(reason).template get<OrderStatus>();
   if (result != OrderStatus{}) {
     return result;
   }
-  if (utils::is_equal(quantity, filled)) {  // XXX FIXME TODO is this correct?? (quantity is normally *remaining*)
+  if (utils::is_zero(remaining_quantity)) {
     return OrderStatus::COMPLETED;
   }
   if (is_cancel) {
@@ -84,7 +84,8 @@ void OrderUpdate::operator()(
     TraceInfo const &trace_info,
     bool is_download) {
   auto side = compute_side(order.direction);
-  auto order_status = compute_order_status_2(reason, is_cancel, order.qty, order.filled);
+  auto order_status = compute_order_status_2(reason, is_cancel, order.qty);
+  auto quantity = order.qty + order.filled;
   auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
   auto order_update = server::oms::OrderUpdate{
       .account = account_,
@@ -97,15 +98,15 @@ void OrderUpdate::operator()(
       .order_type = map(order.type),
       .time_in_force = {},
       .execution_instructions = {},
-      .create_time_utc = {},
+      .create_time_utc = order.time,
       .update_time_utc = order.last_update_time,
       .external_account = {},
       .external_order_id = order.order_id,
-      .client_order_id = {},
+      .client_order_id = cli_ord_id,
       .order_status = order_status,
-      .quantity = NaN,  // note!
+      .quantity = quantity,  // note!
       .price = order.limit_price,
-      .stop_price = NaN,
+      .stop_price = order.stop_price,
       .remaining_quantity = order.qty,  // note!
       .traded_quantity = order.filled,
       .average_traded_price = NaN,
@@ -119,6 +120,7 @@ void OrderUpdate::operator()(
       .update_type = update_type,
       .sending_time_utc = {},
   };
+  log::warn("DEBUG order_update={}"sv, order_update);
   auto request_id = cli_ord_id;
   if (shared_.update_order(request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
