@@ -1,3 +1,28 @@
+aggressive requests => no open_orders update !!!
+
+create:
+
+W0530 08:54:29.715177 1587541 L0 drop_copy.cpp:433] DEBUG fills={feed=FILLS, username="cc34f46b-bc3b-47a2-a7fa-e19e34e376f0", fills=[{instrument="PF_SOLUSD", time=1748588069690ms, price=162.85, seq=67, buy=true, qty=1, order_id="9f087d13-42e9-454e-8ab8-6c40efa1bc4e", cli_ord_id="vwAF9AoUCB4AAQAAAAAA", fill_id="354c844c-b4b4-4de5-84be-7cb9ea80bcf0", fill_type=TAKER, fee_paid=0.08142500000000003, fee_currency="USD", taker_order_type="lmt", remaining_order_qty=0, order_type="lmt"}]}
+W0530 08:54:29.719277 1587541 L0 order_entry.cpp:262] DEBUG body="{"result":"success","sendStatus":{"cliOrdId":"vwAF9AoUCB4AAQAAAAAA","status":"placed","receivedTime":"2025-05-30T06:54:29.690657Z","orderEvents":[{"executionId":"354c844c-b4b4-4de5-84be-7cb9ea80bcf0","price":162.85,"amount":1,"orderPriorEdit":null,"orderPriorExecution":{"orderId":"9f087d13-42e9-454e-8ab8-6c40efa1bc4e","cliOrdId":"vwAF9AoUCB4AAQAAAAAA","type":"lmt","symbol":"PF_SOLUSD","side":"buy","quantity":1,"filled":0,"limitPrice":163.00,"reduceOnly":false,"timestamp":"2025-05-30T06:54:29.690Z","lastUpdateTimestamp":"2025-05-30T06:54:29.690Z"},"takerReducedQuantity":null,"type":"EXECUTION"}],"order_id":"9f087d13-42e9-454e-8ab8-6c40efa1bc4e"},"serverTime":"2025-05-30T06:54:29.691Z"}"
+
+modify:
+
+W0530 09:01:53.852924 1587541 L0 order_entry.cpp:385] DEBUG body="{"result":"success","serverTime":"2025-05-30T07:01:53.827Z","editStatus":{"status":"filled","orderId":"9f087d6c-5696-4a84-8ae3-afe319bb1759","receivedTime":"2025-05-30T07:01:53.827Z","orderEvents":[{"executionId":"7f28d250-4d68-4773-847e-125f4f9f56d7","price":163.6300000000,"amount":1,"orderPriorEdit":{"orderId":"9f087d6c-5696-4a84-8ae3-afe319bb1759","cliOrdId":"vgAF9QoUCB4AAQAAAAAA","type":"lmt","symbol":"PF_SOLUSD","side":"sell","quantity":1,"filled":0,"limitPrice":165.00,"reduceOnly":false,"timestamp":"2025-05-30T06:55:28.068Z","lastUpdateTimestamp":"2025-05-30T06:55:28.068Z"},"orderPriorExecution":{"orderId":"9f087d6c-5696-4a84-8ae3-afe319bb1759","cliOrdId":"vgAF9QoUCB4AAQAAAAAA","type":"lmt","symbol":"PF_SOLUSD","side":"sell","quantity":1,"filled":0,"limitPrice":163.50,"reduceOnly":false,"timestamp":"2025-05-30T06:55:28.068Z","lastUpdateTimestamp":"2025-05-30T07:01:53.815Z"},"takerReducedQuantity":null,"type":"EXECUTION"}]}}"
+W0530 09:01:53.877881 1587541 L0 drop_copy.cpp:433] DEBUG fills={feed=FILLS, username="cc34f46b-bc3b-47a2-a7fa-e19e34e376f0", fills=[{instrument="PF_SOLUSD", time=1748588513815ms, price=163.63, seq=68, buy=false, qty=1, order_id="9f087d6c-5696-4a84-8ae3-afe319bb1759", cli_ord_id="vgAF9QoUCB4AAQAAAAAA", fill_id="7f28d250-4d68-4773-847e-125f4f9f56d7", fill_type=TAKER, fee_paid=0.08181500000000001, fee_currency="USD", taker_order_type="lmt", remaining_order_qty=0, order_type="lmt"}]}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 W0528 14:16:31.340488 1135147 L0 drop_copy.cpp:376] DEBUG open_orders={feed=OPEN_ORDERS, order_id="", cli_ord_id="", order={instrument="PF_SOLUSD", time=1748434591319ms, last_update_time=1748434591319ms, qty=1, filled=0, limit_price=174.6, stop_price=0, type=LIMIT, order_id="9f04ea45-da4d-45a1-a40c-8ca38151ab03", cli_ord_id="pQAFV5WVrB0AAQAAAAAA", direction=1, reduce_only=false}, is_cancel=false, reason=NEW_PLACED_ORDER_BY_USER}
 W0528 14:16:31.343244 1135147 L0 order_entry.cpp:262] DEBUG body="{"result":"success","sendStatus":{"cliOrdId":"pQAFV5WVrB0AAQAAAAAA","status":"placed","receivedTime":"2025-05-28T12:16:31.319813Z","orderEvents":[{"order":{"orderId":"9f04ea45-da4d-45a1-a40c-8ca38151ab03","cliOrdId":"pQAFV5WVrB0AAQAAAAAA","type":"lmt","symbol":"PF_SOLUSD","side":"sell","quantity":1,"filled":0,"limitPrice":174.60,"reduceOnly":false,"timestamp":"2025-05-28T12:16:31.319Z","lastUpdateTimestamp":"2025-05-28T12:16:31.319Z"},"reducedQuantity":null,"type":"PLACE"}],"order_id":"9f04ea45-da4d-45a1-a40c-8ca38151ab03"},"serverTime":"2025-05-28T12:16:31.319Z"}"
 
