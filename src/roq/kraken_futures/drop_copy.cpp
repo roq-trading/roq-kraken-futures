@@ -305,6 +305,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
           .margin_mode = {},
           .balance = item.balance,
           .hold = NaN,
+          .borrowed = NaN,
           .external_account = account_balances_and_margins.account,
           .update_type = UpdateType::INCREMENTAL,
           .exchange_time_utc = {},

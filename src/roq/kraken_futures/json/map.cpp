@@ -111,6 +111,8 @@ constexpr Helper<kraken_futures::json::OrderType>::operator std::optional<roq::O
       return roq::OrderType::UNDEFINED;
     case LIMIT:
       return roq::OrderType::LIMIT;
+    case TAKE_PROFIT:
+      return roq::OrderType::UNDEFINED;
     case STOP:
       return roq::OrderType::LIMIT;  // XXX could also be market ???
   }
@@ -119,6 +121,7 @@ constexpr Helper<kraken_futures::json::OrderType>::operator std::optional<roq::O
 
 static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::UNDEFINED_INTERNAL}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
+static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::TAKE_PROFIT}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{kraken_futures::json::OrderType{kraken_futures::json::OrderType::STOP}} == roq::OrderType::LIMIT);
 
 template <>
