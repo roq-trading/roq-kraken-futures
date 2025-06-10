@@ -11,7 +11,6 @@ set(SOURCES
     gateway.cpp
     market_data.cpp
     order_entry.cpp
-    order_update.cpp
     rest.cpp
     settings.cpp
     shared.cpp

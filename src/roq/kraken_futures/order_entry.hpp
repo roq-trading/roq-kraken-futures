@@ -81,6 +81,31 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   void operator()(Trace<server::oms::OrderUpdate> const &, std::string_view const &client_order_id);
 
+  // helpers
+
+  template <typename Accept, typename Reject>
+  void process_send_order(auto &request_status, Accept, Reject);
+
+  template <typename Accept, typename Reject>
+  void process_edit_order(auto &request_status, Accept, Reject);
+
+  template <typename Accept, typename Reject>
+  void process_cancel_order(auto &request_status, Accept, Reject);
+
+  // helpers 2
+
+  template <typename Callback>
+  void process_place(auto &request_status, Callback);
+
+  template <typename Callback>
+  void process_edit(auto &request_status, Callback);
+
+  template <typename Callback>
+  void process_cancel(auto &request_status, Callback);
+
+  template <typename Callback>
+  void process_execution(auto &request_status, Callback);
+
  private:
   Handler &handler_;
   // config

@@ -16,8 +16,6 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/kraken_futures/order_update.hpp"
-
 #include "roq/kraken_futures/json/cancel_all_after_ack.hpp"
 #include "roq/kraken_futures/json/cancel_all_orders.hpp"
 #include "roq/kraken_futures/json/cancel_order.hpp"
@@ -92,6 +90,31 @@ struct create_metrics final : public utils::metrics::Factory {
 
 auto get_quality_of_service(auto &settings) {
   return settings.rest.allow_order_request_pipeline ? io::QualityOfService::IMMEDIATE : io::QualityOfService::CRITICAL;
+}
+
+auto compute_order_event_type(auto &order_events) {
+  if (std::empty(order_events)) {
+    throw RuntimeError{"Unexpected"sv};
+  }
+  json::OrderEventType result = json::OrderEventType::type_t{};
+  for (auto &item : order_events) {
+    if (result == json::OrderEventType::type_t{}) {
+      result = item.type;
+    } else if (item.type != result) {
+      throw RuntimeError{R"(Unexpected: type="{}")"sv, item};
+    }
+  }
+  if (result == json::OrderEventType::type_t{}) {
+    throw RuntimeError{"Unexpected"sv};
+  }
+  return result;
+}
+
+auto compute_order_status(auto status, auto remaining_quantity) {
+  if (utils::is_zero(remaining_quantity)) {
+    return OrderStatus::COMPLETED;
+  }
+  return map(status).template get<OrderStatus>();
 }
 }  // namespace
 
@@ -322,7 +345,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id);
           };
-          OrderUpdate{shared_, stream_id_, account_.name}(order_id, send_order, accept_handler, reject_handler);
+          process_send_order(send_order.send_status, accept_handler, reject_handler);
           break;
         }
       }
@@ -357,6 +380,7 @@ void OrderEntry::modify_order(
     }
     auto &[message_info, modify_order] = event;
     auto query = json::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
+    log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -445,7 +469,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id);
           };
-          OrderUpdate{shared_, stream_id_, account_.name}(order_id, edit_order, accept_handler, reject_handler);
+          process_edit_order(edit_order.edit_status, accept_handler, reject_handler);
           break;
         }
       }
@@ -568,7 +592,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
             Trace event_2{event, response};
             (*this)(event_2, user_id, order_id);
           };
-          OrderUpdate{shared_, stream_id_, account_.name}(order_id, cancel_order, accept_handler, reject_handler);
+          process_cancel_order(cancel_order.cancel_status, accept_handler, reject_handler);
           break;
         }
       }
@@ -799,6 +823,329 @@ void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::s
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
   }
+}
+
+// helpers
+
+template <typename Accept, typename Reject>
+void OrderEntry::process_send_order(auto &request_status, Accept accept, Reject reject) {
+  switch (request_status.status) {
+    using enum json::Status::type_t;
+    case PLACED:
+    case PARTIALLY_FILLED:  // note! have not seen this during testing, but found this enum in the docs
+    case FILLED: {
+      auto order_event_type = compute_order_event_type(request_status.order_events);
+      switch (order_event_type) {
+        using enum json::OrderEventType::type_t;
+        case UNDEFINED_INTERNAL:
+        case UNKNOWN_INTERNAL:
+          throw RuntimeError{"Unexpected"sv};
+        case PLACE:
+          process_place(request_status, accept);
+          break;
+        case EDIT:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};
+        case CANCEL:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};  // XXX FIXME TODO possible ???
+        case EXECUTION:
+          process_execution(request_status, accept);
+          break;
+        case REJECT:
+          reject(map(request_status.status), request_status.status.as_raw_text());
+          break;
+      }
+      break;
+    }
+    default:
+      reject(map(request_status.status), request_status.status.as_raw_text());
+  }
+}
+
+template <typename Accept, typename Reject>
+void OrderEntry::process_edit_order(auto &request_status, Accept accept, Reject reject) {
+  switch (request_status.status) {
+    using enum json::Status::type_t;
+    case EDITED:
+    case FILLED:
+    case PARTIALLY_FILLED: {
+      auto order_event_type = compute_order_event_type(request_status.order_events);
+      switch (order_event_type) {
+        using enum json::OrderEventType::type_t;
+        case UNDEFINED_INTERNAL:
+        case UNKNOWN_INTERNAL:
+          throw RuntimeError{"Unexpected"sv};
+        case PLACE:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};
+          break;
+        case EDIT:
+          process_edit(request_status, accept);
+          break;
+        case CANCEL:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};  // XXX FIXME TODO possible ???
+        case EXECUTION:
+          process_execution(request_status, accept);
+          break;
+        case REJECT:
+          reject(map(request_status.status), request_status.status.as_raw_text());
+          break;
+      }
+      break;
+    }
+    default:
+      reject(map(request_status.status), request_status.status.as_raw_text());
+  }
+}
+
+template <typename Accept, typename Reject>
+void OrderEntry::process_cancel_order(auto &request_status, Accept accept, Reject reject) {
+  switch (request_status.status) {
+    using enum json::Status::type_t;
+    case CANCELLED:
+    case PARTIALLY_FILLED:
+    case FILLED: {
+      auto order_event_type = compute_order_event_type(request_status.order_events);
+      switch (order_event_type) {
+        using enum json::OrderEventType::type_t;
+        case UNDEFINED_INTERNAL:
+        case UNKNOWN_INTERNAL:
+          throw RuntimeError{"Unexpected"sv};
+        case PLACE:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};
+        case EDIT:
+          throw RuntimeError{R"(Unexpected: type="{}")"sv, order_event_type};
+        case CANCEL:
+          process_edit(request_status, accept);
+          break;
+        case EXECUTION:
+          process_execution(request_status, accept);
+          break;
+        case REJECT:
+          reject(map(request_status.status), request_status.status.as_raw_text());
+          break;
+      }
+      break;
+    }
+    default:
+      reject(map(request_status.status), request_status.status.as_raw_text());
+      break;
+  }
+}
+
+// helpers 2
+
+template <typename Callback>
+void OrderEntry::process_place(auto &request_status, Callback callback) {
+  if (std::size(request_status.order_events) != 1) {
+    throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+  }
+  auto &order_event = request_status.order_events[0];
+  auto &order_ = order_event.order;
+  auto symbol = std::string{order_.symbol};
+  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+  auto remaining_quantity = order_.quantity;
+  auto traded_quantity = order_.filled;
+  auto quantity = remaining_quantity + traded_quantity;
+  auto order_status = compute_order_status(request_status.status, remaining_quantity);
+  auto order_update = server::oms::OrderUpdate{
+      .account = account_.name,
+      .exchange = {},
+      .symbol = symbol,
+      .side = map(order_.side),
+      .position_effect = {},
+      .margin_mode = {},
+      .max_show_quantity = NaN,
+      .order_type = map(order_.type),
+      .time_in_force = {},
+      .execution_instructions = {},
+      .create_time_utc = {},
+      .update_time_utc = request_status.received_time,
+      .external_account = {},
+      .external_order_id = request_status.order_id,
+      .client_order_id = {},
+      .order_status = order_status,
+      .quantity = quantity,         // note!
+      .price = order_.limit_price,  // note!
+      .stop_price = NaN,
+      .remaining_quantity = remaining_quantity,  // note!
+      .traded_quantity = traded_quantity,        // note!
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+      .update_type = {},
+      .sending_time_utc = {},
+  };
+  callback(std::as_const(order_update));
+}
+
+template <typename Callback>
+void OrderEntry::process_edit(auto &request_status, Callback callback) {
+  if (std::size(request_status.order_events) != 1) {
+    throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+  }
+  auto &order_event = request_status.order_events[0];
+  auto &order_ = order_event.order;
+  auto symbol = std::string{order_.symbol};
+  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+  auto remaining_quantity = order_.quantity;
+  auto traded_quantity = order_.filled;
+  auto quantity = remaining_quantity + traded_quantity;
+  auto order_status = compute_order_status(request_status.status, remaining_quantity);
+  auto order_update = server::oms::OrderUpdate{
+      .account = account_.name,
+      .exchange = {},
+      .symbol = symbol,
+      .side = map(order_.side),
+      .position_effect = {},
+      .margin_mode = {},
+      .max_show_quantity = NaN,
+      .order_type = map(order_.type),
+      .time_in_force = {},
+      .execution_instructions = {},
+      .create_time_utc = {},
+      .update_time_utc = request_status.received_time,
+      .external_account = {},
+      .external_order_id = request_status.order_id,
+      .client_order_id = {},
+      .order_status = order_status,
+      .quantity = quantity,         // note!
+      .price = order_.limit_price,  // note!
+      .stop_price = NaN,
+      .remaining_quantity = remaining_quantity,  // note!
+      .traded_quantity = traded_quantity,        // note!
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+      .update_type = {},
+      .sending_time_utc = {},
+  };
+  callback(std::as_const(order_update));
+}
+
+template <typename Callback>
+void OrderEntry::process_cancel(auto &request_status, Callback callback) {
+  if (std::size(request_status.order_events) != 1) {
+    throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+  }
+  auto &order_event = request_status.order_events[0];
+  auto &order_ = order_event.order;
+  auto symbol = std::string{order_.symbol};
+  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+  auto remaining_quantity = order_.quantity;
+  auto traded_quantity = order_.filled;
+  auto quantity = remaining_quantity + traded_quantity;
+  auto order_status = compute_order_status(request_status.status, remaining_quantity);
+  auto order_update = server::oms::OrderUpdate{
+      .account = account_.name,
+      .exchange = {},
+      .symbol = symbol,
+      .side = map(order_.side),
+      .position_effect = {},
+      .margin_mode = {},
+      .max_show_quantity = NaN,
+      .order_type = map(order_.type),
+      .time_in_force = {},
+      .execution_instructions = {},
+      .create_time_utc = {},
+      .update_time_utc = request_status.received_time,
+      .external_account = {},
+      .external_order_id = request_status.order_id,
+      .client_order_id = {},
+      .order_status = order_status,
+      .quantity = quantity,         // note!
+      .price = order_.limit_price,  // note!
+      .stop_price = NaN,
+      .remaining_quantity = remaining_quantity,  // note!
+      .traded_quantity = traded_quantity,        // note!
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+      .update_type = {},
+      .sending_time_utc = {},
+  };
+  callback(std::as_const(order_update));
+}
+
+template <typename Callback>
+void OrderEntry::process_execution(auto &request_status, Callback callback) {
+  if (std::empty(request_status.order_events)) {
+    throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
+  }
+  std::string symbol;
+  Side side = {};
+  double price = NaN;
+  double prior_quantity = NaN;
+  double prior_filled = NaN;
+  double last_traded_quantity = 0.0;
+  double sum_product = 0.0;
+  for (auto &order_event : request_status.order_events) {
+    if (order_event.type != json::OrderEventType::EXECUTION) {
+      throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
+    }
+    auto &order_prior_execution = order_event.order_prior_execution;
+    if (std::empty(symbol)) {
+      symbol = std::string{order_prior_execution.symbol};
+      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+    }
+    side = map(order_prior_execution.side);
+    price = order_prior_execution.limit_price;
+    prior_quantity = order_prior_execution.quantity;
+    prior_filled = order_prior_execution.filled;
+    last_traded_quantity += order_event.amount;
+    sum_product += order_event.amount * order_event.price;
+  }
+  auto last_traded_price = utils::is_zero(last_traded_quantity) ? NaN : (sum_product / last_traded_quantity);
+  auto remaining_quantity = prior_quantity - last_traded_quantity;  // ???
+  auto traded_quantity = prior_filled + last_traded_quantity;
+  auto order_status = compute_order_status(request_status.status, remaining_quantity);
+  auto order_update = server::oms::OrderUpdate{
+      .account = account_.name,
+      .exchange = {},
+      .symbol = symbol,
+      .side = side,
+      .position_effect = {},
+      .margin_mode = {},
+      .max_show_quantity = NaN,
+      .order_type = {},  // note! we can't infer order_type because they convert market orders into IOC limit orders
+      .time_in_force = {},
+      .execution_instructions = {},
+      .create_time_utc = {},
+      .update_time_utc = request_status.received_time,
+      .external_account = {},
+      .external_order_id = request_status.order_id,
+      .client_order_id = {},
+      .order_status = order_status,
+      .quantity = NaN,  // note!
+      .price = price,   // note!
+      .stop_price = NaN,
+      .remaining_quantity = remaining_quantity,  // note!
+      .traded_quantity = traded_quantity,        // note!
+      .average_traded_price = NaN,
+      .last_traded_quantity = last_traded_quantity,  // note!
+      .last_traded_price = last_traded_price,        // note!
+      .last_liquidity = Liquidity::TAKER,
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+      .update_type = {},
+      .sending_time_utc = {},
+  };
+  callback(std::as_const(order_update));  // XXX FIXME TODO include the fills
 }
 
 }  // namespace kraken_futures

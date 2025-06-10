@@ -806,3 +806,215 @@ cancel_order={
     },
     server_time=1748486382792ms}
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// market order
+
+send_order={
+    result=SUCCESS,
+    error="",
+    send_status={
+        order_id="9f1d0f41-b621-4c2c-a145-9f296de50eb9",
+        cli_ord_id="QQAFw3qNFiAAAQAAAAAA",
+        status=PLACED,
+        received_time=1749471588326ms,
+        order_events=[{
+            order={
+                order_id="",
+                cli_ord_id="",
+                type=UNDEFINED_INTERNAL,
+                symbol="",
+                side=UNDEFINED_INTERNAL,
+                quantity=nan,
+                filled=nan,
+                limit_price=nan,
+                reduce_only=false,
+                timestamp=0ms,
+                last_update_timestamp=0ms
+            },
+            old={
+                order_id="",
+                cli_ord_id="",
+                type=UNDEFINED_INTERNAL,
+                symbol="",
+                side=UNDEFINED_INTERNAL,
+                quantity=nan,
+                filled=nan,
+                limit_price=nan,
+                reduce_only=false,
+                timestamp=0ms,
+                last_update_timestamp=0ms
+            },
+            new_={
+                order_id="",
+                cli_ord_id="",
+                type=UNDEFINED_INTERNAL,
+                symbol="",
+                side=UNDEFINED_INTERNAL,
+                quantity=nan,
+                filled=nan,
+                limit_price=nan,
+                reduce_only=false,
+                timestamp=0ms,
+                last_update_timestamp=0ms
+            },
+            reduced_quantity=nan,
+            type=EXECUTION,
+            uid="",
+            reason="",
+            execution_id="9fb43174-7922-4e21-b9a8-5697ba90a4ae",
+            amount=1,
+            price=155.26,
+            order_prior_execution={
+                order_id="9f1d0f41-b621-4c2c-a145-9f296de50eb9",
+                cli_ord_id="QQAFw3qNFiAAAQAAAAAA",
+                type=IOC,
+                symbol="PF_SOLUSD",
+                side=BUY,
+                quantity=1,
+                filled=0,
+                limit_price=156.81,
+                reduce_only=false,
+                timestamp=1749471588326ms,
+                last_update_timestamp=1749471588326ms
+            },
+            order_prior_edit={
+                order_id="",
+                cli_ord_id="",
+                type=UNDEFINED_INTERNAL,
+                symbol="",
+                side=UNDEFINED_INTERNAL,
+                quantity=nan,
+                filled=nan,
+                limit_price=nan,
+                reduce_only=false,
+                timestamp=0ms,
+                last_update_timestamp=0ms
+            },
+            taker_reduced_quantity=nan
+        }
+        ]
+    },
+    server_time=1749471588327ms
+}
+
+
+
+{"result":"success",
+"serverTime":"2025-06-10T02:29:49.62Z",
+"editStatus":{"status":"edited",
+"orderId":"9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+"receivedTime":"2025-06-10T02:29:49.620Z",
+"orderEvents":[{"old":{"orderId":"9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+"cliOrdId":"6QAFU8UAHCAAAQAAAAAA",
+"type":"lmt",
+"symbol":"PF_SOLUSD",
+"side":"buy",
+"quantity":1,
+"filled":0,
+"limitPrice":102,
+"reduceOnly":false,
+"timestamp":"2025-06-09T14:48:11.207Z",
+"lastUpdateTimestamp":"2025-06-10T02:29:46.325Z"},
+"new":{"orderId":"9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+"cliOrdId":"6QAFU8UAHCAAAQAAAAAA",
+"type":"lmt",
+"symbol":"PF_SOLUSD",
+"side":"buy",
+"quantity":1,
+"filled":0,
+"limitPrice":100,
+"reduceOnly":false,
+"timestamp":"2025-06-09T14:48:11.207Z",
+"lastUpdateTimestamp":"2025-06-10T02:29:49.589Z"},
+"reducedQuantity":null,
+"type":"EDIT"}]}}
+
+
+edit_order={result=SUCCESS,
+error="",
+edit_status={order_id="9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+cli_ord_id="",
+status=EDITED,
+received_time=1749522589620ms,
+order_events=[{order={order_id="",
+cli_ord_id="",
+type=UNDEFINED_INTERNAL,
+symbol="",
+side=UNDEFINED_INTERNAL,
+quantity=nan,
+filled=nan,
+limit_price=nan,
+reduce_only=false,
+timestamp=0ms,
+last_update_timestamp=0ms},
+old={order_id="9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+cli_ord_id="6QAFU8UAHCAAAQAAAAAA",
+type=LMT,
+symbol="PF_SOLUSD",
+side=BUY,
+quantity=1,
+filled=0,
+limit_price=102,
+reduce_only=false,
+timestamp=1749480491207ms,
+last_update_timestamp=1749522586325ms},
+new_={order_id="9f1d4452-6df7-4488-8da5-000e2ce5d56e",
+cli_ord_id="6QAFU8UAHCAAAQAAAAAA",
+type=LMT,
+symbol="PF_SOLUSD",
+side=BUY,
+quantity=1,
+filled=0,
+limit_price=100,
+reduce_only=false,
+timestamp=1749480491207ms,
+last_update_timestamp=1749522589589ms},
+reduced_quantity=nan,
+type=EDIT,
+uid="",
+reason="",
+execution_id="",
+amount=nan,
+price=nan,
+order_prior_execution={order_id="",
+cli_ord_id="",
+type=UNDEFINED_INTERNAL,
+symbol="",
+side=UNDEFINED_INTERNAL,
+quantity=nan,
+filled=nan,
+limit_price=nan,
+reduce_only=false,
+timestamp=0ms,
+last_update_timestamp=0ms},
+order_prior_edit={order_id="",
+cli_ord_id="",
+type=UNDEFINED_INTERNAL,
+symbol="",
+side=UNDEFINED_INTERNAL,
+quantity=nan,
+filled=nan,
+limit_price=nan,
+reduce_only=false,
+timestamp=0ms,
+last_update_timestamp=0ms},
+taker_reduced_quantity=nan}]},
+server_time=1749522589620ms}

@@ -12,8 +12,6 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/kraken_futures/order_update.hpp"
-
 #include "roq/kraken_futures/json/map.hpp"
 
 using namespace std::literals;
@@ -70,6 +68,36 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
 struct create_metrics final : public utils::metrics::Factory {
   create_metrics(auto &settings, auto &group, auto const &function) : utils::metrics::Factory{settings.app.name, group, function} {}
 };
+
+// helpers
+
+auto compute_side(int32_t direction) -> Side {
+  switch (direction) {
+    case -1:
+      break;
+    case 0:
+      return Side::BUY;
+    case 1:
+      return Side::SELL;
+    default:
+      break;
+  }
+  return {};
+}
+
+auto compute_order_status(json::Reason reason, bool is_cancel, double remaining_quantity) -> OrderStatus {
+  auto result = map(reason).template get<OrderStatus>();
+  if (result != OrderStatus{}) {
+    return result;
+  }
+  if (utils::is_zero(remaining_quantity)) {
+    return OrderStatus::COMPLETED;
+  }
+  if (is_cancel) {
+    return OrderStatus::CANCELED;
+  }
+  return OrderStatus::WORKING;
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
@@ -367,7 +395,9 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
     log::warn("DEBUG open_orders_snapshot={}"sv, open_orders_snapshot);
-    OrderUpdate{shared_, stream_id_, account_.name}(event);
+    for (auto &order : open_orders_snapshot.orders) {
+      process_order(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
+    }
   });
 }
 
@@ -376,7 +406,20 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
     log::warn("DEBUG open_orders={}"sv, open_orders);
-    OrderUpdate{shared_, stream_id_, account_.name}(event);
+    auto &order = open_orders.order;
+    auto order_id = [&]() {
+      if (std::empty(open_orders.order_id)) {
+        return order.order_id;
+      }
+      return open_orders.order_id;
+    }();
+    auto cli_ord_id = [&]() {
+      if (std::empty(open_orders.cli_ord_id)) {
+        return order.cli_ord_id;
+      }
+      return open_orders.cli_ord_id;
+    }();
+    process_order(order, order_id, cli_ord_id, open_orders.reason, open_orders.is_cancel, trace_info, false);
   });
 }
 
@@ -482,6 +525,62 @@ void DropCopy::parse(std::string_view const &message) {
       log::warn(R"(Unexpected: message="{}")"sv, message);
     }
   });
+}
+
+// helpers
+
+void DropCopy::process_order(
+    auto &order,
+    [[maybe_unused]] std::string_view const &order_id,  // XXX FIXME TODO did we forget something ???
+    std::string_view const &cli_ord_id,
+    json::Reason reason,
+    bool is_cancel,
+    TraceInfo const &trace_info,
+    bool is_download) {
+  auto side = compute_side(order.direction);
+  auto order_status = compute_order_status(reason, is_cancel, order.qty);
+  auto quantity = order.qty + order.filled;
+  auto update_type = is_download ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL;
+  auto order_update = server::oms::OrderUpdate{
+      .account = account_.name,
+      .exchange = shared_.settings.exchange,
+      .symbol = order.instrument,
+      .side = side,
+      .position_effect = {},
+      .margin_mode = {},
+      .max_show_quantity = NaN,
+      .order_type = map(order.type),
+      .time_in_force = TimeInForce::GTC,  // note! assumption
+      .execution_instructions = {},
+      .create_time_utc = order.time,
+      .update_time_utc = order.last_update_time,
+      .external_account = {},
+      .external_order_id = order.order_id,
+      .client_order_id = cli_ord_id,
+      .order_status = order_status,
+      .quantity = quantity,  // note!
+      .price = order.limit_price,
+      .stop_price = order.stop_price,
+      .remaining_quantity = order.qty,  // note!
+      .traded_quantity = order.filled,
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .routing_id = {},
+      .max_request_version = {},
+      .max_response_version = {},
+      .max_accepted_version = {},
+      .update_type = update_type,
+      .sending_time_utc = {},
+  };
+  log::warn("DEBUG order_update={}"sv, order_update);
+  auto request_id = cli_ord_id;
+  if (shared_.update_order(request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+  } else {
+    log::warn("*** EXTERNAL ORDER ***"sv);
+    log::warn("order={}"sv, order);
+  }
 }
 
 }  // namespace kraken_futures

@@ -87,6 +87,11 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(Trace<json::FillsSnapshot> const &) override;
   void operator()(Trace<json::Fills> const &) override;
 
+  // helpers
+
+  void process_order(
+      auto &order, std::string_view const &order_id, std::string_view const &cli_ord_id, json::Reason, bool is_cancel, TraceInfo const &, bool is_download);
+
  private:
   void parse(std::string_view const &message);
 
