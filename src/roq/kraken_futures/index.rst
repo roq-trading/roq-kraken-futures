@@ -589,3 +589,7 @@ Comments
 * Some uncertainty around edit/cancel order and execution response
 
 * Statistics are using relative funding rates to be compatible with other exchanges
+
+* Aggressive orders may only report the fills on the WS channel (an open order never exists).
+  This is an issue because we can potentially lose the REST response and never be able to update the order status.
+  And artificial :code:`OrderUpdate` is therefore injected when receiving fills from the WS channel.

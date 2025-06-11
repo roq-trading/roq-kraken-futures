@@ -40,6 +40,7 @@ struct Shared final {
 
  public:
   std::vector<MBPUpdate> bids, asks;
+  std::vector<Fill> fills;
 
  private:
   server::Dispatcher &dispatcher_;

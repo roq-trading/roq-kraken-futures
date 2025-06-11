@@ -475,21 +475,59 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     auto &fills = event.value;
     log::info<2>("fills={}"sv, fills);
     log::warn("DEBUG fills={}"sv, fills);
-    // XXX HANS should emplace_back and try to group by order_id
-    for (auto &item : fills.fills) {
-      auto symbol = std::string{item.instrument};
-      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-      fill_symbols_.try_emplace(symbol);  // note!
-      auto side = item.buy ? Side::BUY : Side::SELL;
-      auto fill = Fill{
-          .external_trade_id = item.fill_id,
-          .quantity = item.qty,
-          .price = item.price,
-          .liquidity = map(item.fill_type),
-          .quote_quantity = NaN,
-          .commission_quantity = item.fee_paid,
-          .commission_currency = item.fee_currency,
-      };
+    std::string_view symbol, external_order_id, client_order_id;
+    Side side = {};
+    std::chrono::milliseconds update_time_utc = {};
+    double remaining_quantity = NaN;
+    auto dispatch = [&]() {
+      // note!
+      //   here we try to catch the situation where the REST response is lost and we never get a WS update because this order was never "open"
+      //   this is only the case for create order and that's why we must find the order and check for max_response_version == 0
+      //   an aggressive order modification will already have had an "open" order and it will correctly be reported as completed on this channel
+      if (!std::isnan(remaining_quantity) && utils::is_zero(remaining_quantity)) {
+        auto is_create = false;
+        shared_.find_order(client_order_id, [&](auto &order) { is_create = order.max_response_version == 0; });
+        if (is_create) {
+          auto order_update = server::oms::OrderUpdate{
+              .account = account_.name,
+              .exchange = shared_.settings.exchange,
+              .symbol = symbol,
+              .side = side,
+              .position_effect = {},
+              .margin_mode = {},
+              .max_show_quantity = NaN,
+              .order_type = {},
+              .time_in_force = {},
+              .execution_instructions = {},
+              .create_time_utc = {},
+              .update_time_utc = update_time_utc,
+              .external_account = {},
+              .external_order_id = external_order_id,
+              .client_order_id = client_order_id,
+              .order_status = OrderStatus::COMPLETED,
+              .quantity = NaN,
+              .price = NaN,
+              .stop_price = NaN,
+              .remaining_quantity = remaining_quantity,
+              .traded_quantity = NaN,
+              .average_traded_price = NaN,
+              .last_traded_quantity = NaN,
+              .last_traded_price = NaN,
+              .last_liquidity = {},
+              .routing_id = {},
+              .max_request_version = {},
+              .max_response_version = {},
+              .max_accepted_version = {},
+              .update_type = UpdateType::INCREMENTAL,
+              .sending_time_utc = {},
+          };
+          log::warn("DEBUG order_update={}"sv, order_update);
+          if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+          } else {
+            log::warn("*** EXTERNAL ORDER ***"sv);
+          }
+        }
+      }
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
           .account = account_.name,
@@ -500,19 +538,61 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .position_effect = {},
           .margin_mode = {},
           .quantity_type = {},
-          .create_time_utc = item.time,
-          .update_time_utc = item.time,
-          .external_account = fills.username,  // note! appears to be account
-          .external_order_id = item.order_id,
+          .create_time_utc = update_time_utc,
+          .update_time_utc = update_time_utc,
+          .external_account = {},
+          .external_order_id = external_order_id,
           .client_order_id = {},
-          .fills = {&fill, 1},
+          .fills = shared_.fills,
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = {},
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, client_order_id);
+    };
+    shared_.fills.clear();
+    for (auto &item : fills.fills) {
+      if (item.order_id != external_order_id) {
+        if (!std::empty(shared_.fills)) {
+          assert(!std::empty(symbol));
+          assert(!std::empty(client_order_id));
+          assert(side != Side{});
+          dispatch();
+        }
+        symbol = item.instrument;
+        external_order_id = item.order_id;
+        client_order_id = item.cli_ord_id;
+        side = item.buy ? Side::BUY : Side::SELL;  // note! assume the same
+        update_time_utc = {};
+        remaining_quantity = NaN;
+        shared_.fills.clear();
+        fill_symbols_.try_emplace(symbol);  // note!
+      }
+      update_time_utc = std::max(update_time_utc, item.time);
+      remaining_quantity = [&]() {
+        if (std::isnan(remaining_quantity)) {
+          return item.remaining_order_qty;
+        }
+        if (std::isnan(item.remaining_order_qty)) {
+          return remaining_quantity;
+        }
+        return std::min(remaining_quantity, item.remaining_order_qty);
+      }();
+      auto fill = Fill{
+          .external_trade_id = item.fill_id,
+          .quantity = item.qty,
+          .price = item.price,
+          .liquidity = map(item.fill_type),
+          .quote_quantity = NaN,
+          .commission_quantity = item.fee_paid,
+          .commission_currency = item.fee_currency,
+      };
+      shared_.fills.emplace_back(std::move(fill));
+    }
+    if (!std::empty(shared_.fills)) {
+      dispatch();
     }
   });
 }
