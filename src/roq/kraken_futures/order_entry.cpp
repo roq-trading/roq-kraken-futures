@@ -42,6 +42,7 @@ auto const SUPPORTS = Mask{
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
+    SupportType::ORDER,
 };
 }  // namespace
 
@@ -281,6 +282,22 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
 
 void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.create_order_ack([&]() {
+    auto dispatch = [&](auto origin, auto request_status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
+      auto response = server::oms::Response{
+          .request_type = RequestType::CREATE_ORDER,
+          .origin = origin,
+          .request_status = request_status,
+          .error = error,
+          .text = text,
+          .version = version,
+          .request_id = request_id,
+          .quantity = NaN,
+          .price = NaN,
+      };
+      log::warn("DEBUG response={}"sv, response);
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id, args...);
+    };
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::SendOrder send_order{body, decode_buffer_};
@@ -293,79 +310,22 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("send_order={}"sv, send_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR: {
-          auto response = server::oms::Response{
-              .request_type = RequestType::CREATE_ORDER,
-              .origin = Origin::EXCHANGE,
-              .request_status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,  // XXX FIXME TODO
-              .text = send_order.error,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          log::warn("DEBUG response={}"sv, response);
-          Trace event_2{event, response};
-          (*this)(event_2, user_id, order_id);
+        case ERROR:
+          dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, send_order.error, {});
           break;
-        }
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;  // note! could be missing
           auto accept_handler = [&](auto &order_update) {
             log::warn("DEBUG order_update={}"sv, order_update);
-            auto response = server::oms::Response{
-                .request_type = RequestType::CREATE_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::ACCEPTED,
-                .error = {},
-                .text = {},
-                .version = version,
-                .request_id = request_id,
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id, order_update);
+            dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto const &text) {
-            auto response = server::oms::Response{
-                .request_type = RequestType::CREATE_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::REJECTED,
-                .error = error,
-                .text = text,
-                .version = version,
-                .request_id = request_id,
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id);
-          };
+          auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
           process_send_order(send_order.send_status, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
-      auto response = server::oms::Response{
-          .request_type = RequestType::CREATE_ORDER,
-          .origin = origin,
-          .request_status = request_status,
-          .error = error,
-          .text = text,
-          .version = version,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      log::warn("DEBUG response={}"sv, response);
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
-    };
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
     process_response(event, handle_success, handle_error);
   });
 }
@@ -405,6 +365,22 @@ void OrderEntry::modify_order(
 
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
+    auto dispatch = [&](auto origin, auto request_status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
+      auto response = server::oms::Response{
+          .request_type = RequestType::MODIFY_ORDER,
+          .origin = origin,
+          .request_status = request_status,
+          .error = error,
+          .text = text,
+          .version = version,
+          .request_id = request_id,
+          .quantity = NaN,
+          .price = NaN,
+      };
+      log::warn("DEBUG response={}"sv, response);
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id, args...);
+    };
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::EditOrder edit_order{body, decode_buffer_};
@@ -417,79 +393,22 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("edit_order={}"sv, edit_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR: {
-          auto response = server::oms::Response{
-              .request_type = RequestType::MODIFY_ORDER,
-              .origin = Origin::EXCHANGE,
-              .request_status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,  // XXX FIXME TODO
-              .text = edit_order.error,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          log::warn("DEBUG response={}"sv, response);
-          Trace event_2{event, response};
-          (*this)(event_2, user_id, order_id);
+        case ERROR:
+          dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, edit_order.error, {});
           break;
-        }
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
             log::warn("DEBUG order_update={}"sv, order_update);
-            auto response = server::oms::Response{
-                .request_type = RequestType::MODIFY_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::ACCEPTED,
-                .error = {},
-                .text = {},
-                .version = version,
-                .request_id = request_id,
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id, order_update);
+            dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto const &text) {
-            auto response = server::oms::Response{
-                .request_type = RequestType::MODIFY_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::REJECTED,
-                .error = error,
-                .text = text,
-                .version = version,
-                .request_id = {},
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id);
-          };
+          auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
           process_edit_order(edit_order.edit_status, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
-      auto response = server::oms::Response{
-          .request_type = RequestType::MODIFY_ORDER,
-          .origin = origin,
-          .request_status = request_status,
-          .error = error,
-          .text = text,
-          .version = version,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      log::warn("DEBUG response={}"sv, response);
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
-    };
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
     process_response(event, handle_success, handle_error);
   });
 }
@@ -528,6 +447,22 @@ void OrderEntry::cancel_order(
 
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
+    auto dispatch = [&](auto origin, auto request_status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
+      auto response = server::oms::Response{
+          .request_type = RequestType::CANCEL_ORDER,
+          .origin = origin,
+          .request_status = request_status,
+          .error = error,
+          .text = text,
+          .version = version,
+          .request_id = request_id,
+          .quantity = NaN,
+          .price = NaN,
+      };
+      log::warn("DEBUG response={}"sv, response);
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id, args...);
+    };
     auto handle_success = [&](auto &body) {
       log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelOrder cancel_order{body, decode_buffer_};
@@ -540,79 +475,22 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           log::warn("cancel_order={}"sv, cancel_order);
           log::fatal("Unexpected"sv);
           break;
-        case ERROR: {
-          auto response = server::oms::Response{
-              .request_type = RequestType::CANCEL_ORDER,
-              .origin = Origin::EXCHANGE,
-              .request_status = RequestStatus::REJECTED,
-              .error = Error::UNKNOWN,  // XXX FIXME TODO
-              .text = cancel_order.error,
-              .version = version,
-              .request_id = {},
-              .quantity = NaN,
-              .price = NaN,
-          };
-          log::warn("DEBUG response={}"sv, response);
-          Trace event_2{event, response};
-          (*this)(event_2, user_id, order_id);
+        case ERROR:
+          dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, cancel_order.error, {});
           break;
-        }
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
             log::warn("DEBUG order_update={}"sv, order_update);
-            auto response = server::oms::Response{
-                .request_type = RequestType::CANCEL_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::ACCEPTED,
-                .error = {},
-                .text = {},
-                .version = version,
-                .request_id = request_id,
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id, order_update);
+            dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
-          auto reject_handler = [&](auto error, auto const &text) {
-            auto response = server::oms::Response{
-                .request_type = RequestType::CANCEL_ORDER,
-                .origin = Origin::EXCHANGE,
-                .request_status = RequestStatus::REJECTED,
-                .error = error,
-                .text = text,
-                .version = version,
-                .request_id = {},
-                .quantity = NaN,
-                .price = NaN,
-            };
-            log::warn("DEBUG response={}"sv, response);
-            Trace event_2{event, response};
-            (*this)(event_2, user_id, order_id);
-          };
+          auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
           process_cancel_order(cancel_order.cancel_status, accept_handler, reject_handler);
           break;
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) {
-      auto response = server::oms::Response{
-          .request_type = RequestType::CANCEL_ORDER,
-          .origin = origin,
-          .request_status = request_status,
-          .error = error,
-          .text = text,
-          .version = version,
-          .request_id = {},
-          .quantity = NaN,
-          .price = NaN,
-      };
-      log::warn("DEBUG response={}"sv, response);
-      Trace event_2{event, response};
-      (*this)(event_2, user_id, order_id);
-    };
+    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
     process_response(event, handle_success, handle_error);
   });
 }
