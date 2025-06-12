@@ -324,12 +324,10 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
     log::warn("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
-      auto currency = std::string{item.name};
-      std::ranges::transform(currency, std::begin(currency), ::toupper);
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = account_.name,
-          .currency = currency,
+          .currency = item.name,
           .margin_mode = {},
           .balance = item.balance,
           .hold = NaN,
@@ -429,9 +427,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
     auto &fills_snapshot = event.value;
     log::info<2>("fills_snapshot={}"sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
-      auto symbol = std::string{item.instrument};
-      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-      fill_symbols_.try_emplace(symbol);  // note!
+      fill_symbols_.try_emplace(item.instrument);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto fill = Fill{
           .external_trade_id = item.fill_id,
@@ -447,7 +443,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
-          .symbol = symbol,
+          .symbol = item.instrument,
           .side = side,
           .position_effect = {},
           .margin_mode = {},

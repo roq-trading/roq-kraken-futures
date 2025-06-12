@@ -939,22 +939,20 @@ void OrderEntry::process_place(auto &request_status, Callback callback) {
     throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
   }
   auto &order_event = request_status.order_events[0];
-  auto &order_ = order_event.order;
-  auto symbol = std::string{order_.symbol};
-  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-  auto remaining_quantity = order_.quantity;
-  auto traded_quantity = order_.filled;
+  auto &order = order_event.order;
+  auto remaining_quantity = order.quantity;
+  auto traded_quantity = order.filled;
   auto quantity = remaining_quantity + traded_quantity;
   auto order_status = compute_order_status(request_status.status, remaining_quantity);
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = {},
-      .symbol = symbol,
-      .side = map(order_.side),
+      .symbol = order.symbol,
+      .side = map(order.side),
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = map(order_.type),
+      .order_type = map(order.type),
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
@@ -963,8 +961,8 @@ void OrderEntry::process_place(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
-      .quantity = quantity,         // note!
-      .price = order_.limit_price,  // note!
+      .quantity = quantity,        // note!
+      .price = order.limit_price,  // note!
       .stop_price = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
@@ -988,22 +986,20 @@ void OrderEntry::process_edit(auto &request_status, Callback callback) {
     throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
   }
   auto &order_event = request_status.order_events[0];
-  auto &order_ = order_event.order;
-  auto symbol = std::string{order_.symbol};
-  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-  auto remaining_quantity = order_.quantity;
-  auto traded_quantity = order_.filled;
+  auto &order = order_event.order;
+  auto remaining_quantity = order.quantity;
+  auto traded_quantity = order.filled;
   auto quantity = remaining_quantity + traded_quantity;
   auto order_status = compute_order_status(request_status.status, remaining_quantity);
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = {},
-      .symbol = symbol,
-      .side = map(order_.side),
+      .symbol = order.symbol,
+      .side = map(order.side),
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = map(order_.type),
+      .order_type = map(order.type),
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
@@ -1012,8 +1008,8 @@ void OrderEntry::process_edit(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
-      .quantity = quantity,         // note!
-      .price = order_.limit_price,  // note!
+      .quantity = quantity,        // note!
+      .price = order.limit_price,  // note!
       .stop_price = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
@@ -1037,22 +1033,20 @@ void OrderEntry::process_cancel(auto &request_status, Callback callback) {
     throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
   }
   auto &order_event = request_status.order_events[0];
-  auto &order_ = order_event.order;
-  auto symbol = std::string{order_.symbol};
-  std::ranges::transform(symbol, std::begin(symbol), ::toupper);
-  auto remaining_quantity = order_.quantity;
-  auto traded_quantity = order_.filled;
+  auto &order = order_event.order;
+  auto remaining_quantity = order.quantity;
+  auto traded_quantity = order.filled;
   auto quantity = remaining_quantity + traded_quantity;
   auto order_status = compute_order_status(request_status.status, remaining_quantity);
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = {},
-      .symbol = symbol,
-      .side = map(order_.side),
+      .symbol = order.symbol,
+      .side = map(order.side),
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = map(order_.type),
+      .order_type = map(order.type),
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
@@ -1061,8 +1055,8 @@ void OrderEntry::process_cancel(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
-      .quantity = quantity,         // note!
-      .price = order_.limit_price,  // note!
+      .quantity = quantity,        // note!
+      .price = order.limit_price,  // note!
       .stop_price = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
@@ -1085,7 +1079,7 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
   if (std::empty(request_status.order_events)) {
     throw RuntimeError{"Unexpected: size={}"sv, std::size(request_status.order_events)};
   }
-  std::string symbol;
+  std::string_view symbol;
   Side side = {};
   double price = NaN;
   double prior_quantity = NaN;
@@ -1098,8 +1092,7 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
     }
     auto &order_prior_execution = order_event.order_prior_execution;
     if (std::empty(symbol)) {
-      symbol = std::string{order_prior_execution.symbol};
-      std::ranges::transform(symbol, std::begin(symbol), ::toupper);
+      symbol = order_prior_execution.symbol;
     }
     side = map(order_prior_execution.side);
     price = order_prior_execution.limit_price;

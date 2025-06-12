@@ -581,15 +581,11 @@ Constraints
 Comments
 --------
 
-* Order updates has no information about last traded price/quantity and total
-  average price
-
-* There is a race between REST (ack) and WebSocket (update) for order actions
-
-* Some uncertainty around edit/cancel order and execution response
-
 * Statistics are using relative funding rates to be compatible with other exchanges
 
-* Aggressive orders may only report the fills on the WS channel (an open order never exists).
-  This is an issue because we can potentially lose the REST response and never be able to update the order status.
-  And artificial :code:`OrderUpdate` is therefore injected when receiving fills from the WS channel.
+* Aggressive orders may only report fills on the WS channel (an open order never exists).
+  This is an issue because we can potentially lose the REST response and then never be able to update the order status.
+  An artificial :code:`OrderUpdate` is therefore injected when receiving fills from the WS channel.
+
+* Order updates have no information about last traded price/quantity and total average price.
+  Although attempts are made to compute the right average price, this is not always possible and errors should be expected.
