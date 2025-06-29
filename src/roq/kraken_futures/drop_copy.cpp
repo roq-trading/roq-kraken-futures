@@ -392,7 +392,7 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
-    log::warn("DEBUG open_orders_snapshot={}"sv, open_orders_snapshot);
+    // log::warn("DEBUG open_orders_snapshot={}"sv, open_orders_snapshot);
     for (auto &order : open_orders_snapshot.orders) {
       process_order(order, order.order_id, order.cli_ord_id, {}, false, trace_info, true);
     }
@@ -403,7 +403,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
-    log::warn("DEBUG open_orders={}"sv, open_orders);
+    // log::warn("DEBUG open_orders={}"sv, open_orders);
     auto &order = open_orders.order;
     auto order_id = [&]() {
       if (std::empty(open_orders.order_id)) {
@@ -470,7 +470,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
     log::info<2>("fills={}"sv, fills);
-    log::warn("DEBUG fills={}"sv, fills);
+    // log::warn("DEBUG fills={}"sv, fills);
     std::string_view symbol, external_order_id, client_order_id;
     Side side = {};
     std::chrono::milliseconds update_time_utc = {};
@@ -517,7 +517,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
               .update_type = UpdateType::INCREMENTAL,
               .sending_time_utc = {},
           };
-          log::warn("DEBUG order_update={}"sv, order_update);
+          // log::warn("DEBUG order_update={}"sv, order_update);
           if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
           } else {
             log::warn("*** EXTERNAL ORDER ***"sv);
@@ -650,7 +650,7 @@ void DropCopy::process_order(
       .update_type = update_type,
       .sending_time_utc = {},
   };
-  log::warn("DEBUG order_update={}"sv, order_update);
+  // log::warn("DEBUG order_update={}"sv, order_update);
   auto request_id = cli_ord_id;
   if (shared_.update_order(request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {

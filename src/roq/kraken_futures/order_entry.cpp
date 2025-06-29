@@ -294,14 +294,14 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      log::warn("DEBUG response={}"sv, response);
+      // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
     };
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
+      // log::warn(R"(DEBUG body="{}")"sv, body);
       json::SendOrder send_order{body, decode_buffer_};
-      log::warn(R"(DEBUG send_order={})"sv, send_order);
+      // log::warn(R"(DEBUG send_order={})"sv, send_order);
       switch (send_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:
@@ -316,7 +316,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
         case SUCCESS: {
           auto request_id = send_order.send_status.cli_ord_id;  // note! could be missing
           auto accept_handler = [&](auto &order_update) {
-            log::warn("DEBUG order_update={}"sv, order_update);
+            // log::warn("DEBUG order_update={}"sv, order_update);
             dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
           auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
@@ -340,7 +340,7 @@ void OrderEntry::modify_order(
     }
     auto &[message_info, modify_order] = event;
     auto query = json::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
-    log::warn("DEBUG query={}"sv, query);
+    // log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -377,14 +377,14 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      log::warn("DEBUG response={}"sv, response);
+      // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
     };
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
+      // log::warn(R"(DEBUG body="{}")"sv, body);
       json::EditOrder edit_order{body, decode_buffer_};
-      log::warn(R"(DEBUG edit_order={})"sv, edit_order);
+      // log::warn(R"(DEBUG edit_order={})"sv, edit_order);
       switch (edit_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:
@@ -399,7 +399,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
         case SUCCESS: {
           auto request_id = edit_order.edit_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
-            log::warn("DEBUG order_update={}"sv, order_update);
+            // log::warn("DEBUG order_update={}"sv, order_update);
             dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
           auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
@@ -459,14 +459,14 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           .quantity = NaN,
           .price = NaN,
       };
-      log::warn("DEBUG response={}"sv, response);
+      // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
     };
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
+      // log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelOrder cancel_order{body, decode_buffer_};
-      log::warn(R"(DEBUG cancel_order={})"sv, cancel_order);
+      // log::warn(R"(DEBUG cancel_order={})"sv, cancel_order);
       switch (cancel_order.result) {
         using enum json::Result::type_t;
         case UNDEFINED_INTERNAL:
@@ -481,7 +481,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
         case SUCCESS: {
           auto request_id = cancel_order.cancel_status.cli_ord_id;
           auto accept_handler = [&](auto &order_update) {
-            log::warn("DEBUG order_update={}"sv, order_update);
+            // log::warn("DEBUG order_update={}"sv, order_update);
             dispatch(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {}, request_id, order_update);
           };
           auto reject_handler = [&](auto error, auto const &text) { dispatch(Origin::EXCHANGE, RequestStatus::REJECTED, error, text, request_id); };
@@ -573,7 +573,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       shared_(event_2);
     };
     auto handle_success = [&](auto &body) {
-      log::warn(R"(DEBUG body="{}")"sv, body);
+      // log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
