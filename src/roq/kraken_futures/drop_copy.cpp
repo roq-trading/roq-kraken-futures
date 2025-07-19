@@ -438,7 +438,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_amount = NaN,
+          .profit_loss_cost_amount = NaN,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
@@ -587,7 +587,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_amount = NaN,
+          .profit_loss_cost_amount = NaN,
       };
       shared_.fills.emplace_back(std::move(fill));
     }
