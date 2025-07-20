@@ -437,10 +437,10 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .quantity = item.qty,
           .price = item.price,
           .liquidity = map(item.fill_type),
-          .base_amount = NaN,
-          .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
+          .base_amount = NaN,
+          .quote_amount = NaN,
           .profit_loss_amount = profit_loss_amount,
       };
       auto trade_update = TradeUpdate{
@@ -590,10 +590,10 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .quantity = item.qty,
           .price = item.price,
           .liquidity = map(item.fill_type),
-          .base_amount = NaN,
-          .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
+          .base_amount = NaN,
+          .quote_amount = NaN,
           .profit_loss_amount = profit_loss_amount,
       };
       shared_.fills.emplace_back(std::move(fill));
