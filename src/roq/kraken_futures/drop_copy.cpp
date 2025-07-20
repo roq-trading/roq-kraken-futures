@@ -6,6 +6,7 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/utils/common.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
@@ -429,6 +430,8 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
     for (auto &item : fills_snapshot.fills) {
       fill_symbols_.try_emplace(item.instrument);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
+      auto ref_data = shared_.get_ref_data(shared_.settings.exchange, item.instrument);
+      auto profit_loss_cost_amount = utils::compute_profit_loss_cost_amount(side, item.qty, item.price, ref_data.multiplier);
       auto fill = Fill{
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
@@ -438,7 +441,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_cost_amount = NaN,
+          .profit_loss_cost_amount = profit_loss_cost_amount,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
@@ -477,6 +480,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
     Side side = {};
     std::chrono::milliseconds update_time_utc = {};
     double remaining_quantity = NaN;
+    double multiplier = NaN;
     auto dispatch = [&]() {
       // note!
       //   here we try to catch the situation where the REST response is lost and we never get a WS update because this order was never "open"
@@ -567,6 +571,8 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
         remaining_quantity = NaN;
         shared_.fills.clear();
         fill_symbols_.try_emplace(symbol);  // note!
+        auto ref_data = shared_.get_ref_data(shared_.settings.exchange, symbol);
+        multiplier = ref_data.multiplier;
       }
       update_time_utc = std::max(update_time_utc, item.time);
       remaining_quantity = [&]() {
@@ -578,6 +584,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
         }
         return std::min(remaining_quantity, item.remaining_order_qty);
       }();
+      auto profit_loss_cost_amount = utils::compute_profit_loss_cost_amount(side, item.qty, item.price, multiplier);
       auto fill = Fill{
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
@@ -587,7 +594,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_cost_amount = NaN,
+          .profit_loss_cost_amount = profit_loss_cost_amount,
       };
       shared_.fills.emplace_back(std::move(fill));
     }
