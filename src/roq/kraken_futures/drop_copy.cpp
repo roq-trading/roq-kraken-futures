@@ -431,7 +431,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
       fill_symbols_.try_emplace(item.instrument);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
       auto ref_data = shared_.get_ref_data(shared_.settings.exchange, item.instrument);
-      auto profit_loss_cost_amount = utils::compute_profit_loss_cost_amount(side, item.qty, item.price, ref_data.multiplier);
+      auto profit_loss_amount = utils::compute_profit_loss_amount(side, item.qty, item.price, ref_data.multiplier);
       auto fill = Fill{
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
@@ -441,7 +441,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_cost_amount = profit_loss_cost_amount,
+          .profit_loss_amount = profit_loss_amount,
       };
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
@@ -584,7 +584,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
         }
         return std::min(remaining_quantity, item.remaining_order_qty);
       }();
-      auto profit_loss_cost_amount = utils::compute_profit_loss_cost_amount(side, item.qty, item.price, multiplier);
+      auto profit_loss_amount = utils::compute_profit_loss_amount(side, item.qty, item.price, multiplier);
       auto fill = Fill{
           .external_trade_id = item.fill_id,
           .quantity = item.qty,
@@ -594,7 +594,7 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
           .quote_amount = NaN,
           .commission_amount = item.fee_paid,
           .commission_currency = item.fee_currency,
-          .profit_loss_cost_amount = profit_loss_cost_amount,
+          .profit_loss_amount = profit_loss_amount,
       };
       shared_.fills.emplace_back(std::move(fill));
     }
