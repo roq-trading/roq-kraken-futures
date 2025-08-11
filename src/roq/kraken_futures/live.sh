@@ -16,7 +16,7 @@ ENV=""
 
 URI="futures.kraken.com"
 
-REST_URI="https://${ENV}$URI/derivatives"
+REST_URI="https://${ENV}$URI"
 WS_URI="wss://${ENV}$URI/ws/v3"
 
 $PREFIX ./roq-kraken-futures \
@@ -29,4 +29,5 @@ $PREFIX ./roq-kraken-futures \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
   --rest_uri "$REST_URI" \
   --ws_uri "$WS_URI" \
+  --download_time_series_lookback "2h" \
   $@

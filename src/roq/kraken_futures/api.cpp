@@ -14,7 +14,8 @@ namespace kraken_futures {
 API API::create(Settings const &) {
   return {
       .market_data{
-          .instruments = "/api/v3/instruments"sv,
+          .instruments = "/derivatives/api/v3/instruments"sv,
+          .charts_trade = "/api/charts/v1/trade"sv,
       },
       .order_management{
           .send_order = "/api/v3/sendorder"sv,

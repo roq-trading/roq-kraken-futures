@@ -9,6 +9,9 @@
 #include "roq/server.hpp"
 
 #include "roq/core/symbols.hpp"
+#include "roq/core/timer_queue.hpp"
+
+#include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/kraken_futures/api.hpp"
 #include "roq/kraken_futures/settings.hpp"
@@ -54,6 +57,11 @@ struct Shared final {
   Settings const &settings;
   API const api;
   core::Symbols symbols;
+
+  core::limit::RateLimiter rate_limiter;
+  core::TimerQueue<std::string> time_series_request_queue;
+
+  std::vector<Bar> bars;
 };
 
 }  // namespace kraken_futures

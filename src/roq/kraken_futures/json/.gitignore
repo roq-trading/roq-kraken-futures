@@ -11,6 +11,8 @@ cancel_all_orders.hpp
 cancel_all_status.hpp
 cancel_order.hpp
 cancel_status.hpp
+candles_item.hpp
+candles.hpp
 challenge.hpp
 edit_order.hpp
 edit_status.hpp
@@ -66,6 +68,8 @@ cancel_all_orders.cpp
 cancel_all_status.cpp
 cancel_order.cpp
 cancel_status.cpp
+candles_item.cpp
+candles.cpp
 challenge.cpp
 edit_order.cpp
 edit_status.cpp

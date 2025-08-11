@@ -16,6 +16,8 @@ set(AUTOGEN_SCHEMAS
     cancel_all_status.json
     cancel_order.json
     cancel_status.json
+    candles_item.json
+    candles.json
     challenge.json
     edit_order.json
     edit_status.json

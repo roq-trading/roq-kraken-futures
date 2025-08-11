@@ -194,6 +194,12 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   subscribe("ticker"sv, symbols);
   subscribe("book"sv, symbols);
   subscribe("trade"sv, symbols);
+  if (shared_.settings.download.time_series_lookback.count()) {
+    // note! there is no WS feed
+    for (auto &symbol : symbols) {
+      shared_.time_series_request_queue.emplace_back(symbol);
+    }
+  }
 }
 
 void MarketData::subscribe(std::string_view const &feed) {

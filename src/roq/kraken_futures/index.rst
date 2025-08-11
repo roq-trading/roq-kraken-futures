@@ -147,6 +147,14 @@ Flags
 
    .. include:: flags/misc.rstinc
 
+.. tab:: Request
+
+   .. include:: flags/request.rstinc
+
+.. tab:: Download
+
+   .. include:: flags/download.rstinc
+
 
 Environments
 ------------
@@ -589,3 +597,6 @@ Comments
 
 * Order updates have no information about last traded price/quantity and total average price.
   Although attempts are made to compute the right average price, this is not always possible and errors should be expected.
+
+* Time-series can only be downloaded.
+  There is no web-socket API for subscribing.

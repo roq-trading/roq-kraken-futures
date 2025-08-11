@@ -12,6 +12,7 @@ namespace kraken_futures {
 struct API final {
   struct {
     std::string_view instruments;
+    std::string_view charts_trade;
   } market_data;
   struct {
     std::string_view send_order;

@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* BREAKING CHANGE: REST URL is now without `/derivatives` to allow for downloading candles (#517)
+
 ## 1.0.7 &ndash; 2025-07-02
 
 ## 1.0.6 &ndash; 2025-05-16

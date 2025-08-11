@@ -23,6 +23,7 @@
 #include "roq/kraken_futures/rest_state.hpp"
 #include "roq/kraken_futures/shared.hpp"
 
+#include "roq/kraken_futures/json/candles.hpp"
 #include "roq/kraken_futures/json/instruments.hpp"
 
 namespace roq {
@@ -43,6 +44,7 @@ struct Rest final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TimeSeriesUpdate> const &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(SymbolsUpdate &) = 0;
   };
@@ -72,6 +74,12 @@ struct Rest final : public web::rest::Client::Handler {
   void get_instruments_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::Instruments> const &);
 
+  void get_candles(std::string_view const &symbol);
+  void get_candles_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
+  void operator()(Trace<json::Candles> const &, std::string_view const &symbol);
+
+  void check_request_queue(std::chrono::nanoseconds now);
+
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
@@ -89,7 +97,7 @@ struct Rest final : public web::rest::Client::Handler {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile instruments, instruments_ack;
+    utils::metrics::Profile instruments, instruments_ack, candles, candles_ack;
   } profile_;
   struct {
     utils::metrics::Latency ping;

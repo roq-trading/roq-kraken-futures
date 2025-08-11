@@ -7,7 +7,7 @@
       "name": "uri",
       "type": "roq/io/web/URI",
       "validator": "roq/core/flags/URI",
-      "default": "https://demo-futures.kraken.com/derivatives",
+      "default": "https://demo-futures.kraken.com",
       "description": "Exchange end-point"
     },
     {

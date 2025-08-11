@@ -1,0 +1,30 @@
+{
+  "name": "roq/kraken_futures/json/CandlesItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "open",
+      "type": "std/double"
+    },
+    {
+      "name": "high",
+      "type": "std/double"
+    },
+    {
+      "name": "low",
+      "type": "std/double"
+    },
+    {
+      "name": "close",
+      "type": "std/double"
+    },
+    {
+      "name": "volume",
+      "type": "std/double"
+    }
+  ]
+}
