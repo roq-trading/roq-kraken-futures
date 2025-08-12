@@ -411,6 +411,7 @@ void Rest::operator()(Trace<json::Candles> const &events, std::string_view const
   for (auto &item : candles.candles) {
     auto bar = Bar{
         .begin_time_utc = item.time,
+        .confirmed = true,
         .open_price = item.open,
         .high_price = item.high,
         .low_price = item.low,
