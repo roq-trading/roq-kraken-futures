@@ -378,7 +378,6 @@ void Rest::get_candles(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    log::warn("{}"sv, request);
     auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
@@ -391,7 +390,6 @@ void Rest::get_candles(std::string_view const &symbol) {
 void Rest::get_candles_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.candles_ack([&]() {
     auto handle_success = [&](auto &body) {
-      log::warn("{}"sv, body);
       json::Candles candles{body, decode_buffer_};
       Trace event_2{event, candles};
       (*this)(event_2, symbol);
@@ -429,7 +427,7 @@ void Rest::operator()(Trace<json::Candles> const &events, std::string_view const
       .exchange = shared_.settings.exchange,
       .symbol = symbol,
       .data_source = DataSource::TRADE_SUMMARY,
-      .interval = shared_.settings_time_series_interval,
+      .interval = shared_.settings.time_series.interval,
       .origin = Origin::EXCHANGE,
       .bars = bars,
       .update_type = UpdateType::SNAPSHOT,

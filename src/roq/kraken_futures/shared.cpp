@@ -2,8 +2,6 @@
 
 #include "roq/kraken_futures/shared.hpp"
 
-#include "roq/utils/common.hpp"
-
 namespace roq {
 namespace kraken_futures {
 
@@ -18,8 +16,8 @@ auto create_rate_limiter(auto &settings) {
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, settings_time_series_interval{utils::to_interval(settings.time_series.interval)}, api{API::create(settings)},
-      symbols{settings.ws.max_subscriptions_per_stream}, rate_limiter{create_rate_limiter(settings)} {
+    : dispatcher_{dispatcher}, settings{settings}, api{API::create(settings)}, symbols{settings.ws.max_subscriptions_per_stream},
+      rate_limiter{create_rate_limiter(settings)} {
 }
 
 }  // namespace kraken_futures
