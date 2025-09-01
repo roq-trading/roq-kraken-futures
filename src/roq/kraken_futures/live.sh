@@ -29,8 +29,9 @@ $PREFIX ./roq-kraken-futures \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
   --rest_uri "$REST_URI" \
   --ws_uri "$WS_URI" \
-  --time_series_interval "60s" \
-  --time_series_lookback "2h" \
-  --time_series_realtime true \
-  --download_time_series true \
   $@
+
+#  --time_series_interval "60s" \
+#  --time_series_lookback "2h" \
+#  --time_series_realtime true \
+#  --download_time_series true \
