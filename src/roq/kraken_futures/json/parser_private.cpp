@@ -18,15 +18,15 @@ namespace json {
 
 namespace {
 template <typename T>
-void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_info) {
-  T obj{message, buffer};
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info) {
+  T obj{message, buffer_stack};
   create_trace_and_dispatch(handler, trace_info, obj);
 }
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
+bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
@@ -42,19 +42,19 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
-          dispatch_helper<Info>(handler, message, buffer, trace_info);
+          dispatch_helper<Info>(handler, message, buffer_stack, trace_info);
           return true;
         case ALERT:
-          dispatch_helper<Alert>(handler, message, buffer, trace_info);
+          dispatch_helper<Alert>(handler, message, buffer_stack, trace_info);
           return true;
         case ERROR:
-          dispatch_helper<Error>(handler, message, buffer, trace_info);
+          dispatch_helper<Error>(handler, message, buffer_stack, trace_info);
           return true;
         case CHALLENGE:
-          dispatch_helper<Challenge>(handler, message, buffer, trace_info);
+          dispatch_helper<Challenge>(handler, message, buffer_stack, trace_info);
           return true;
         case SUBSCRIBED:
-          dispatch_helper<Subscribed>(handler, message, buffer, trace_info);
+          dispatch_helper<Subscribed>(handler, message, buffer_stack, trace_info);
           return true;
         default:
           assert(false);
@@ -72,7 +72,7 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:
-          dispatch_helper<Heartbeat>(handler, message, buffer, trace_info);
+          dispatch_helper<Heartbeat>(handler, message, buffer_stack, trace_info);
           return true;
         case TICKER:
         case BOOK_SNAPSHOT:
@@ -82,28 +82,28 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
           log::fatal("Unexpected: feed={}"sv, feed);
           break;
         case CHALLENGE:
-          dispatch_helper<Challenge>(handler, message, buffer, trace_info);
+          dispatch_helper<Challenge>(handler, message, buffer_stack, trace_info);
           return true;
         case ACCOUNT_BALANCES_AND_MARGINS:
-          dispatch_helper<AccountBalancesAndMargins>(handler, message, buffer, trace_info);
+          dispatch_helper<AccountBalancesAndMargins>(handler, message, buffer_stack, trace_info);
           return true;
         case OPEN_POSITIONS:
-          dispatch_helper<OpenPositions>(handler, message, buffer, trace_info);
+          dispatch_helper<OpenPositions>(handler, message, buffer_stack, trace_info);
           return true;
         case OPEN_ORDERS_SNAPSHOT:
-          dispatch_helper<OpenOrdersSnapshot>(handler, message, buffer, trace_info);
+          dispatch_helper<OpenOrdersSnapshot>(handler, message, buffer_stack, trace_info);
           return true;
         case OPEN_ORDERS:
-          dispatch_helper<OpenOrders>(handler, message, buffer, trace_info);
+          dispatch_helper<OpenOrders>(handler, message, buffer_stack, trace_info);
           return true;
         case OPEN_ORDERS_VERBOSE:
           // XXX
           break;
         case FILLS_SNAPSHOT:
-          dispatch_helper<FillsSnapshot>(handler, message, buffer, trace_info);
+          dispatch_helper<FillsSnapshot>(handler, message, buffer_stack, trace_info);
           return true;
         case FILLS:
-          dispatch_helper<Fills>(handler, message, buffer, trace_info);
+          dispatch_helper<Fills>(handler, message, buffer_stack, trace_info);
           return true;
           break;
         default:

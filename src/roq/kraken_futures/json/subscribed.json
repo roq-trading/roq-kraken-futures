@@ -12,7 +12,7 @@
     },
     {
       "name": "product_ids",
-      "type": "roq/kraken_futures/json/ProductID",
+      "type": "std/string_view",
       "array": "std/span"
     }
   ]

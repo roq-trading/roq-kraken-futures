@@ -6,6 +6,8 @@
 
 #include "roq/trace_info.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/alert.hpp"
 #include "roq/kraken_futures/json/error.hpp"
 #include "roq/kraken_futures/json/info.hpp"
@@ -51,7 +53,7 @@ struct ParserPrivate final {
     virtual void operator()(Trace<Fills> const &) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
 };
 
 }  // namespace json

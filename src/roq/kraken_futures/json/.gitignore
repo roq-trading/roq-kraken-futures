@@ -41,7 +41,6 @@ order_event_type.hpp
 order.hpp
 order_type.hpp
 position.hpp
-product_id.hpp
 reason.hpp
 rest_error_item.hpp
 rest_error.hpp
@@ -98,7 +97,6 @@ order_event_type.cpp
 order.cpp
 order_type.cpp
 position.cpp
-product_id.cpp
 reason.cpp
 rest_error_item.cpp
 rest_error.cpp

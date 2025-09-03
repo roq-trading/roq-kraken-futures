@@ -46,7 +46,6 @@ set(AUTOGEN_SCHEMAS
     order.json
     order_type.json
     position.json
-    product_id.json
     reason.json
     rest_error_item.json
     rest_error.json

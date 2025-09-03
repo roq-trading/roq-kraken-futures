@@ -18,15 +18,15 @@ namespace json {
 
 namespace {
 template <typename T>
-void dispatch_helper(auto &handler, auto &message, auto &buffer, auto &trace_info) {
-  T obj{message, buffer};
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info) {
+  T obj{message, buffer_stack};
   create_trace_and_dispatch(handler, trace_info, obj);
 }
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
+bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
@@ -42,19 +42,19 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
           log::warn(R"(Unknown event="{}")"sv, event);
           return false;
         case INFO:
-          dispatch_helper<Info>(handler, message, buffer, trace_info);
+          dispatch_helper<Info>(handler, message, buffer_stack, trace_info);
           return true;
         case ALERT:
-          dispatch_helper<Alert>(handler, message, buffer, trace_info);
+          dispatch_helper<Alert>(handler, message, buffer_stack, trace_info);
           return true;
         case ERROR:
-          dispatch_helper<Error>(handler, message, buffer, trace_info);
+          dispatch_helper<Error>(handler, message, buffer_stack, trace_info);
           return true;
         case CHALLENGE:
           log::fatal("Unexpected: event={}"sv, event);
           break;
         case SUBSCRIBED:
-          dispatch_helper<Subscribed>(handler, message, buffer, trace_info);
+          dispatch_helper<Subscribed>(handler, message, buffer_stack, trace_info);
           return true;
         default:
           assert(false);
@@ -72,22 +72,22 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
           log::warn(R"(Unknown feed="{}")"sv, feed);
           return false;
         case HEARTBEAT:
-          dispatch_helper<Heartbeat>(handler, message, buffer, trace_info);
+          dispatch_helper<Heartbeat>(handler, message, buffer_stack, trace_info);
           return true;
         case TICKER:
-          dispatch_helper<Ticker>(handler, message, buffer, trace_info);
+          dispatch_helper<Ticker>(handler, message, buffer_stack, trace_info);
           return true;
         case BOOK_SNAPSHOT:
-          dispatch_helper<BookSnapshot>(handler, message, buffer, trace_info);
+          dispatch_helper<BookSnapshot>(handler, message, buffer_stack, trace_info);
           return true;
         case BOOK:
-          dispatch_helper<Book>(handler, message, buffer, trace_info);
+          dispatch_helper<Book>(handler, message, buffer_stack, trace_info);
           return true;
         case TRADE_SNAPSHOT:
-          dispatch_helper<TradeSnapshot>(handler, message, buffer, trace_info);
+          dispatch_helper<TradeSnapshot>(handler, message, buffer_stack, trace_info);
           return true;
         case TRADE:
-          dispatch_helper<Trade>(handler, message, buffer, trace_info);
+          dispatch_helper<Trade>(handler, message, buffer_stack, trace_info);
           return true;
         case CHALLENGE:
         case ACCOUNT_BALANCES_AND_MARGINS:
