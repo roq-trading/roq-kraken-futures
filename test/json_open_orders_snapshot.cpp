@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/open_orders_snapshot.hpp"
 
 using namespace roq;
@@ -32,7 +34,7 @@ TEST_CASE("json_open_orders_snapshot_simple", "[json_open_orders_snapshot]") {
                  R"(})"
                  R"(])"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OpenOrdersSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::OPEN_ORDERS_SNAPSHOT);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);

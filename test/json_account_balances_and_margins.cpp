@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/account_balances_and_margins.hpp"
 
 using namespace roq;
@@ -30,7 +32,7 @@ TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_an
                  R"(],)"
                  R"("seq":0)"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::AccountBalancesAndMargins obj{message, buffer};
   CHECK(obj.feed == json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);

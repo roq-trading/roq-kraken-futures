@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/trade_snapshot.hpp"
 
 using namespace roq;
@@ -23,7 +25,7 @@ TEST_CASE("json_trade_snapshot_simple", "[json_trade_snapshot]") {
       R"({"feed":"trade","product_id":"PI_XBTUSD","uid":"25ec0c98-676b-4522-a94e-f4a848f0ed84","side":"sell","type":"fill","seq":6920,"time":1627483200036,"qty":10.0,"price":39963.5})"
       R"(])"
       R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::TradeSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::TRADE_SNAPSHOT);
   CHECK(obj.product_id == "PI_XBTUSD"sv);

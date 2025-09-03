@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/edit_order.hpp"
 
 using namespace roq;
@@ -54,7 +56,7 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::EditOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627648619235ms);
@@ -97,7 +99,7 @@ TEST_CASE("json_edit_order_authentication_error", "[json_edit_order]") {
                  R"("error":"authenticationError",)"
                  R"("serverTime":"2021-07-31T04:30:20.840Z")"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::EditOrder obj{message, buffer};
   CHECK(obj.result == json::Result::ERROR);
   CHECK(obj.error == "authenticationError"sv);
@@ -131,7 +133,7 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::EditOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627876310939ms);
@@ -203,7 +205,7 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
                  R"(])"
                  R"(})"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::EditOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.server_time == 1627972925376ms);

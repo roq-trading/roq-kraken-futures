@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/cancel_order.hpp"
 
 using namespace roq;
@@ -41,7 +43,7 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
                  R"(},)"
                  R"("serverTime":"2021-07-31T04:53:14.376Z")"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::CancelOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::CANCELLED);
@@ -78,7 +80,7 @@ TEST_CASE("json_cancel_order_not_found", "[json_cancel_order]") {
                  R"("serverTime":"2021-08-02T07:46:05.900Z")"
                  R"(})"
                  R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::CancelOrder obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(obj.cancel_status.status == json::Status::NOT_FOUND);

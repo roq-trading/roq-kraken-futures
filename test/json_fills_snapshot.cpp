@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/fills_snapshot.hpp"
 
 using namespace roq;
@@ -25,7 +27,7 @@ TEST_CASE("json_fills_snapshot_simple", "[json_fills_snapshot]") {
       R"({"instrument":"PI_XBTUSD","time":1627966660729,"price":38660.5,"seq":4,"buy":true,"qty":1.0,"order_id":"de5d0b8d-2977-4a50-8276-13464fc5c031","cli_ord_id":"rAAF6QMAAQAAKr9PGtUQ","fill_id":"938f8e66-1698-4d6e-9707-e629a79f9c07","fill_type":"maker","fee_paid":5.18e-9,"fee_currency":"BTC"})"
       R"(])"
       R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::FillsSnapshot obj{message, buffer};
   CHECK(obj.feed == json::Feed::FILLS_SNAPSHOT);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);

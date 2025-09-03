@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken_futures/json/instruments.hpp"
 
 using namespace roq;
@@ -44,7 +46,7 @@ TEST_CASE("json_instruments_simple", "[json_instruments]") {
       R"(],)"
       R"("serverTime":"2021-07-28T05:32:46.371Z")"
       R"(})";
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Instruments obj{message, buffer};
   CHECK(obj.result == json::Result::SUCCESS);
   CHECK(std::size(obj.instruments) == 25);
