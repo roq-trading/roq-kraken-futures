@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken_futures/json/TradeSnapshot",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "feed",

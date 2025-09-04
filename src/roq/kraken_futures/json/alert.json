@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken_futures/json/Alert",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "event",

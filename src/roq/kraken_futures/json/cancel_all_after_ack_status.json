@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken_futures/json/CancelAllAfterAckStatus",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "currentTime",

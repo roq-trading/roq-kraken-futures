@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken_futures/json/Subscribed",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "event",

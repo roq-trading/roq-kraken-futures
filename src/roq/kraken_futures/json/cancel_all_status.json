@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken_futures/json/CancelAllStatus",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "receivedTime",
