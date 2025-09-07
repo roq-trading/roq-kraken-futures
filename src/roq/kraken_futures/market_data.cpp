@@ -10,6 +10,8 @@
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
+#include "roq/utils/exceptions/unhandled.hpp"
+
 #include "roq/utils/metrics/factory.hpp"
 
 #include "roq/web/socket/client.hpp"
@@ -248,10 +250,15 @@ void MarketData::unsubscribe(std::string_view const &feed, std::span<T> const &p
 
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    TraceInfo trace_info;
-    auto result = json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info);
-    if (!result) [[unlikely]] {
-      log::warn(R"(Unexpected: message="{}")"sv, message);
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
+    try {
+      TraceInfo trace_info;
+      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+        log_message();
+      }
+    } catch (...) {
+      log_message();
+      utils::exceptions::Unhandled::terminate();
     }
   });
 }

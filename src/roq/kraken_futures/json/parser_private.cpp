@@ -14,6 +14,13 @@ namespace roq {
 namespace kraken_futures {
 namespace json {
 
+// === CONSTANTS ===
+
+namespace {
+auto const FIELD_EVENT = "event"sv;
+auto const FIELD_FEED = "feed"sv;
+}  // namespace
+
 // === HELPERS ===
 
 namespace {
@@ -26,21 +33,22 @@ void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &tra
 
 // === IMPLEMENTATION ===
 
-bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
+bool ParserPrivate::dispatch(
+    Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info, bool allow_unknown_event_types) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
-    // event
-    if (key == "event"sv) {
+    if (key == FIELD_EVENT) {
       Event event{value};
       switch (event) {
         using enum Event::type_t;
         case UNDEFINED_INTERNAL:
-          assert(false);
-          [[fallthrough]];
+          break;
         case UNKNOWN_INTERNAL:
-          log::warn(R"(Unknown event="{}")"sv, event);
-          return false;
+          if (allow_unknown_event_types) {
+            return false;
+          }
+          break;
         case INFO:
           dispatch_helper<Info>(handler, message, buffer_stack, trace_info);
           return true;
@@ -56,21 +64,22 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
         case SUBSCRIBED:
           dispatch_helper<Subscribed>(handler, message, buffer_stack, trace_info);
           return true;
-        default:
-          assert(false);
+        case SUBSCRIBED_FAILED:
+        case UNSUBSCRIBED:
+        case UNSUBSCRIBED_FAILED:
+          break;
       }
-    }
-    // feed
-    if (key == "feed"sv) {
+    } else if (key == FIELD_FEED) {
       Feed feed{value};
       switch (feed) {
         using enum Feed::type_t;
         case UNDEFINED_INTERNAL:
-          assert(false);
-          [[fallthrough]];
+          break;
         case UNKNOWN_INTERNAL:
-          log::warn(R"(Unknown feed="{}")"sv, feed);
-          return false;
+          if (allow_unknown_event_types) {
+            return false;
+          }
+          break;
         case HEARTBEAT:
           dispatch_helper<Heartbeat>(handler, message, buffer_stack, trace_info);
           return true;
@@ -79,7 +88,6 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
         case BOOK:
         case TRADE_SNAPSHOT:
         case TRADE:
-          log::fatal("Unexpected: feed={}"sv, feed);
           break;
         case CHALLENGE:
           dispatch_helper<Challenge>(handler, message, buffer_stack, trace_info);
@@ -97,7 +105,6 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
           dispatch_helper<OpenOrders>(handler, message, buffer_stack, trace_info);
           return true;
         case OPEN_ORDERS_VERBOSE:
-          // XXX
           break;
         case FILLS_SNAPSHOT:
           dispatch_helper<FillsSnapshot>(handler, message, buffer_stack, trace_info);
@@ -106,12 +113,10 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
           dispatch_helper<Fills>(handler, message, buffer_stack, trace_info);
           return true;
           break;
-        default:
-          assert(false);
       }
     }
   }
-  return false;
+  log::fatal(R"(Unexpected: message="{}")"sv, message);
 }
 
 }  // namespace json
