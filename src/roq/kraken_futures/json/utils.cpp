@@ -2,6 +2,8 @@
 
 #include "roq/kraken_futures/json/utils.hpp"
 
+#include <vector>
+
 #include "roq/logging.hpp"
 
 #include "roq/decimal.hpp"
