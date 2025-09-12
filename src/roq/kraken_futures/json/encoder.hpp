@@ -4,6 +4,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "roq/cancel_all_orders.hpp"
 #include "roq/cancel_order.hpp"
