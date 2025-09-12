@@ -7,14 +7,10 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/server/oms/exceptions.hpp"
-
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
-
-#include "roq/web/rest/client.hpp"
 
 #include "roq/core/json/parser.hpp"
 
@@ -220,8 +216,12 @@ void Rest::get_instruments() {
 }
 
 void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  constexpr auto const STATE = RestState::INSTRUMENTS;
+  auto const STATE = RestState::INSTRUMENTS;
   profile_.instruments_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      download_.retry(STATE);
+    };
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
@@ -241,11 +241,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
         }
       }
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-      download_.retry(STATE);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -391,15 +387,15 @@ void Rest::get_candles(std::string_view const &symbol) {
 
 void Rest::get_candles_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.candles_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+    };
     auto handle_success = [&](auto &body) {
       json::Candles candles{body, decode_buffer_};
       Trace event_2{event, candles};
       (*this)(event_2, symbol);
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -444,31 +440,31 @@ void Rest::check_request_queue(std::chrono::nanoseconds now) {
   shared_.time_series_request_queue.dispatch(can_request, request, now);
 }
 
-template <typename SuccessHandler, typename ErrorHandler>
-void Rest::process_response(web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+void Rest::process_response(web::rest::Response const &response, auto error_handler, auto success_handler) {
   try {
     auto [status, category, body] = response.result();
     switch (category) {
       using enum web::http::Category;
-      case SUCCESS:  // 2xx
+      case UNKNOWN:
+      case INFORMATIONAL_RESPONSE:
+        response.expect(web::http::Status::OK);  // throws
+        break;
+      case SUCCESS:
         success_handler(body);
         break;
-      case CLIENT_ERROR: {  // 4xx
-        auto text = fmt::format("{}"sv, status);
-        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);
+      case REDIRECTION:
+        log::fatal("Unexpected: URL is being redirected"sv);
+      case CLIENT_ERROR: {
+        auto message = fmt::format("{}"sv, status);
+        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, message);
         break;
       }
-      case SERVER_ERROR: {  // 5xx
-        auto text = fmt::format("{}"sv, status);
-        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, text);
+      case SERVER_ERROR: {
+        auto message = fmt::format("{}"sv, status);
+        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, message);
         break;
       }
-      default:
-        response.expect(web::http::Status::OK);  // throws
     }
-  } catch (server::oms::Exception &e) {
-    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-    error_handler(e.origin, e.status, e.error, e.what());
   } catch (NetworkError &e) {
     log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
     error_handler(Origin::GATEWAY, e.request_status(), e.error(), e.what());

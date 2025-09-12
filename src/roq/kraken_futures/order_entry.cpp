@@ -10,8 +10,6 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/web/rest/client.hpp"
-
 #include "roq/core/json/parser.hpp"
 
 #include "roq/server/oms/exceptions.hpp"
@@ -275,7 +273,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      auto version = uint32_t{1};
+      auto version = 1;
       create_order_ack(event, user_id, order_id, version);
     };
     (*connection_)(request_id, request, callback);
@@ -299,6 +297,10 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
       // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      dispatch(origin, status, error, text, {});
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
@@ -327,8 +329,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -367,11 +368,11 @@ void OrderEntry::modify_order(
 
 void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.modify_order_ack([&]() {
-    auto dispatch = [&](auto origin, auto request_status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
+    auto dispatch = [&](auto origin, auto status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
       auto response = server::oms::Response{
           .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
-          .request_status = request_status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -382,6 +383,10 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
       // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      dispatch(origin, status, error, text, {});
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
@@ -410,8 +415,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -449,11 +453,11 @@ void OrderEntry::cancel_order(
 
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
-    auto dispatch = [&](auto origin, auto request_status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
+    auto dispatch = [&](auto origin, auto status, Error error, std::string_view const &text, std::string_view const &request_id, auto... args) {
       auto response = server::oms::Response{
           .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
-          .request_status = request_status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -464,6 +468,10 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
       // log::warn("DEBUG response={}"sv, response);
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id, args...);
+    };
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      dispatch(origin, status, error, text, {});
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
@@ -492,8 +500,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
         }
       }
     };
-    auto handle_error = [&](auto origin, auto request_status, auto error, auto const &text) { dispatch(origin, request_status, error, text, {}); };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -574,17 +581,17 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       Trace event_2{event, cancel_all_orders_ack};
       shared_(event_2);
     };
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      send_ack(origin, status, error, text);
+    };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
       json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-      send_ack(origin, status, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -615,15 +622,15 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
 
 void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      // note! no response required
+    };
     auto handle_success = [&](auto &body) {
       json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
       log::info<2>("cancel_all_after_ack={}"sv, cancel_all_after_ack);
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto const &text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-      // note! no response required
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -641,19 +648,24 @@ uint32_t OrderEntry::download(OrderEntryState state) {
   return 0;
 }
 
-template <typename SuccessHandler, typename ErrorHandler>
-void OrderEntry::process_response(web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+void OrderEntry::process_response(web::rest::Response const &response, auto error_handler, auto success_handler) {
   try {
     auto [status, category, body] = response.result();
     switch (category) {
       using enum web::http::Category;
-      case SUCCESS:  // 2xx
+      case UNKNOWN:
+      case INFORMATIONAL_RESPONSE:
+        response.expect(web::http::Status::OK);  // throws
+        break;
+      case SUCCESS:
         success_handler(body);
         break;
-      case CLIENT_ERROR: {  // 4xx
+      case REDIRECTION:
+        log::fatal("Unexpected: URL is being redirected"sv);
+      case CLIENT_ERROR: {
         json::RestError rest_error{body, decode_buffer_};
         log::warn("error={}"sv, rest_error);
-        auto text = [&]() {
+        auto message = [&]() {
           if (!std::empty(rest_error.errors)) {
             return rest_error.errors[0].message;
           }
@@ -662,16 +674,14 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
           }
           return rest_error.message;
         }();
-        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);
+        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, message);
         break;
       }
-      case SERVER_ERROR: {  // 5xx
-        auto text = fmt::format("{}"sv, status);
-        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, text);
+      case SERVER_ERROR: {
+        auto message = fmt::format("{}"sv, status);
+        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, message);
         break;
       }
-      default:
-        response.expect(web::http::Status::OK);  // throws
     }
   } catch (server::oms::Exception &e) {
     std::string_view const what{e.what()};
