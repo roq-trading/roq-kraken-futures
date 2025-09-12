@@ -10,8 +10,6 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/core/json/parser.hpp"
-
 #include "roq/server/oms/exceptions.hpp"
 
 #include "roq/kraken_futures/json/cancel_all_after_ack.hpp"
@@ -22,6 +20,7 @@
 #include "roq/kraken_futures/json/result.hpp"
 #include "roq/kraken_futures/json/send_order.hpp"
 
+#include "roq/kraken_futures/json/encoder.hpp"
 #include "roq/kraken_futures/json/map.hpp"
 #include "roq/kraken_futures/json/utils.hpp"
 
@@ -257,7 +256,7 @@ void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Orde
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, create_order] = event;
-    auto query = json::send_order(encode_buffer_, create_order, order, request_id);
+    auto query = json::Encoder::send_order(encode_buffer_, create_order, order, request_id);
     auto path = shared_.api.order_management.send_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -342,7 +341,7 @@ void OrderEntry::modify_order(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, modify_order] = event;
-    auto query = json::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
+    auto query = json::Encoder::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
     // log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
@@ -428,7 +427,7 @@ void OrderEntry::cancel_order(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
-    auto query = json::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
+    auto query = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
     auto path = shared_.api.order_management.cancel_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
