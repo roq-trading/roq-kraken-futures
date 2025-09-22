@@ -153,10 +153,6 @@ Flags
 
    .. include:: flags/request.rstinc
 
-.. tab:: Download
-
-   .. include:: flags/download.rstinc
-
 
 Environments
 ------------

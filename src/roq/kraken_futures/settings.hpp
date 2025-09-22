@@ -8,7 +8,6 @@
 
 #include "roq/server/flags/settings.hpp"
 
-#include "roq/kraken_futures/flags/download.hpp"
 #include "roq/kraken_futures/flags/flags.hpp"
 #include "roq/kraken_futures/flags/misc.hpp"
 #include "roq/kraken_futures/flags/request.hpp"
@@ -24,7 +23,6 @@ struct Settings final : public server::flags::Settings, public flags::Flags {
   flags::Misc misc;
   flags::REST rest;
   flags::WS ws;
-  flags::Download download;
   flags::Request request;
 };
 
@@ -42,14 +40,12 @@ struct fmt::formatter<roq::kraken_futures::Settings> {
         R"(misc={}, )"
         R"(rest={}, )"
         R"(ws={}, )"
-        R"(download={}, )"
         R"(request={}, )"
         R"(server={})"
         R"(}})"sv,
         value.misc,
         value.rest,
         value.ws,
-        value.download,
         value.request,
         static_cast<roq::server::Settings const &>(value));
   }

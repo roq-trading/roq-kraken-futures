@@ -4,7 +4,7 @@ include(RoqAutogen)
 
 set(NAMESPACE "roq/kraken_futures/flags")
 
-set(AUTOGEN_SCHEMAS download.json misc.json request.json rest.json ws.json flags.json)
+set(AUTOGEN_SCHEMAS misc.json request.json rest.json ws.json flags.json)
 
 if(BUILD_DOCS)
 

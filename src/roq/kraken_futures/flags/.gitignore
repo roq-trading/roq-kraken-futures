@@ -1,18 +1,15 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-kraken-futures-flags
-download.rstinc
 misc.rstinc
 request.rstinc
 rest.rstinc
 ws.rstinc
 flags.rstinc
-download.hpp
 misc.hpp
 request.hpp
 rest.hpp
 ws.hpp
 flags.hpp
-download.cpp
 misc.cpp
 request.cpp
 rest.cpp
