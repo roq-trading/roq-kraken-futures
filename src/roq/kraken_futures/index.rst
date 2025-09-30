@@ -6,17 +6,35 @@ roq-kraken-futures
 ==================
 
 
-Links
------
+.. tab:: Unstable
 
-* `Website <https://futures.kraken.com/>`__
-* `Demo <https://demo-futures.kraken.com/futures/PI_XBTUSD>`__
-* `Support <https://support.kraken.com/hc/en-us/categories/360001977131-Futures>`__
-* `API <https://support.kraken.com/hc/en-us/sections/360012894412-Futures-API>`__
-* `Reddit Support <https://www.reddit.com/r/KrakenSupport/>`__
-* `Telegram API <https://t.me/kraken_futures_api>`__
-* `Telegram General <https://t.me/kraken_futures>`__
+  .. code-block:: shell
 
+     $ conda install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-kraken-futures
+
+.. tab:: Stable
+
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-kraken-futures
+
+
+:code:`roq-kraken-futures`
+--------------------------
+
+.. code-block:: shell
+
+   $ roq-kraken-futures [FLAGS]
+
+
+Description
+~~~~~~~~~~~
+
+:code:`roq-kraken-futures` is a gateway
 
 Supports
 --------
@@ -85,40 +103,6 @@ Supports
         - |checkmark|
       * - Funds
         - |checkmark|
-
-
-Installing
-----------
-
-* :ref:`Using Conda <tutorial-conda>`
-
-.. tab:: Unstable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/unstable \
-           roq-kraken-futures
-
-.. tab:: Stable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/stable \
-           roq-kraken-futures
-
-
-Using
------
-
-.. code-block:: shell
-
-   $ roq-kraken-futures \
-         --name "kraken-futures" \
-         --config_file $CONFIG_FILE_PATH \
-         --client_listen_address $UNIX_SOCKET_PATH \
-         --flagfile $ENVIRONMENT_FLAGFILE
 
 
 .. _roq-kraken-futures-flags:
@@ -583,6 +567,7 @@ Constraints
 -----------
 
 * The field :code:`cliOrdId` is a string containing only web-safe characters.
+
 
 Comments
 --------
