@@ -1,3 +1,5 @@
+# config template for the roq-kraken-futures gateway
+
 symbols = [
   "^FI_ETHUSD_[0-9]{6}$",  # futures
   "^FI_XBTUSD_[0-9]{6}$",  # futures
