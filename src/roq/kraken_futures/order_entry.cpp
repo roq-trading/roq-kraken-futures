@@ -853,6 +853,7 @@ void OrderEntry::process_place(auto &request_status, Callback callback) {
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
+      .leverage = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
       .average_traded_price = NaN,
@@ -900,6 +901,7 @@ void OrderEntry::process_edit(auto &request_status, Callback callback) {
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
+      .leverage = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
       .average_traded_price = NaN,
@@ -947,6 +949,7 @@ void OrderEntry::process_cancel(auto &request_status, Callback callback) {
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
+      .leverage = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
       .average_traded_price = NaN,
@@ -1014,6 +1017,7 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
       .quantity = NaN,  // note!
       .price = price,   // note!
       .stop_price = NaN,
+      .leverage = NaN,
       .remaining_quantity = remaining_quantity,  // note!
       .traded_quantity = traded_quantity,        // note!
       .average_traded_price = NaN,
