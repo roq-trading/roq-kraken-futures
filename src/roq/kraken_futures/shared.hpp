@@ -57,6 +57,7 @@ struct Shared final {
   Settings const &settings;
   API const api;
   core::Symbols symbols;
+  utils::unordered_set<std::string> all_symbols;
 
   core::limit::RateLimiter rate_limiter;
   core::TimerQueue<std::string> time_series_request_queue;
