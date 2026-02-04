@@ -305,6 +305,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
         .symbol = item.symbol,
         .description = {},
         .security_type = security_type,
+        .external_security_id = {},
         .cfi_code = {},
         .base_currency = item.base,
         .quote_currency = item.quote,
