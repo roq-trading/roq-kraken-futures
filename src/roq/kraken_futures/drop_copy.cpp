@@ -511,6 +511,8 @@ void DropCopy::operator()(Trace<json::Fills> const &event) {
               .external_order_id = external_order_id,
               .client_order_id = client_order_id,
               .order_status = OrderStatus::COMPLETED,
+              .error = {},
+              .text = {},
               .quantity = NaN,
               .price = NaN,
               .stop_price = NaN,
@@ -655,6 +657,8 @@ void DropCopy::process_order(
       .external_order_id = order.order_id,
       .client_order_id = cli_ord_id,
       .order_status = order_status,
+      .error = {},
+      .text = {},
       .quantity = quantity,  // note!
       .price = order.limit_price,
       .stop_price = order.stop_price,

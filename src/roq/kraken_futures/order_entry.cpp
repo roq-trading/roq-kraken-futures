@@ -853,6 +853,8 @@ void OrderEntry::process_place(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
+      .error = {},
+      .text = {},
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
@@ -901,6 +903,8 @@ void OrderEntry::process_edit(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
+      .error = {},
+      .text = {},
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
@@ -949,6 +953,8 @@ void OrderEntry::process_cancel(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
+      .error = {},
+      .text = {},
       .quantity = quantity,        // note!
       .price = order.limit_price,  // note!
       .stop_price = NaN,
@@ -1017,6 +1023,8 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
       .external_order_id = request_status.order_id,
       .client_order_id = {},
       .order_status = order_status,
+      .error = {},
+      .text = {},
       .quantity = NaN,  // note!
       .price = price,   // note!
       .stop_price = NaN,
