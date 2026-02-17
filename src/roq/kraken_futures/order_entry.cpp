@@ -177,28 +177,28 @@ void OrderEntry::operator()(metrics::Writer &writer) const {
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &, std::string_view const &request_id) {
-  create_order(event, order, request_id);
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+  create_order(event, order, ref_data, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
     Event<ModifyOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  modify_order(event, order, request_id, previous_request_id);
+  modify_order(event, order, ref_data, request_id, previous_request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
     Event<CancelOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  cancel_order(event, order, request_id, previous_request_id);
+  cancel_order(event, order, ref_data, request_id, previous_request_id);
   return stream_id_;
 }
 
@@ -259,13 +259,14 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
 
 // create-order
 
-void OrderEntry::create_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+void OrderEntry::create_order(
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, create_order] = event;
-    auto query = json::Encoder::send_order(encode_buffer_, create_order, order, request_id);
+    auto query = json::Encoder::send_order(encode_buffer_, create_order, order, ref_data, request_id);
     auto path = shared_.api.order_management.send_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -345,13 +346,17 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
 // modify-order
 
 void OrderEntry::modify_order(
-    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, modify_order] = event;
-    auto query = json::Encoder::edit_order(encode_buffer_, modify_order, order, request_id, previous_request_id);
+    auto query = json::Encoder::edit_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
     // log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
@@ -432,13 +437,17 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
 // cancel-order
 
 void OrderEntry::cancel_order(
-    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event,
+    server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
-    auto query = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id);
+    auto query = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
     auto path = shared_.api.order_management.cancel_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{

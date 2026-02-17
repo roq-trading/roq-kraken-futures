@@ -47,7 +47,11 @@ json::OrderEventOrderType compute_order_type(auto const &order_type, auto const 
 // === IMPLEMENTATION ===
 
 std::string_view Encoder::send_order(
-    std::vector<char> &buffer, CreateOrder const &create_order, server::oms::Order const &order, std::string_view const &request_id) {
+    std::string &buffer,
+    CreateOrder const &create_order,
+    server::oms::Order const &,
+    server::oms::RefData const &ref_data,
+    std::string_view const &request_id) {
   auto order_type = compute_order_type(create_order.order_type, create_order.time_in_force, create_order.execution_instructions, create_order.stop_price);
   auto side = map(create_order.side).template get<json::Side>();
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
@@ -67,8 +71,8 @@ std::string_view Encoder::send_order(
           order_type.as_raw_text(),
           create_order.symbol,
           side.as_raw_text(),
-          Decimal{create_order.quantity, order.quantity_precision.precision},
-          Decimal{create_order.price, order.price_precision.precision},
+          Decimal{create_order.quantity, ref_data.quantity.precision},
+          Decimal{create_order.price, ref_data.price.precision},
           request_id,
           reduce_only);
     } else {
@@ -86,9 +90,9 @@ std::string_view Encoder::send_order(
           order_type.as_raw_text(),
           create_order.symbol,
           side.as_raw_text(),
-          Decimal{create_order.quantity, order.quantity_precision.precision},
-          Decimal{create_order.price, order.price_precision.precision},
-          Decimal{create_order.stop_price, order.price_precision.precision},
+          Decimal{create_order.quantity, ref_data.quantity.precision},
+          Decimal{create_order.price, ref_data.price.precision},
+          Decimal{create_order.stop_price, ref_data.price.precision},
           request_id,
           reduce_only);
     }
@@ -105,18 +109,18 @@ std::string_view Encoder::send_order(
         order_type.as_raw_text(),
         create_order.symbol,
         side.as_raw_text(),
-        Decimal{create_order.quantity, order.quantity_precision.precision},
+        Decimal{create_order.quantity, ref_data.quantity.precision},
         request_id,
         reduce_only);
   }
-  std::string_view result{std::data(buffer), std::size(buffer)};
-  return result;
+  return buffer;
 }
 
 std::string_view Encoder::edit_order(
-    std::vector<char> &buffer,
+    std::string &buffer,
     ModifyOrder const &modify_order,
     server::oms::Order const &order,
+    server::oms::RefData const &ref_data,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   buffer.clear();
@@ -127,23 +131,23 @@ std::string_view Encoder::edit_order(
       "&size={}"
       "&limitPrice={}"sv,
       order.external_order_id,
-      Decimal{modify_order.quantity, order.quantity_precision.precision},
-      Decimal{modify_order.price, order.price_precision.precision});
+      Decimal{modify_order.quantity, ref_data.quantity.precision},
+      Decimal{modify_order.price, ref_data.price.precision});
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
 }
 
 std::string_view Encoder::cancel_order(
-    std::vector<char> &buffer,
+    std::string &buffer,
     roq::CancelOrder const &,
     server::oms::Order const &order,
+    server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   buffer.clear();
   // note! price has max 2 decimals, size is integer
   fmt::format_to(std::back_inserter(buffer), "?order_id={}"sv, order.external_order_id);
-  std::string_view result{std::data(buffer), std::size(buffer)};
-  return result;
+  return buffer;
 }
 
 }  // namespace json
