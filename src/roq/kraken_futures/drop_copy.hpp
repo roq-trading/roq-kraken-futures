@@ -59,7 +59,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   uint32_t download(DropCopyState);
 
@@ -125,7 +125,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   core::Download<DropCopyState> download_;
   // challenge
   std::string original_challenge_;
