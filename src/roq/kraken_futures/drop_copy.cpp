@@ -260,9 +260,9 @@ void DropCopy::operator()(ConnectionStatus connection_status, std::string_view c
   create_trace_and_dispatch(handler_, trace_info, stream_status);
 }
 
-uint32_t DropCopy::download(DropCopyState state) {
+uint32_t DropCopy::download(State state) {
   switch (state) {
-    using enum DropCopyState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
@@ -307,7 +307,7 @@ void DropCopy::operator()(Trace<json::Challenge> const &event) {
     assert(std::empty(signed_challenge_));
     original_challenge_ = challenge.message;
     signed_challenge_ = account_.signed_challenge(original_challenge_);
-    download_.check(DropCopyState::GET_CHALLENGE);  // note!
+    download_.check(State::GET_CHALLENGE);  // note!
   });
 }
 

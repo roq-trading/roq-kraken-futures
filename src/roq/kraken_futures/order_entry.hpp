@@ -21,7 +21,6 @@
 #include "roq/server.hpp"
 
 #include "roq/kraken_futures/account.hpp"
-#include "roq/kraken_futures/order_entry_state.hpp"
 #include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
@@ -93,7 +92,12 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void cancel_all_orders_after(std::chrono::nanoseconds timeout);
   void cancel_all_orders_after_ack(Trace<web::rest::Response> const &);
 
-  uint32_t download(OrderEntryState);
+  enum class State {
+    UNDEFINED = 0,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
 
@@ -155,7 +159,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download<OrderEntryState> download_;
+  core::Download<State> download_;
   // cancel all
   std::chrono::nanoseconds next_cancel_all_timer_ = {};
   //

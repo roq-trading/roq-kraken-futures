@@ -653,9 +653,9 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &e
   });
 }
 
-uint32_t OrderEntry::download(OrderEntryState state) {
+uint32_t OrderEntry::download(State state) {
   switch (state) {
-    using enum OrderEntryState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
