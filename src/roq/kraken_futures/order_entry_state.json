@@ -1,9 +1,0 @@
-{
-  "name": "roq/kraken_futures/OrderEntryState",
-  "type": "enum",
-  "values": [
-    {
-      "name": "done"
-    }
-  ]
-}
