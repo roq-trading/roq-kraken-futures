@@ -57,6 +57,8 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Confi
   }
 }
 
+// server::Handler
+
 void Gateway::operator()(Event<Start> const &event) {
   log::info("Starting..."sv);
   dispatch(event);
@@ -154,6 +156,8 @@ void Gateway::operator()(metrics::Writer &writer) const {
   dispatch_helper(*this, writer);
 }
 
+// streams
+
 void Gateway::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
@@ -210,6 +214,8 @@ void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
     (*iter).subscribe(start_from);
   }
 }
+
+// utilities
 
 void Gateway::ensure_symbol_slices(size_t size) {
   while (std::size(market_data_) < size) {

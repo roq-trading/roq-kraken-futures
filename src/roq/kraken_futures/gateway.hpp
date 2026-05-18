@@ -14,12 +14,13 @@
 
 #include "roq/kraken_futures/account.hpp"
 #include "roq/kraken_futures/config.hpp"
+#include "roq/kraken_futures/settings.hpp"
+#include "roq/kraken_futures/shared.hpp"
+
 #include "roq/kraken_futures/drop_copy.hpp"
 #include "roq/kraken_futures/market_data.hpp"
 #include "roq/kraken_futures/order_entry.hpp"
 #include "roq/kraken_futures/rest.hpp"
-#include "roq/kraken_futures/settings.hpp"
-#include "roq/kraken_futures/shared.hpp"
 
 namespace roq {
 namespace kraken_futures {
@@ -63,6 +64,8 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
 
   void operator()(metrics::Writer &) const override;
 
+  // streams
+
   void operator()(Trace<StreamStatus> const &) override;
   void operator()(Trace<ExternalLatency> const &) override;
   void operator()(Trace<ReferenceData> const &, bool is_last) override;
@@ -78,9 +81,9 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
 
   void operator()(Rest::SymbolsUpdate &) override;
 
-  void ensure_symbol_slices(size_t size);
-
   // utilities
+
+  void ensure_symbol_slices(size_t size);
 
   template <typename... Args>
   void dispatch(Args &&...);
