@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/account.hpp"
+#include "roq/kraken_futures/gateway/account.hpp"
 
 #include <algorithm>
 
@@ -10,6 +10,7 @@ using namespace std::chrono_literals;
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -33,5 +34,6 @@ std::chrono::milliseconds Account::get_nonce() {
   return nonce_;
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

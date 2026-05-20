@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/drop_copy.hpp"
+#include "roq/kraken_futures/gateway/drop_copy.hpp"
 
 #include <algorithm>
 
@@ -21,6 +21,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -686,5 +687,6 @@ void DropCopy::process_order(
   }
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

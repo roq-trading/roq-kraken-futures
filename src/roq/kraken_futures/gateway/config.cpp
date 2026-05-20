@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/config.hpp"
+#include "roq/kraken_futures/gateway/config.hpp"
 
 #include <utility>
 
@@ -10,6 +10,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -126,5 +127,6 @@ void Config::operator()(std::string_view const &key, toml::node &) {
   log::warn(R"(Unexpected: key="{}")"sv, key);
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

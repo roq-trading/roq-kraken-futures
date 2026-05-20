@@ -20,11 +20,12 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken_futures/account.hpp"
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/account.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct OrderEntry final : public web::rest::Client::Handler {
   struct Handler {
@@ -166,5 +167,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   std::string encode_buffer_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

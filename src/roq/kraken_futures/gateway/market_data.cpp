@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/market_data.hpp"
+#include "roq/kraken_futures/gateway/market_data.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -23,6 +23,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -531,5 +532,6 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
   subscribe("book"sv, symbol);
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

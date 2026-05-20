@@ -4,10 +4,11 @@
 
 #include <string_view>
 
-#include "roq/kraken_futures/settings.hpp"
+#include "roq/kraken_futures/gateway/settings.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct API final {
   struct {
@@ -26,5 +27,6 @@ struct API final {
   static API create(Settings const &);
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

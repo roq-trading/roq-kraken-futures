@@ -1,9 +1,10 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -20,5 +21,6 @@ Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
       rate_limiter{create_rate_limiter(settings)} {
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

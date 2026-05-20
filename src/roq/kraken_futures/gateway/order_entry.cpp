@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken_futures/order_entry.hpp"
+#include "roq/kraken_futures/gateway/order_entry.hpp"
 
 #include <utility>
 
@@ -28,6 +28,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -1062,5 +1063,6 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
   callback(std::as_const(order_update));  // XXX FIXME TODO include the fills
 }
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

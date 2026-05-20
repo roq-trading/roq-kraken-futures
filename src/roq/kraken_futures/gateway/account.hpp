@@ -5,12 +5,13 @@
 #include <chrono>
 #include <string>
 
-#include "roq/kraken_futures/config.hpp"
+#include "roq/kraken_futures/gateway/config.hpp"
 
 #include "roq/kraken_futures/tools/crypto.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct Account final {
   Account(Config const &, std::string_view const &name, bool use_nonce);
@@ -34,5 +35,6 @@ struct Account final {
   bool const use_nonce_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

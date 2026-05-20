@@ -13,11 +13,12 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
-#include "roq/kraken_futures/api.hpp"
-#include "roq/kraken_futures/settings.hpp"
+#include "roq/kraken_futures/gateway/api.hpp"
+#include "roq/kraken_futures/gateway/settings.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct Shared final {
   Shared(server::Dispatcher &, Settings const &);
@@ -65,5 +66,6 @@ struct Shared final {
   std::vector<Bar> bars;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

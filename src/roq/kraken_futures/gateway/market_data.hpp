@@ -22,12 +22,13 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
 #include "roq/kraken_futures/json/parser_public.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct MarketData final : public web::socket::Client::Handler, public json::ParserPublic::Handler {
   struct Handler {
@@ -129,5 +130,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   utils::unordered_set<std::string> latch_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

@@ -22,13 +22,14 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken_futures/account.hpp"
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/account.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
 #include "roq/kraken_futures/json/parser_private.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct DropCopy final : public web::socket::Client::Handler, public json::ParserPrivate::Handler {
   struct Handler {
@@ -139,5 +140,6 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   utils::unordered_map<std::string, bool> fill_symbols_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

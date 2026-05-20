@@ -22,13 +22,14 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
 #include "roq/kraken_futures/json/candles.hpp"
 #include "roq/kraken_futures/json/instruments.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
 struct Rest final : public web::rest::Client::Handler {
   struct TokenUpdate final {
@@ -115,5 +116,6 @@ struct Rest final : public web::rest::Client::Handler {
   core::Download<State> download_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq

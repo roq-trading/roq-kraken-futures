@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,23 +14,28 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/kraken_futures/account.hpp"
-#include "roq/kraken_futures/config.hpp"
-#include "roq/kraken_futures/settings.hpp"
-#include "roq/kraken_futures/shared.hpp"
+#include "roq/kraken_futures/gateway/account.hpp"
+#include "roq/kraken_futures/gateway/config.hpp"
+#include "roq/kraken_futures/gateway/settings.hpp"
+#include "roq/kraken_futures/gateway/shared.hpp"
 
-#include "roq/kraken_futures/drop_copy.hpp"
-#include "roq/kraken_futures/market_data.hpp"
-#include "roq/kraken_futures/order_entry.hpp"
-#include "roq/kraken_futures/rest.hpp"
+#include "roq/kraken_futures/gateway/drop_copy.hpp"
+#include "roq/kraken_futures/gateway/market_data.hpp"
+#include "roq/kraken_futures/gateway/order_entry.hpp"
+#include "roq/kraken_futures/gateway/rest.hpp"
 
 namespace roq {
 namespace kraken_futures {
+namespace gateway {
 
-struct Gateway final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
-  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+struct Controller final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
+  ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway const &) = delete;
+  Controller(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+
+  Controller(Controller const &) = delete;
+
+  virtual ~Controller() = default;
 
  protected:
   // server::Handler
@@ -112,5 +119,6 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   std::vector<MBPUpdate> bids_, asks_;
 };
 
+}  // namespace gateway
 }  // namespace kraken_futures
 }  // namespace roq
