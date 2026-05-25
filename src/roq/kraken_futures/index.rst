@@ -13,9 +13,8 @@
 .. |footnote-3| unicode:: U+2778
 
 
-roq-kraken-futures
-==================
-
+`roq-kraken-futures <https://github.com/roq-trading/roq-kraken-futures/>`__
+===========================================================================
 
 .. tab:: Unstable
 
@@ -452,6 +451,12 @@ Common
 * :ref:`Using Flags <abseil-cpp>`
 * :ref:`Gateway Flags <gateway-flags>`
 * :ref:`Gateway Config <gateway-config>`
+
+
+GitHub
+~~~~~~
+
+* `roq-kraken-futures <https://github.com/roq-trading/roq-kraken-futures/>`__
 
 
 Exchange
