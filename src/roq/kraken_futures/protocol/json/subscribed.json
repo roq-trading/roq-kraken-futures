@@ -1,0 +1,19 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Subscribed",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "event",
+      "type": "roq/kraken_futures/protocol/json/Event"
+    },
+    {
+      "name": "feed",
+      "type": "roq/kraken_futures/protocol/json/Feed"
+    },
+    {
+      "name": "product_ids",
+      "type": "std/string_view",
+      "array": "std/span"
+    }
+  ]
+}

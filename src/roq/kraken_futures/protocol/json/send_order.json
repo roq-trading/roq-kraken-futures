@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken_futures/protocol/json/SendOrder",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "result",
+      "type": "roq/kraken_futures/protocol/json/Result"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "sendStatus",
+      "type": "roq/kraken_futures/protocol/json/SendStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std/milliseconds"
+    }
+  ]
+}

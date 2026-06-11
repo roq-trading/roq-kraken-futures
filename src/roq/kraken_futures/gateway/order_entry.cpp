@@ -12,17 +12,17 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/kraken_futures/json/cancel_all_after_ack.hpp"
-#include "roq/kraken_futures/json/cancel_all_orders.hpp"
-#include "roq/kraken_futures/json/cancel_order.hpp"
-#include "roq/kraken_futures/json/edit_order.hpp"
-#include "roq/kraken_futures/json/rest_error.hpp"
-#include "roq/kraken_futures/json/result.hpp"
-#include "roq/kraken_futures/json/send_order.hpp"
+#include "roq/kraken_futures/protocol/json/cancel_all_after_ack.hpp"
+#include "roq/kraken_futures/protocol/json/cancel_all_orders.hpp"
+#include "roq/kraken_futures/protocol/json/cancel_order.hpp"
+#include "roq/kraken_futures/protocol/json/edit_order.hpp"
+#include "roq/kraken_futures/protocol/json/rest_error.hpp"
+#include "roq/kraken_futures/protocol/json/result.hpp"
+#include "roq/kraken_futures/protocol/json/send_order.hpp"
 
-#include "roq/kraken_futures/json/encoder.hpp"
-#include "roq/kraken_futures/json/map.hpp"
-#include "roq/kraken_futures/json/utils.hpp"
+#include "roq/kraken_futures/protocol/json/encoder.hpp"
+#include "roq/kraken_futures/protocol/json/map.hpp"
+#include "roq/kraken_futures/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -97,15 +97,15 @@ auto compute_order_event_type(auto &order_events) {
   if (std::empty(order_events)) {
     throw RuntimeError{"Unexpected"sv};
   }
-  json::OrderEventType result = json::OrderEventType::type_t{};
+  protocol::json::OrderEventType result = protocol::json::OrderEventType::type_t{};
   for (auto &item : order_events) {
-    if (result == json::OrderEventType::type_t{}) {
+    if (result == protocol::json::OrderEventType::type_t{}) {
       result = item.type;
     } else if (item.type != result) {
       throw RuntimeError{R"(Unexpected: type="{}")"sv, item};
     }
   }
-  if (result == json::OrderEventType::type_t{}) {
+  if (result == protocol::json::OrderEventType::type_t{}) {
     throw RuntimeError{"Unexpected"sv};
   }
   return result;
@@ -266,7 +266,7 @@ void OrderEntry::create_order(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, create_order] = event;
-    auto query = json::Encoder::send_order(encode_buffer_, create_order, order, ref_data, request_id);
+    auto query = protocol::json::Encoder::send_order(encode_buffer_, create_order, order, ref_data, request_id);
     auto path = shared_.api.order_management.send_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -314,10 +314,10 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
-      json::SendOrder send_order{body, decode_buffer_};
+      protocol::json::SendOrder send_order{body, decode_buffer_};
       // log::warn(R"(DEBUG send_order={})"sv, send_order);
       switch (send_order.result) {
-        using enum json::Result::type_t;
+        using enum protocol::json::Result::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           log::warn(R"(response="{}")"sv, body);
@@ -356,7 +356,7 @@ void OrderEntry::modify_order(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, modify_order] = event;
-    auto query = json::Encoder::edit_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
+    auto query = protocol::json::Encoder::edit_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
     // log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
     auto headers = account_.create_headers(path, query);
@@ -405,10 +405,10 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
-      json::EditOrder edit_order{body, decode_buffer_};
+      protocol::json::EditOrder edit_order{body, decode_buffer_};
       // log::warn(R"(DEBUG edit_order={})"sv, edit_order);
       switch (edit_order.result) {
-        using enum json::Result::type_t;
+        using enum protocol::json::Result::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           log::warn(R"(response="{}")"sv, body);
@@ -447,7 +447,7 @@ void OrderEntry::cancel_order(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
-    auto query = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
+    auto query = protocol::json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
     auto path = shared_.api.order_management.cancel_order;
     auto headers = account_.create_headers(path, query);
     auto request = web::rest::Request{
@@ -495,10 +495,10 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
-      json::CancelOrder cancel_order{body, decode_buffer_};
+      protocol::json::CancelOrder cancel_order{body, decode_buffer_};
       // log::warn(R"(DEBUG cancel_order={})"sv, cancel_order);
       switch (cancel_order.result) {
-        using enum json::Result::type_t;
+        using enum protocol::json::Result::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           log::warn(R"(response="{}")"sv, body);
@@ -607,7 +607,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     };
     auto handle_success = [&](auto &body) {
       // log::warn(R"(DEBUG body="{}")"sv, body);
-      json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
+      protocol::json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
       log::info("*** CANCELED {} ORDER(S) ***"sv, std::size(cancel_all_orders.cancel_status.order_events));
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
@@ -647,7 +647,7 @@ void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &e
       // note! no response required
     };
     auto handle_success = [&](auto &body) {
-      json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
+      protocol::json::CancelAllAfterAck cancel_all_after_ack{body, decode_buffer_};
       log::info<2>("cancel_all_after_ack={}"sv, cancel_all_after_ack);
     };
     process_response(event, handle_error, handle_success);
@@ -683,7 +683,7 @@ void OrderEntry::process_response(web::rest::Response const &response, auto erro
       case REDIRECTION:
         log::fatal("Unexpected: URL is being redirected"sv);
       case CLIENT_ERROR: {
-        json::RestError rest_error{body, decode_buffer_};
+        protocol::json::RestError rest_error{body, decode_buffer_};
         log::warn("error={}"sv, rest_error);
         auto message = [&]() {
           if (!std::empty(rest_error.errors)) {
@@ -740,13 +740,13 @@ void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::s
 template <typename Accept, typename Reject>
 void OrderEntry::process_send_order(auto &request_status, Accept accept, Reject reject) {
   switch (request_status.status) {
-    using enum json::Status::type_t;
+    using enum protocol::json::Status::type_t;
     case PLACED:
     case PARTIALLY_FILLED:  // note! have not seen this during testing, but found this enum in the docs
     case FILLED: {
       auto order_event_type = compute_order_event_type(request_status.order_events);
       switch (order_event_type) {
-        using enum json::OrderEventType::type_t;
+        using enum protocol::json::OrderEventType::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           throw RuntimeError{"Unexpected"sv};
@@ -774,13 +774,13 @@ void OrderEntry::process_send_order(auto &request_status, Accept accept, Reject 
 template <typename Accept, typename Reject>
 void OrderEntry::process_edit_order(auto &request_status, Accept accept, Reject reject) {
   switch (request_status.status) {
-    using enum json::Status::type_t;
+    using enum protocol::json::Status::type_t;
     case EDITED:
     case FILLED:
     case PARTIALLY_FILLED: {
       auto order_event_type = compute_order_event_type(request_status.order_events);
       switch (order_event_type) {
-        using enum json::OrderEventType::type_t;
+        using enum protocol::json::OrderEventType::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           throw RuntimeError{"Unexpected"sv};
@@ -809,13 +809,13 @@ void OrderEntry::process_edit_order(auto &request_status, Accept accept, Reject 
 template <typename Accept, typename Reject>
 void OrderEntry::process_cancel_order(auto &request_status, Accept accept, Reject reject) {
   switch (request_status.status) {
-    using enum json::Status::type_t;
+    using enum protocol::json::Status::type_t;
     case CANCELLED:
     case PARTIALLY_FILLED:
     case FILLED: {
       auto order_event_type = compute_order_event_type(request_status.order_events);
       switch (order_event_type) {
-        using enum json::OrderEventType::type_t;
+        using enum protocol::json::OrderEventType::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           throw RuntimeError{"Unexpected"sv};
@@ -1006,7 +1006,7 @@ void OrderEntry::process_execution(auto &request_status, Callback callback) {
   double last_traded_quantity = 0.0;
   double sum_product = 0.0;
   for (auto &order_event : request_status.order_events) {
-    if (order_event.type != json::OrderEventType::EXECUTION) {
+    if (order_event.type != protocol::json::OrderEventType::EXECUTION) {
       throw RuntimeError{"Unexpected: type={}"sv, order_event.type};
     }
     auto &order_prior_execution = order_event.order_prior_execution;

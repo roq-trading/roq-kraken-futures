@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/open_positions.hpp"
+#include "roq/kraken_futures/protocol/json/open_positions.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -33,8 +33,8 @@ TEST_CASE("json_open_positions_simple_1", "[json_open_positions]") {
                  R"(])"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::OpenPositions obj{message, buffer};
-  CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
+  protocol::json::OpenPositions obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::OPEN_POSITIONS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.positions) == 1);
   // idx 0
@@ -70,8 +70,8 @@ TEST_CASE("json_open_positions_simple_2", "[json_open_positions]") {
                  R"(])"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::OpenPositions obj{message, buffer};
-  CHECK(obj.feed == json::Feed::OPEN_POSITIONS);
+  protocol::json::OpenPositions obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::OPEN_POSITIONS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.positions) == 1);
   // idx 0

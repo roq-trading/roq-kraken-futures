@@ -1,0 +1,55 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Order",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "instrument",
+      "type": "std/string_view"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "last_update_time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    },
+    {
+      "name": "filled",
+      "type": "std/double"
+    },
+    {
+      "name": "limit_price",
+      "type": "std/double"
+    },
+    {
+      "name": "stop_price",
+      "type": "std/double"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/protocol/json/OrderType"
+    },
+    {
+      "name": "order_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cli_ord_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "direction",
+      "type": "std/int32",
+      "default": "-1"
+    },
+    {
+      "name": "reduce_only",
+      "type": "std/bool"
+    }
+  ]
+}

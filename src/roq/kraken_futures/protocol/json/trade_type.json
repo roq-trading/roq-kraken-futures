@@ -1,0 +1,21 @@
+{
+  "name": "roq/kraken_futures/protocol/json/TradeType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "fill"
+    },
+    {
+      "name": "liquidation"
+    },
+    {
+      "name": "assignment"
+    },
+    {
+      "name": "unwind"
+    },
+    {
+      "name": "coveredLiquidation"
+    }
+  ]
+}

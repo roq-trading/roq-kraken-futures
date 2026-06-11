@@ -1,0 +1,23 @@
+{
+  "name": "roq/kraken_futures/protocol/json/InstrumentType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "flexible_futures"
+    },
+    {
+      "name": "futures_inverse"
+    },
+    {
+      "name": "futures_vanilla"
+    },
+    {
+      "name": "options"
+    },
+    {
+      "raw": "spot index",
+      "name": "spot_index",
+      "comment": "TODO: REVIEW"
+    }
+  ]
+}

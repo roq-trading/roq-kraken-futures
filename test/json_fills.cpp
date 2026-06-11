@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/fills.hpp"
+#include "roq/kraken_futures/protocol/json/fills.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -36,8 +36,8 @@ TEST_CASE("json_fills_simple", "[json_fills]") {
                  R"(])"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::Fills obj{message, buffer};
-  CHECK(obj.feed == json::Feed::FILLS);
+  protocol::json::Fills obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::FILLS);
   CHECK(obj.username == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.fills) == 1);
   // idx 0
@@ -51,7 +51,7 @@ TEST_CASE("json_fills_simple", "[json_fills]") {
   CHECK(fill_0.order_id == "df2fa719-23bc-4cd7-8a84-5c3c41d75757"sv);
   CHECK(fill_0.cli_ord_id == "EwAF7gMAAQAAnNBFcdUQ"sv);
   CHECK(fill_0.fill_id == "21851c83-c490-40d0-8219-15f0c0c7a3cb"sv);
-  CHECK(fill_0.fill_type == json::FillType::MAKER);
+  CHECK(fill_0.fill_type == protocol::json::FillType::MAKER);
   CHECK(fill_0.fee_paid == 5.2e-9_a);
   CHECK(fill_0.fee_currency == "BTC"sv);
 }

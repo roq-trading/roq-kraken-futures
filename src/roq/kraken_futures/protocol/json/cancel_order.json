@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken_futures/protocol/json/CancelOrder",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "result",
+      "type": "roq/kraken_futures/protocol/json/Result"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cancelStatus",
+      "type": "roq/kraken_futures/protocol/json/CancelStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std/milliseconds"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/book.hpp"
+#include "roq/kraken_futures/protocol/json/book.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -24,10 +24,10 @@ TEST_CASE("json_book_simple", "[json_book]") {
                  R"("qty":3951.0,)"
                  R"("timestamp":1627535639684)"
                  R"(})";
-  json::Book obj{message};
-  CHECK(obj.feed == json::Feed::BOOK);
+  protocol::json::Book obj{message};
+  CHECK(obj.feed == protocol::json::Feed::BOOK);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
-  CHECK(obj.side == json::Side::BUY);
+  CHECK(obj.side == protocol::json::Side::BUY);
   CHECK(obj.seq == 1766422);
   CHECK(obj.price == 39826.0_a);
   CHECK(obj.qty == 3951.0_a);

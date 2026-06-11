@@ -1,0 +1,50 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OrderEventItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "orderId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cliOrdId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/protocol/json/OrderEventOrderType"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "side",
+      "type": "roq/kraken_futures/protocol/json/Side"
+    },
+    {
+      "name": "quantity",
+      "type": "std/double"
+    },
+    {
+      "name": "filled",
+      "type": "std/double"
+    },
+    {
+      "name": "limitPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "reduceOnly",
+      "type": "std/bool"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "lastUpdateTimestamp",
+      "type": "std/milliseconds"
+    }
+  ]
+}

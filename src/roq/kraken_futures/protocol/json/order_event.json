@@ -1,0 +1,64 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OrderEvent",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "order",
+      "type": "roq/kraken_futures/protocol/json/OrderEventItem"
+    },
+    {
+      "name": "old",
+      "type": "roq/kraken_futures/protocol/json/OrderEventItem"
+    },
+    {
+      "raw": "new",
+      "name": "new_",
+      "type": "roq/kraken_futures/protocol/json/OrderEventItem"
+    },
+    {
+      "name": "reducedQuantity",
+      "type": "std/double"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/protocol/json/OrderEventType"
+    },
+    {
+      "name": "uid",
+      "type": "std/string_view",
+      "comment": "cancelorder"
+    },
+    {
+      "name": "reason",
+      "type": "std/string_view",
+      "comment": "editorder"
+    },
+    {
+      "name": "executionId",
+      "type": "std/string_view",
+      "comment": "execution"
+    },
+    {
+      "name": "amount",
+      "type": "std/double",
+      "comment": "execution"
+    },
+    {
+      "name": "price",
+      "type": "std/double",
+      "comment": "execution"
+    },
+    {
+      "name": "orderPriorExecution",
+      "type": "roq/kraken_futures/protocol/json/OrderEventItem"
+    },
+    {
+      "name": "orderPriorEdit",
+      "type": "roq/kraken_futures/protocol/json/OrderEventItem"
+    },
+    {
+      "name": "takerReducedQuantity",
+      "type": "std/double"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Error",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "event",
+      "type": "roq/kraken_futures/protocol/json/Event"
+    },
+    {
+      "name": "message",
+      "type": "std/string_view"
+    }
+  ]
+}

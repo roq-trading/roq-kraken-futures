@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/book_snapshot.hpp"
+#include "roq/kraken_futures/protocol/json/book_snapshot.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -37,8 +37,8 @@ TEST_CASE("json_book_snapshot_simple", "[json_book_snapshot]") {
                  R"(])"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::BookSnapshot obj{message, buffer};
-  CHECK(obj.feed == json::Feed::BOOK_SNAPSHOT);
+  protocol::json::BookSnapshot obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::BOOK_SNAPSHOT);
   CHECK(obj.product_id == "FI_LTCUSD_210924"sv);
   CHECK(obj.timestamp == 1627535620727ms);
   CHECK(obj.seq == 732887);

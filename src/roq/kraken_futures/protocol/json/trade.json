@@ -1,0 +1,43 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Trade",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "feed",
+      "type": "roq/kraken_futures/protocol/json/Feed"
+    },
+    {
+      "name": "product_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "uid",
+      "type": "std/string_view"
+    },
+    {
+      "name": "side",
+      "type": "roq/kraken_futures/protocol/json/Side"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/protocol/json/TradeType"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64",
+      "comment": "subscription specific"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    }
+  ]
+}

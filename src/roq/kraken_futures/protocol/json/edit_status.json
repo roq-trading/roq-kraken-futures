@@ -1,0 +1,28 @@
+{
+  "name": "roq/kraken_futures/protocol/json/EditStatus",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "orderId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cliOrdId",
+      "type": "std/string_view",
+      "required": false
+    },
+    {
+      "name": "status",
+      "type": "roq/kraken_futures/protocol/json/Status"
+    },
+    {
+      "name": "receivedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "orderEvents",
+      "type": "roq/kraken_futures/protocol/json/OrderEvent",
+      "array": "std/span"
+    }
+  ]
+}

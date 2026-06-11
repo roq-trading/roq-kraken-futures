@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken_futures/protocol/json/CancelAllAfterAckStatus",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "currentTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "triggerTime",
+      "type": "std/milliseconds"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/rest_error.hpp"
+#include "roq/kraken_futures/protocol/json/rest_error.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -27,7 +27,7 @@ TEST_CASE("json_rest_error_error_400", "[json_rest_error]") {
                  R"("serverTime":"2021-08-02T08:06:27.896Z")"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::RestError obj{message, buffer};
+  protocol::json::RestError obj{message, buffer};
   // CHECK(obj.status == "BAD_REQUEST"sv);
   CHECK(std::size(obj.errors) == 1);
   // idx 0
@@ -49,7 +49,7 @@ TEST_CASE("json_rest_error_error_404", "[json_rest_error]") {
       R"("requestId":"7ad2fe97-69108954")"
       R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::RestError obj{message, buffer};
+  protocol::json::RestError obj{message, buffer};
   CHECK(obj.timestamp == 1627618268981ms);
   // CHECK(obj.status == 404);
   CHECK(obj.error == "Not Found"sv);

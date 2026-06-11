@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/instruments.hpp"
+#include "roq/kraken_futures/protocol/json/instruments.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -47,7 +47,7 @@ TEST_CASE("json_instruments_simple", "[json_instruments]") {
       R"("serverTime":"2021-07-28T05:32:46.371Z")"
       R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::Instruments obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::Instruments obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(std::size(obj.instruments) == 25);
 }

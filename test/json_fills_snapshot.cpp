@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/fills_snapshot.hpp"
+#include "roq/kraken_futures/protocol/json/fills_snapshot.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -28,8 +28,8 @@ TEST_CASE("json_fills_snapshot_simple", "[json_fills_snapshot]") {
       R"(])"
       R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::FillsSnapshot obj{message, buffer};
-  CHECK(obj.feed == json::Feed::FILLS_SNAPSHOT);
+  protocol::json::FillsSnapshot obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::FILLS_SNAPSHOT);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.fills) == 5);
 }

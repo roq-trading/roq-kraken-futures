@@ -1,0 +1,12 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OptionType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "call"
+    },
+    {
+      "name": "put"
+    }
+  ]
+}

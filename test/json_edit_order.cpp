@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/edit_order.hpp"
+#include "roq/kraken_futures/protocol/json/edit_order.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -57,10 +57,10 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
                  R"(})"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::EditOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::EditOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(obj.server_time == 1627648619235ms);
-  CHECK(obj.edit_status.status == json::Status::EDITED);
+  CHECK(obj.edit_status.status == protocol::json::Status::EDITED);
   CHECK(obj.edit_status.order_id == "018eb846-5962-430e-af9f-31ee03cf1460"sv);
   CHECK(obj.edit_status.received_time == 1627648619235ms);
   CHECK(std::size(obj.edit_status.order_events) == 1);
@@ -69,9 +69,9 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
   // ... old
   CHECK(event.old.order_id == "018eb846-5962-430e-af9f-31ee03cf1460"sv);
   CHECK(event.old.cli_ord_id == "2AAF6QMAAQAAHugQDIsQ"sv);
-  CHECK(event.old.type == json::OrderEventOrderType::LMT);
+  CHECK(event.old.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(event.old.symbol == "pi_xbtusd"sv);
-  CHECK(event.old.side == json::Side::BUY);
+  CHECK(event.old.side == protocol::json::Side::BUY);
   CHECK(event.old.quantity == 1.0_a);
   CHECK(event.old.filled == 0.0_a);
   CHECK(event.old.limit_price == 39033.0_a);
@@ -80,9 +80,9 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
   // ... new
   CHECK(event.new_.order_id == "018eb846-5962-430e-af9f-31ee03cf1460"sv);
   CHECK(event.new_.cli_ord_id == "2AAF6QMAAQAAHugQDIsQ"sv);
-  CHECK(event.new_.type == json::OrderEventOrderType::LMT);
+  CHECK(event.new_.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(event.new_.symbol == "pi_xbtusd"sv);
-  CHECK(event.new_.side == json::Side::BUY);
+  CHECK(event.new_.side == protocol::json::Side::BUY);
   CHECK(event.new_.quantity == 1.0_a);
   CHECK(event.new_.filled == 0.0_a);
   CHECK(event.new_.limit_price == 38981.5_a);
@@ -90,7 +90,7 @@ TEST_CASE("json_edit_order_simple", "[json_edit_order]") {
   CHECK(event.new_.last_update_timestamp == 1627648619124ms);
   // ...
   CHECK(std::isnan(event.reduced_quantity) == true);
-  CHECK(event.type == json::OrderEventType::EDIT);
+  CHECK(event.type == protocol::json::OrderEventType::EDIT);
 }
 
 TEST_CASE("json_edit_order_authentication_error", "[json_edit_order]") {
@@ -100,8 +100,8 @@ TEST_CASE("json_edit_order_authentication_error", "[json_edit_order]") {
                  R"("serverTime":"2021-07-31T04:30:20.840Z")"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::EditOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::ERROR);
+  protocol::json::EditOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::ERROR);
   CHECK(obj.error == "authenticationError"sv);
   CHECK(obj.server_time == 1627705820840ms);
 }
@@ -134,8 +134,8 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
                  R"(})"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::EditOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::EditOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(obj.server_time == 1627876310939ms);
   // edit_status
   auto &edit_status = obj.edit_status;
@@ -147,9 +147,9 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
   CHECK(order_event.uid == "f109eb54-a223-4503-99c5-00f053b9411e"sv);
   CHECK(order_event.order.order_id == "f109eb54-a223-4503-99c5-00f053b9411e"sv);
   CHECK(order_event.order.cli_ord_id == "egAF6gMAAQAAyEmOD8AQ"sv);
-  CHECK(order_event.order.type == json::OrderEventOrderType::LMT);
+  CHECK(order_event.order.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(order_event.order.symbol == "pi_xbtusd"sv);
-  CHECK(order_event.order.side == json::Side::BUY);
+  CHECK(order_event.order.side == protocol::json::Side::BUY);
   CHECK(order_event.order.quantity == 1.0_a);
   CHECK(order_event.order.filled == 0.0_a);
   CHECK(order_event.order.limit_price == 40065.0_a);
@@ -157,7 +157,7 @@ TEST_CASE("json_edit_order_edit_has_no_effect", "[json_edit_order]") {
   CHECK(order_event.order.timestamp == 1627876280856ms);
   CHECK(order_event.order.last_update_timestamp == 1627876280856ms);
   CHECK(order_event.reason == "EDIT_HAS_NO_EFFECT");
-  CHECK(order_event.type == json::OrderEventType::REJECT);
+  CHECK(order_event.type == protocol::json::OrderEventType::REJECT);
 }
 
 TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
@@ -206,12 +206,12 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
                  R"(})"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::EditOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::EditOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(obj.server_time == 1627972925376ms);
   // edit_status
   auto &edit_status = obj.edit_status;
-  CHECK(edit_status.status == json::Status::FILLED);
+  CHECK(edit_status.status == protocol::json::Status::FILLED);
   CHECK(edit_status.order_id == "4178c9d1-b033-4113-afaf-610c97631d07"sv);
   CHECK(edit_status.received_time == 1627972925376ms);
   CHECK(std::size(edit_status.order_events) == 1);
@@ -223,9 +223,9 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
   // ... order_prior_edit
   CHECK(order_event.order_prior_edit.order_id == "4178c9d1-b033-4113-afaf-610c97631d07"sv);
   CHECK(order_event.order_prior_edit.cli_ord_id == "ewAF6QMAAQAAXXO1j9YQ"sv);
-  CHECK(order_event.order_prior_edit.type == json::OrderEventOrderType::LMT);
+  CHECK(order_event.order_prior_edit.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(order_event.order_prior_edit.symbol == "pi_xbtusd"sv);
-  CHECK(order_event.order_prior_edit.side == json::Side::BUY);
+  CHECK(order_event.order_prior_edit.side == protocol::json::Side::BUY);
   CHECK(order_event.order_prior_edit.quantity == 1.0_a);
   CHECK(order_event.order_prior_edit.filled == 0.0_a);
   CHECK(order_event.order_prior_edit.limit_price == 38562.5_a);
@@ -235,9 +235,9 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
   // ... order_prior_execution
   CHECK(order_event.order_prior_execution.order_id == "4178c9d1-b033-4113-afaf-610c97631d07"sv);
   CHECK(order_event.order_prior_execution.cli_ord_id == "ewAF6QMAAQAAXXO1j9YQ"sv);
-  CHECK(order_event.order_prior_execution.type == json::OrderEventOrderType::LMT);
+  CHECK(order_event.order_prior_execution.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(order_event.order_prior_execution.symbol == "pi_xbtusd"sv);
-  CHECK(order_event.order_prior_execution.side == json::Side::BUY);
+  CHECK(order_event.order_prior_execution.side == protocol::json::Side::BUY);
   CHECK(order_event.order_prior_execution.quantity == 1.0_a);
   CHECK(order_event.order_prior_execution.filled == 0.0_a);
   CHECK(order_event.order_prior_execution.limit_price == 38652.0_a);
@@ -246,5 +246,5 @@ TEST_CASE("json_edit_order_execution", "[json_edit_order]") {
   CHECK(order_event.order_prior_execution.last_update_timestamp == 1627972925259ms);
   // ...
   CHECK(std::isnan(order_event.taker_reduced_quantity) == true);
-  CHECK(order_event.type == json::OrderEventType::EXECUTION);
+  CHECK(order_event.type == protocol::json::OrderEventType::EXECUTION);
 }

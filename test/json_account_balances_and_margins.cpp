@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/account_balances_and_margins.hpp"
+#include "roq/kraken_futures/protocol/json/account_balances_and_margins.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -33,8 +33,8 @@ TEST_CASE("json_account_balances_and_margins_simple", "[json_account_balances_an
                  R"("seq":0)"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::AccountBalancesAndMargins obj{message, buffer};
-  CHECK(obj.feed == json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
+  protocol::json::AccountBalancesAndMargins obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::ACCOUNT_BALANCES_AND_MARGINS);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.margin_accounts) == 11);
   CHECK(obj.seq == 0);

@@ -1,0 +1,127 @@
+{
+  "name": "roq/kraken_futures/protocol/json/InstrumentsItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "category",
+      "type": "std/string_view"
+    },
+    {
+      "name": "contractSize",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "contractValueTradePrecision",
+      "type": "std/int32",
+      "comment": "number"
+    },
+    {
+      "name": "fundingRateCoefficient",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "isin",
+      "type": "std/string_view"
+    },
+    {
+      "name": "lastTradingTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "marginSchedules"
+    },
+    {
+      "name": "retailMarginLevels"
+    },
+    {
+      "name": "marginLevels"
+    },
+    {
+      "name": "maxPositionSize",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "maxRelativeFundingRate",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "openingDate",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "postOnly",
+      "type": "std/bool"
+    },
+    {
+      "name": "feeScheduleUid",
+      "type": "std/string_view"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "pair",
+      "type": "std/string_view"
+    },
+    {
+      "name": "base",
+      "type": "std/string_view"
+    },
+    {
+      "name": "quote",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tags"
+    },
+    {
+      "name": "tickSize",
+      "type": "std/double",
+      "comment": "number"
+    },
+    {
+      "name": "tradeable",
+      "type": "std/bool"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken_futures/protocol/json/InstrumentType"
+    },
+    {
+      "name": "underlying",
+      "type": "std/string_view"
+    },
+    {
+      "name": "underlyingFuture",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tradfi",
+      "type": "std/bool"
+    },
+    {
+      "name": "mtf",
+      "type": "std/bool"
+    },
+    {
+      "name": "optionType",
+      "type": "roq/kraken_futures/protocol/json/OptionType",
+      "comment": "undoc"
+    },
+    {
+      "name": "strikePrice",
+      "type": "std/double",
+      "comment": "undoc"
+    },
+    {
+      "name": "impactMidSize",
+      "type": "std/double",
+      "comment": "undoc"
+    }
+  ]
+}

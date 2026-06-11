@@ -1,0 +1,21 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OrderEventOrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "lmt"
+    },
+    {
+      "name": "mkt"
+    },
+    {
+      "name": "stp"
+    },
+    {
+      "name": "take_profit"
+    },
+    {
+      "name": "ioc"
+    }
+  ]
+}

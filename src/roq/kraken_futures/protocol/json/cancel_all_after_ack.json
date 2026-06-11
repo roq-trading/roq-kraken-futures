@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken_futures/protocol/json/CancelAllAfterAck",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "result",
+      "type": "roq/kraken_futures/protocol/json/Result"
+    },
+    {
+      "name": "status",
+      "type": "roq/kraken_futures/protocol/json/CancelAllAfterAckStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    }
+  ]
+}

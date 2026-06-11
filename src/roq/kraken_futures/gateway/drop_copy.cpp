@@ -15,7 +15,7 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/kraken_futures/json/map.hpp"
+#include "roq/kraken_futures/protocol/json/map.hpp"
 
 using namespace std::literals;
 
@@ -90,7 +90,7 @@ auto compute_side(int32_t direction) -> Side {
   return {};
 }
 
-auto compute_order_status(json::Reason reason, bool is_cancel, double remaining_quantity) -> OrderStatus {
+auto compute_order_status(protocol::json::Reason reason, bool is_cancel, double remaining_quantity) -> OrderStatus {
   auto result = map(reason).template get<OrderStatus>();
   if (result != OrderStatus{}) {
     return result;
@@ -285,22 +285,22 @@ uint32_t DropCopy::download(State state) {
   return 0;
 }
 
-void DropCopy::operator()(Trace<json::Info> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Info> const &event) {
   auto &[trace_info, info] = event;
   log::info<2>("info={}"sv, info);
 }
 
-void DropCopy::operator()(Trace<json::Alert> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Alert> const &event) {
   auto &[trace_info, alert] = event;
   log::warn<1>("alert={}"sv, alert);
 }
 
-void DropCopy::operator()(Trace<json::Error> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::warn("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::Challenge> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Challenge> const &event) {
   profile_.challenge([&]() {
     auto &[trace_info, challenge] = event;
     log::info<2>("challenge={}"sv, challenge);
@@ -312,19 +312,19 @@ void DropCopy::operator()(Trace<json::Challenge> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Subscribed> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Subscribed> const &event) {
   auto &[trace_info, subscribed] = event;
   log::info<2>("subscribed={}"sv, subscribed);
 }
 
-void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Heartbeat> const &event) {
   profile_.heartbeat([&]() {
     auto &[trace_info, heartbeat] = event;
     log::info<2>("heartbeat={}"sv, heartbeat);
   });
 }
 
-void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
+void DropCopy::operator()(Trace<protocol::json::AccountBalancesAndMargins> const &event) {
   profile_.account_balances_and_margins([&]() {
     auto &[trace_info, account_balances_and_margins] = event;
     log::info<2>("account_balances_and_margins={}"sv, account_balances_and_margins);
@@ -349,7 +349,7 @@ void DropCopy::operator()(Trace<json::AccountBalancesAndMargins> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
+void DropCopy::operator()(Trace<protocol::json::OpenPositions> const &event) {
   profile_.open_positions([&]() {
     auto &[trace_info, open_positions] = event;
     log::info<2>("open_positions={}"sv, open_positions);
@@ -395,7 +395,7 @@ void DropCopy::operator()(Trace<json::OpenPositions> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
+void DropCopy::operator()(Trace<protocol::json::OpenOrdersSnapshot> const &event) {
   profile_.open_orders_snapshot([&]() {
     auto &[trace_info, open_orders_snapshot] = event;
     log::info<2>("open_orders_snapshot={}"sv, open_orders_snapshot);
@@ -406,7 +406,7 @@ void DropCopy::operator()(Trace<json::OpenOrdersSnapshot> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
+void DropCopy::operator()(Trace<protocol::json::OpenOrders> const &event) {
   profile_.open_orders([&]() {
     auto &[trace_info, open_orders] = event;
     log::info<2>("open_orders={}"sv, open_orders);
@@ -428,7 +428,7 @@ void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
+void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
   profile_.fills_snapshot([&]() {
     auto &trace_info = event.trace_info;
     auto &fills_snapshot = event.value;
@@ -476,7 +476,7 @@ void DropCopy::operator()(Trace<json::FillsSnapshot> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Fills> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
   profile_.fills([&]() {
     auto &trace_info = event.trace_info;
     auto &fills = event.value;
@@ -618,7 +618,7 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!protocol::json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -634,7 +634,7 @@ void DropCopy::process_order(
     auto &order,
     [[maybe_unused]] std::string_view const &order_id,  // XXX FIXME TODO did we forget something ???
     std::string_view const &cli_ord_id,
-    json::Reason reason,
+    protocol::json::Reason reason,
     bool is_cancel,
     TraceInfo const &trace_info,
     bool is_download) {

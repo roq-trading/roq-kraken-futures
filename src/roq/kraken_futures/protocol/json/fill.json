@@ -1,0 +1,66 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Fill",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "instrument",
+      "type": "std/string_view"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64"
+    },
+    {
+      "name": "buy",
+      "type": "std/bool"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    },
+    {
+      "name": "order_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cli_ord_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fill_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fill_type",
+      "type": "roq/kraken_futures/protocol/json/FillType"
+    },
+    {
+      "name": "fee_paid",
+      "type": "std/double"
+    },
+    {
+      "name": "fee_currency",
+      "type": "std/string_view"
+    },
+    {
+      "name": "taker_order_type",
+      "type": "std/string_view"
+    },
+    {
+      "name": "remaining_order_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "order_type",
+      "type": "std/string_view"
+    }
+  ]
+}

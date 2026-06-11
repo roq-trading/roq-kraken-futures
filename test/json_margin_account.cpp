@@ -4,7 +4,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/margin_account.hpp"
+#include "roq/kraken_futures/protocol/json/margin_account.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -25,7 +25,7 @@ TEST_CASE("json_margin_account_simple", "[json_margin_account]") {
                  R"("im":0.0,)"
                  R"("mm":0.0)"
                  R"(})";
-  json::MarginAccount obj{message};
+  protocol::json::MarginAccount obj{message};
   CHECK(obj.name == "bch"sv);
   CHECK(obj.balance == 20.0_a);
   CHECK(obj.pnl == 0.0_a);

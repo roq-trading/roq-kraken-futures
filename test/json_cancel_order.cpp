@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/cancel_order.hpp"
+#include "roq/kraken_futures/protocol/json/cancel_order.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -44,9 +44,9 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
                  R"("serverTime":"2021-07-31T04:53:14.376Z")"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::CancelOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
-  CHECK(obj.cancel_status.status == json::Status::CANCELLED);
+  protocol::json::CancelOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
+  CHECK(obj.cancel_status.status == protocol::json::Status::CANCELLED);
   CHECK(obj.cancel_status.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
   CHECK(obj.cancel_status.received_time == 1627707194376ms);
   CHECK(std::size(obj.cancel_status.order_events) == 1);
@@ -55,9 +55,9 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
   CHECK(event.uid == "85792364-8163-4e13-b62d-695e7f802e22"sv);
   CHECK(event.order.order_id == "85792364-8163-4e13-b62d-695e7f802e22"sv);
   CHECK(event.order.cli_ord_id == "DwAF6QMAAQAAxMacsJgQ"sv);
-  CHECK(event.order.type == json::OrderEventOrderType::LMT);
+  CHECK(event.order.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(event.order.symbol == "pi_xbtusd"sv);
-  CHECK(event.order.side == json::Side::BUY);
+  CHECK(event.order.side == protocol::json::Side::BUY);
   CHECK(event.order.quantity == 1.0_a);
   CHECK(event.order.filled == 0.0_a);
   CHECK(event.order.limit_price == 41936.0_a);
@@ -65,7 +65,7 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
   CHECK(event.order.timestamp == 1627707184171ms);
   CHECK(event.order.last_update_timestamp == 1627707189310ms);
   // ...
-  CHECK(event.type == json::OrderEventType::CANCEL);
+  CHECK(event.type == protocol::json::OrderEventType::CANCEL);
   // ...
   CHECK(obj.server_time == 1627707194376ms);
 }
@@ -81,9 +81,9 @@ TEST_CASE("json_cancel_order_not_found", "[json_cancel_order]") {
                  R"(})"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::CancelOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
-  CHECK(obj.cancel_status.status == json::Status::NOT_FOUND);
+  protocol::json::CancelOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
+  CHECK(obj.cancel_status.status == protocol::json::Status::NOT_FOUND);
   CHECK(obj.cancel_status.received_time == 1627890365900ms);
   CHECK(obj.server_time == 1627890365900ms);
 }

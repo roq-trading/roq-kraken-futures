@@ -1,0 +1,112 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Status",
+  "type": "enum",
+  "values": [
+    {
+      "name": "placed"
+    },
+    {
+      "name": "partiallyFilled"
+    },
+    {
+      "name": "filled"
+    },
+    {
+      "name": "cancelled"
+    },
+    {
+      "name": "edited"
+    },
+    {
+      "name": "marketSuspended"
+    },
+    {
+      "name": "marketInactive"
+    },
+    {
+      "name": "invalidPrice"
+    },
+    {
+      "name": "invalidSize"
+    },
+    {
+      "name": "tooManySmallOrders"
+    },
+    {
+      "name": "insufficientAvailableFunds"
+    },
+    {
+      "name": "wouldCauseLiquidation"
+    },
+    {
+      "name": "clientOrderIdAlreadyExist"
+    },
+    {
+      "name": "clientOrderIdTooBig"
+    },
+    {
+      "name": "maxPositionViolation"
+    },
+    {
+      "name": "outsidePriceCollar"
+    },
+    {
+      "name": "wouldIncreasePriceDislocation"
+    },
+    {
+      "name": "notFound"
+    },
+    {
+      "name": "orderForEditNotAStop"
+    },
+    {
+      "name": "orderForEditNotFound"
+    },
+    {
+      "name": "postWouldExecute"
+    },
+    {
+      "name": "iocWouldNotExecute"
+    },
+    {
+      "name": "selfFill"
+    },
+    {
+      "name": "wouldNotReducePosition"
+    },
+    {
+      "name": "marketIsPostOnly"
+    },
+    {
+      "name": "tooManyOrders"
+    },
+    {
+      "name": "fixedLeverageTooHigh"
+    },
+    {
+      "name": "clientOrderIdInvalid"
+    },
+    {
+      "name": "cannotEditTriggerPriceOfTrailingStop"
+    },
+    {
+      "name": "cannotEditLimitPriceOfTrailingStop"
+    },
+    {
+      "name": "wouldProcessAfterSpecifiedTime"
+    },
+    {
+      "name": "noOrdersToCancel",
+      "comment": "cancel all"
+    },
+    {
+      "name": "invalidOrderType"
+    },
+    {
+      "name": "invalidSide"
+    },
+    {
+      "name": "clientOrderIdTooLong"
+    }
+  ]
+}

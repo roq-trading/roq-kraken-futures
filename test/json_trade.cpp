@@ -5,7 +5,7 @@
 #include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/trade.hpp"
+#include "roq/kraken_futures/protocol/json/trade.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -27,12 +27,12 @@ TEST_CASE("json_trade_simple", "[json_trade]") {
                  R"("qty":1.0,)"
                  R"("price":136.53)"
                  R"(})";
-  json::Trade obj{message};
-  CHECK(obj.feed == json::Feed::TRADE);
+  protocol::json::Trade obj{message};
+  CHECK(obj.feed == protocol::json::Feed::TRADE);
   CHECK(obj.product_id == "PI_LTCUSD"sv);
   CHECK(obj.uid == "bee759b2-c264-4a9e-a8a6-07b60556786d"sv);
-  CHECK(obj.side == json::Side::BUY);
-  CHECK(obj.type == json::TradeType::FILL);
+  CHECK(obj.side == protocol::json::Side::BUY);
+  CHECK(obj.type == protocol::json::TradeType::FILL);
   CHECK(obj.seq == 3732);
   CHECK(obj.time == 1627483389597ms);
   CHECK(obj.qty == 1.0_a);

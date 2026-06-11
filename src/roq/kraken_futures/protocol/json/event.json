@@ -1,0 +1,30 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Event",
+  "type": "enum",
+  "values": [
+    {
+      "name": "info"
+    },
+    {
+      "name": "alert"
+    },
+    {
+      "name": "error"
+    },
+    {
+      "name": "challenge"
+    },
+    {
+      "name": "subscribed"
+    },
+    {
+      "name": "subscribed_failed"
+    },
+    {
+      "name": "unsubscribed"
+    },
+    {
+      "name": "unsubscribed_failed"
+    }
+  ]
+}

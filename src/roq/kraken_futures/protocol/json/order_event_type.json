@@ -1,0 +1,21 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OrderEventType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "PLACE"
+    },
+    {
+      "name": "EDIT"
+    },
+    {
+      "name": "CANCEL"
+    },
+    {
+      "name": "EXECUTION"
+    },
+    {
+      "name": "REJECT"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/send_order.hpp"
+#include "roq/kraken_futures/protocol/json/send_order.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -45,20 +45,20 @@ TEST_CASE("json_send_order_simple", "[json_send_order]") {
                  R"("serverTime":"2021-07-30T04:19:40.804Z")"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::SendOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::SendOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "f2af600b-5fe8-49be-8983-de874071563b"sv);
   CHECK(obj.send_status.cli_ord_id == "TgAF6QMAAQAAbl1bG4QQ"sv);
-  CHECK(obj.send_status.status == json::Status::PLACED);
+  CHECK(obj.send_status.status == protocol::json::Status::PLACED);
   CHECK(obj.send_status.received_time == 1627618780804ms);
   CHECK(std::size(obj.send_status.order_events) == 1);
   // idx 0
   auto &order_event_0 = obj.send_status.order_events[0];
   CHECK(order_event_0.order.order_id == "f2af600b-5fe8-49be-8983-de874071563b"sv);
   CHECK(order_event_0.order.cli_ord_id == "TgAF6QMAAQAAbl1bG4QQ"sv);
-  CHECK(order_event_0.order.type == json::OrderEventOrderType::LMT);
+  CHECK(order_event_0.order.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(order_event_0.order.symbol == "pi_xbtusd"sv);
-  CHECK(order_event_0.order.side == json::Side::BUY);
+  CHECK(order_event_0.order.side == protocol::json::Side::BUY);
   CHECK(order_event_0.order.quantity == 1.0_a);
   CHECK(order_event_0.order.filled == 0.0_a);
   CHECK(order_event_0.order.limit_price == 40166.0_a);
@@ -66,7 +66,7 @@ TEST_CASE("json_send_order_simple", "[json_send_order]") {
   CHECK(order_event_0.order.timestamp == 1627618780804ms);
   CHECK(order_event_0.order.last_update_timestamp == 1627618780804ms);
   CHECK(std::isnan(order_event_0.reduced_quantity) == true);
-  CHECK(order_event_0.type == json::OrderEventType::PLACE);
+  CHECK(order_event_0.type == protocol::json::OrderEventType::PLACE);
   CHECK(obj.server_time == 1627618780804ms);
 }
 
@@ -105,11 +105,11 @@ TEST_CASE("json_send_order_order_prior_execution", "[json_send_order]") {
                  R"("serverTime":"2021-08-03T05:56:30.992Z")"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::SendOrder obj{message, buffer};
-  CHECK(obj.result == json::Result::SUCCESS);
+  protocol::json::SendOrder obj{message, buffer};
+  CHECK(obj.result == protocol::json::Result::SUCCESS);
   CHECK(obj.send_status.order_id == "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
   CHECK(obj.send_status.cli_ord_id == "WwAF6QMAAQAAPOEH7dUQ"sv);
-  CHECK(obj.send_status.status == json::Status::PLACED);
+  CHECK(obj.send_status.status == protocol::json::Status::PLACED);
   CHECK(obj.send_status.received_time == 1627970190892ms);
   CHECK(std::size(obj.send_status.order_events) == 1);
   // idx 0
@@ -120,9 +120,9 @@ TEST_CASE("json_send_order_order_prior_execution", "[json_send_order]") {
   // EXPECT_EQ(order_event_0.order_prior_edit,
   CHECK(order_event_0.order_prior_execution.order_id == "9d97b7ba-4d2e-439a-97ac-a59dea6f1eff"sv);
   CHECK(order_event_0.order_prior_execution.cli_ord_id == "WwAF6QMAAQAAPOEH7dUQ"sv);
-  CHECK(order_event_0.order_prior_execution.type == json::OrderEventOrderType::LMT);
+  CHECK(order_event_0.order_prior_execution.type == protocol::json::OrderEventOrderType::LMT);
   CHECK(order_event_0.order_prior_execution.symbol == "pi_xbtusd"sv);
-  CHECK(order_event_0.order_prior_execution.side == json::Side::BUY);
+  CHECK(order_event_0.order_prior_execution.side == protocol::json::Side::BUY);
   CHECK(order_event_0.order_prior_execution.quantity == 1.0_a);
   CHECK(order_event_0.order_prior_execution.filled == 0.0_a);
   CHECK(order_event_0.order_prior_execution.limit_price == 38541.0_a);
@@ -130,6 +130,6 @@ TEST_CASE("json_send_order_order_prior_execution", "[json_send_order]") {
   CHECK(order_event_0.order_prior_execution.timestamp == 1627970190892ms);
   CHECK(order_event_0.order_prior_execution.last_update_timestamp == 1627970190892ms);
   // CHECK(order_event_0.takerReducedQuantity == 0.0_a);
-  CHECK(order_event_0.type == json::OrderEventType::EXECUTION);
+  CHECK(order_event_0.type == protocol::json::OrderEventType::EXECUTION);
   CHECK(obj.server_time == 1627970190992ms);
 }

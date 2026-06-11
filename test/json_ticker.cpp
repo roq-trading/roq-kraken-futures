@@ -4,7 +4,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/ticker.hpp"
+#include "roq/kraken_futures/protocol/json/ticker.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -37,9 +37,9 @@ TEST_CASE("json_ticker_simple", "[json_ticker]") {
                  R"("markPrice":2312.725,)"
                  R"("maturityTime":1627657200000)"
                  R"(})";
-  json::Ticker obj{message};
+  protocol::json::Ticker obj{message};
   CHECK(obj.time == 1627460663568ms);
-  CHECK(obj.feed == json::Feed::TICKER);
+  CHECK(obj.feed == protocol::json::Feed::TICKER);
   CHECK(obj.product_id == "FI_ETHUSD_210730"sv);
   CHECK(obj.bid == 2312.15_a);
   CHECK(obj.ask == 2313.3_a);
@@ -53,7 +53,7 @@ TEST_CASE("json_ticker_simple", "[json_ticker]") {
   CHECK(obj.last == 2313.05_a);
   CHECK(obj.change == 4.008723413822568_a);
   CHECK(obj.suspended == false);
-  CHECK(obj.tag == json::Tag::MONTH);
+  CHECK(obj.tag == protocol::json::Tag::MONTH);
   CHECK(obj.pair == "ETH:USD"sv);
   CHECK(obj.open_interest == 38089.0_a);
   CHECK(obj.mark_price == 2312.725_a);
@@ -88,9 +88,9 @@ TEST_CASE("json_ticker_funding_rates", "[json_ticker]") {
                  R"("relative_funding_rate_prediction":0.000874329625,)"
                  R"("next_funding_rate_time":1627473600000)"
                  R"(})";
-  json::Ticker obj{message};
+  protocol::json::Ticker obj{message};
   CHECK(obj.time == 1627462526224ms);
-  CHECK(obj.feed == json::Feed::TICKER);
+  CHECK(obj.feed == protocol::json::Feed::TICKER);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
   CHECK(obj.bid == 39780.5_a);
   CHECK(obj.ask == 39800.5_a);
@@ -106,7 +106,7 @@ TEST_CASE("json_ticker_funding_rates", "[json_ticker]") {
   CHECK(obj.funding_rate == 2.1914353639e-8_a);
   CHECK(obj.funding_rate_prediction == 2.2099858377e-8_a);
   CHECK(obj.suspended == false);
-  CHECK(obj.tag == json::Tag::PERPETUAL);
+  CHECK(obj.tag == protocol::json::Tag::PERPETUAL);
   CHECK(obj.pair == "XBT:USD"sv);
   CHECK(obj.open_interest == 32093438.0_a);
   CHECK(obj.mark_price == 39790.5_a);

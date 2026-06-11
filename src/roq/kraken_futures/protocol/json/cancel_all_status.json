@@ -1,0 +1,26 @@
+{
+  "name": "roq/kraken_futures/protocol/json/CancelAllStatus",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "receivedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "cancelOnly",
+      "type": "std/string_view"
+    },
+    {
+      "name": "status",
+      "type": "roq/kraken_futures/protocol/json/Status"
+    },
+    {
+      "name": "cancelledOrders"
+    },
+    {
+      "name": "orderEvents",
+      "type": "roq/kraken_futures/protocol/json/OrderEvent",
+      "array": "std/span"
+    }
+  ]
+}

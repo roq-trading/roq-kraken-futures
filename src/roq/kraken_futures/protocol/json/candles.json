@@ -1,0 +1,15 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Candles",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "candles",
+      "type": "roq/kraken_futures/protocol/json/CandlesItem",
+      "array": "std/span"
+    },
+    {
+      "name": "more_candles",
+      "type": "std/bool"
+    }
+  ]
+}

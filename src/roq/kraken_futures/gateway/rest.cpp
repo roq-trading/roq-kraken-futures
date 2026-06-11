@@ -14,7 +14,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/kraken_futures/json/result.hpp"
+#include "roq/kraken_futures/protocol/json/result.hpp"
 
 using namespace std::literals;
 
@@ -227,7 +227,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::Instruments instruments{body, decode_buffer_};
+        protocol::json::Instruments instruments{body, decode_buffer_};
         if (std::empty(instruments.error)) {
           Trace event_2{event, instruments};
           (*this)(event_2);
@@ -246,7 +246,7 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
   });
 }
 
-void Rest::operator()(Trace<json::Instruments> const &events) {
+void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
   auto &[trace_info, instruments] = events;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));
@@ -258,7 +258,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     auto discard = shared_.discard_symbol(item.symbol);
     auto security_type = [&]() -> SecurityType {
       switch (item.type) {
-        using enum json::InstrumentType::type_t;
+        using enum protocol::json::InstrumentType::type_t;
         case UNDEFINED_INTERNAL:
           break;
         case UNKNOWN_INTERNAL:
@@ -281,7 +281,7 @@ void Rest::operator()(Trace<json::Instruments> const &events) {
     }();
     auto option_type = [&]() -> OptionType {
       switch (item.option_type) {
-        using enum json::OptionType::type_t;
+        using enum protocol::json::OptionType::type_t;
         case UNDEFINED_INTERNAL:
           break;
         case UNKNOWN_INTERNAL:
@@ -393,7 +393,7 @@ void Rest::get_candles_ack(Trace<web::rest::Response> const &event, std::string_
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
-      json::Candles candles{body, decode_buffer_};
+      protocol::json::Candles candles{body, decode_buffer_};
       Trace event_2{event, candles};
       (*this)(event_2, symbol);
     };
@@ -401,7 +401,7 @@ void Rest::get_candles_ack(Trace<web::rest::Response> const &event, std::string_
   });
 }
 
-void Rest::operator()(Trace<json::Candles> const &events, std::string_view const &symbol) {
+void Rest::operator()(Trace<protocol::json::Candles> const &events, std::string_view const &symbol) {
   auto &[trace_info, candles] = events;
   log::info<4>("candles={}"sv, candles);
   auto &bars = shared_.bars;

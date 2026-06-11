@@ -1,0 +1,15 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "limit"
+    },
+    {
+      "name": "take_profit"
+    },
+    {
+      "name": "stop"
+    }
+  ]
+}

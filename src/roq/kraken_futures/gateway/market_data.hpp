@@ -24,13 +24,13 @@
 
 #include "roq/kraken_futures/gateway/shared.hpp"
 
-#include "roq/kraken_futures/json/parser_public.hpp"
+#include "roq/kraken_futures/protocol/json/parser_public.hpp"
 
 namespace roq {
 namespace kraken_futures {
 namespace gateway {
 
-struct MarketData final : public web::socket::Client::Handler, public json::ParserPublic::Handler {
+struct MarketData final : public web::socket::Client::Handler, public protocol::json::ParserPublic::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -79,21 +79,21 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void unsubscribe(std::string_view const &feed, std::span<T> const &product_ids);
   void unsubscribe(std::string_view const &feed, std::string_view const &symbol) { unsubscribe(feed, std::span{&symbol, 1}); }
 
-  // json::ParserPublic::Handler
+  // protocol::json::ParserPublic::Handler
 
-  void operator()(Trace<json::Info> const &) override;
-  void operator()(Trace<json::Alert> const &) override;
-  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<protocol::json::Info> const &) override;
+  void operator()(Trace<protocol::json::Alert> const &) override;
+  void operator()(Trace<protocol::json::Error> const &) override;
 
-  void operator()(Trace<json::Subscribed> const &) override;
+  void operator()(Trace<protocol::json::Subscribed> const &) override;
 
-  void operator()(Trace<json::Heartbeat> const &) override;
+  void operator()(Trace<protocol::json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::Ticker> const &) override;
-  void operator()(Trace<json::BookSnapshot> const &) override;
-  void operator()(Trace<json::Book> const &) override;
-  void operator()(Trace<json::TradeSnapshot> const &) override;
-  void operator()(Trace<json::Trade> const &) override;
+  void operator()(Trace<protocol::json::Ticker> const &) override;
+  void operator()(Trace<protocol::json::BookSnapshot> const &) override;
+  void operator()(Trace<protocol::json::Book> const &) override;
+  void operator()(Trace<protocol::json::TradeSnapshot> const &) override;
+  void operator()(Trace<protocol::json::Trade> const &) override;
 
  private:
   void parse(std::string_view const &message);

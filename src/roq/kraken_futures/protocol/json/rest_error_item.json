@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken_futures/protocol/json/RestErrorItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "code",
+      "type": "std/int32"
+    },
+    {
+      "name": "message",
+      "type": "std/string_view"
+    }
+  ]
+}

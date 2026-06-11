@@ -24,8 +24,8 @@
 
 #include "roq/kraken_futures/gateway/shared.hpp"
 
-#include "roq/kraken_futures/json/candles.hpp"
-#include "roq/kraken_futures/json/instruments.hpp"
+#include "roq/kraken_futures/protocol/json/candles.hpp"
+#include "roq/kraken_futures/protocol/json/instruments.hpp"
 
 namespace roq {
 namespace kraken_futures {
@@ -80,11 +80,11 @@ struct Rest final : public web::rest::Client::Handler {
 
   void get_instruments();
   void get_instruments_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Instruments> const &);
+  void operator()(Trace<protocol::json::Instruments> const &);
 
   void get_candles(std::string_view const &symbol);
   void get_candles_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::Candles> const &, std::string_view const &symbol);
+  void operator()(Trace<protocol::json::Candles> const &, std::string_view const &symbol);
 
   void check_request_queue(std::chrono::nanoseconds now);
 

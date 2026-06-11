@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/trade_snapshot.hpp"
+#include "roq/kraken_futures/protocol/json/trade_snapshot.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -26,8 +26,8 @@ TEST_CASE("json_trade_snapshot_simple", "[json_trade_snapshot]") {
       R"(])"
       R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::TradeSnapshot obj{message, buffer};
-  CHECK(obj.feed == json::Feed::TRADE_SNAPSHOT);
+  protocol::json::TradeSnapshot obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::TRADE_SNAPSHOT);
   CHECK(obj.product_id == "PI_XBTUSD"sv);
   CHECK(std::size(obj.trades) == 3);
 }

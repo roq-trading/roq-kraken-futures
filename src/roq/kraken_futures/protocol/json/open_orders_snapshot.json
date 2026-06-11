@@ -1,0 +1,19 @@
+{
+  "name": "roq/kraken_futures/protocol/json/OpenOrdersSnapshot",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "feed",
+      "type": "roq/kraken_futures/protocol/json/Feed"
+    },
+    {
+      "name": "account",
+      "type": "std/string_view"
+    },
+    {
+      "name": "orders",
+      "type": "roq/kraken_futures/protocol/json/Order",
+      "array": "std/span"
+    }
+  ]
+}

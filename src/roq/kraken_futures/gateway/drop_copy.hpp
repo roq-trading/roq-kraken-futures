@@ -25,13 +25,13 @@
 #include "roq/kraken_futures/gateway/account.hpp"
 #include "roq/kraken_futures/gateway/shared.hpp"
 
-#include "roq/kraken_futures/json/parser_private.hpp"
+#include "roq/kraken_futures/protocol/json/parser_private.hpp"
 
 namespace roq {
 namespace kraken_futures {
 namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, public json::ParserPrivate::Handler {
+struct DropCopy final : public web::socket::Client::Handler, public protocol::json::ParserPrivate::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -75,31 +75,37 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void subscribe();
   void subscribe(std::string_view const &feed);
 
-  // json::ParserPrivate::Handler
+  // protocol::json::ParserPrivate::Handler
 
-  void operator()(Trace<json::Info> const &) override;
-  void operator()(Trace<json::Alert> const &) override;
-  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<protocol::json::Info> const &) override;
+  void operator()(Trace<protocol::json::Alert> const &) override;
+  void operator()(Trace<protocol::json::Error> const &) override;
 
-  void operator()(Trace<json::Challenge> const &) override;
+  void operator()(Trace<protocol::json::Challenge> const &) override;
 
-  void operator()(Trace<json::Subscribed> const &) override;
+  void operator()(Trace<protocol::json::Subscribed> const &) override;
 
-  void operator()(Trace<json::Heartbeat> const &) override;
+  void operator()(Trace<protocol::json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::AccountBalancesAndMargins> const &) override;
-  void operator()(Trace<json::OpenPositions> const &) override;
+  void operator()(Trace<protocol::json::AccountBalancesAndMargins> const &) override;
+  void operator()(Trace<protocol::json::OpenPositions> const &) override;
 
-  void operator()(Trace<json::OpenOrdersSnapshot> const &) override;
-  void operator()(Trace<json::OpenOrders> const &) override;
+  void operator()(Trace<protocol::json::OpenOrdersSnapshot> const &) override;
+  void operator()(Trace<protocol::json::OpenOrders> const &) override;
 
-  void operator()(Trace<json::FillsSnapshot> const &) override;
-  void operator()(Trace<json::Fills> const &) override;
+  void operator()(Trace<protocol::json::FillsSnapshot> const &) override;
+  void operator()(Trace<protocol::json::Fills> const &) override;
 
   // helpers
 
   void process_order(
-      auto &order, std::string_view const &order_id, std::string_view const &cli_ord_id, json::Reason, bool is_cancel, TraceInfo const &, bool is_download);
+      auto &order,
+      std::string_view const &order_id,
+      std::string_view const &cli_ord_id,
+      protocol::json::Reason,
+      bool is_cancel,
+      TraceInfo const &,
+      bool is_download);
 
  private:
   void parse(std::string_view const &message);

@@ -1,0 +1,21 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Tag",
+  "type": "enum",
+  "values": [
+    {
+      "name": "month"
+    },
+    {
+      "name": "quarter"
+    },
+    {
+      "name": "semiannual"
+    },
+    {
+      "name": "perpetual"
+    },
+    {
+      "name": "week"
+    }
+  ]
+}

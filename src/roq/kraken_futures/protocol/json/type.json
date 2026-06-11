@@ -1,0 +1,13 @@
+{
+  "name": "roq/kraken_futures/protocol/json/Type",
+  "type": "enum",
+  "values": [
+    {
+      "name": "futures_inverse"
+    },
+    {
+      "name": "spot_index",
+      "comment": "can't parse 'spot index' (with space)"
+    }
+  ]
+}

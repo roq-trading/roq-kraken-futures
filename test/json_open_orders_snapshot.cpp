@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken_futures/json/open_orders_snapshot.hpp"
+#include "roq/kraken_futures/protocol/json/open_orders_snapshot.hpp"
 
 using namespace roq;
 using namespace roq::kraken_futures;
@@ -35,8 +35,8 @@ TEST_CASE("json_open_orders_snapshot_simple", "[json_open_orders_snapshot]") {
                  R"(])"
                  R"(})";
   core::json::BufferStack buffer{8192, 1};
-  json::OpenOrdersSnapshot obj{message, buffer};
-  CHECK(obj.feed == json::Feed::OPEN_ORDERS_SNAPSHOT);
+  protocol::json::OpenOrdersSnapshot obj{message, buffer};
+  CHECK(obj.feed == protocol::json::Feed::OPEN_ORDERS_SNAPSHOT);
   CHECK(obj.account == "bdb7a134-386a-45c0-b8e5-76a75537df4c"sv);
   CHECK(std::size(obj.orders) == 1);
   // idx 0
@@ -48,7 +48,7 @@ TEST_CASE("json_open_orders_snapshot_simple", "[json_open_orders_snapshot]") {
   CHECK(order.filled == 0.0_a);
   CHECK(order.limit_price == 39528.0_a);
   CHECK(order.stop_price == 0.0_a);
-  CHECK(order.type == json::OrderType::LIMIT);
+  CHECK(order.type == protocol::json::OrderType::LIMIT);
   CHECK(order.order_id == "494f7cb0-6936-495f-a0c5-663ad9b9fbdd"sv);
   CHECK(order.direction == 0);
   CHECK(order.reduce_only == false);

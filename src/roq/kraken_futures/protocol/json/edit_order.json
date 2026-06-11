@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken_futures/protocol/json/EditOrder",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "result",
+      "type": "roq/kraken_futures/protocol/json/Result"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "editStatus",
+      "type": "roq/kraken_futures/protocol/json/EditStatus"
+    },
+    {
+      "name": "serverTime",
+      "type": "std/milliseconds"
+    }
+  ]
+}
