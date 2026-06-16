@@ -494,7 +494,12 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
       //   an aggressive order modification will already have had an "open" order and it will correctly be reported as completed on this channel
       if (!std::isnan(remaining_quantity) && utils::is_zero(remaining_quantity)) {
         auto is_create = false;
-        shared_.find_order(client_order_id, [&](auto &order) { is_create = order.max_response_version == 0; });
+        auto lookup = server::oms::Lookup{
+            .request_id = {},
+            .external_order_id = {},
+            .client_order_id = client_order_id,
+        };
+        shared_.find_order(lookup, [&](auto &order) { is_create = order.max_response_version == 0; });
         if (is_create) {
           auto order_update = server::oms::OrderUpdate{
               .account = account_.name,
