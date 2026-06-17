@@ -463,7 +463,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
           .update_time_utc = item.time,
           .external_account = {},
           .external_order_id = item.order_id,
-          .client_order_id = {},
+          .client_order_id = item.cli_ord_id,
           .fills = {&fill, 1},
           .routing_id = {},
           .update_type = UpdateType::SNAPSHOT,
@@ -471,7 +471,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, item.cli_ord_id);
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
     }
   });
 }
@@ -538,7 +538,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
               .sending_time_utc = {},
           };
           // log::warn("DEBUG order_update={}"sv, order_update);
-          if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+          if (shared_.update_order(stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
           } else {
             log::warn("*** EXTERNAL ORDER ***"sv);
           }
@@ -558,7 +558,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
           .update_time_utc = update_time_utc,
           .external_account = {},
           .external_order_id = external_order_id,
-          .client_order_id = {},
+          .client_order_id = client_order_id,
           .fills = shared_.fills,
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,
@@ -566,7 +566,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, client_order_id);
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
     };
     shared_.fills.clear();
     for (auto &item : fills.fills) {
@@ -684,8 +684,7 @@ void DropCopy::process_order(
       .sending_time_utc = {},
   };
   // log::warn("DEBUG order_update={}"sv, order_update);
-  auto request_id = cli_ord_id;
-  if (shared_.update_order(request_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
     log::warn("order={}"sv, order);

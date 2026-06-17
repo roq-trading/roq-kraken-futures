@@ -301,7 +301,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           .version = version,
           .request_id = request_id,
           .external_order_id = {},
-          .client_order_id = {},
+          .client_order_id = request_id,
           .quantity = NaN,
           .price = NaN,
       };
@@ -730,9 +730,9 @@ void OrderEntry::operator()(Trace<server::oms::Response> const &event, uint8_t u
   }
 }
 
-void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
+void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event) {
   auto &[trace_info, order_update] = event;
-  if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
   }
