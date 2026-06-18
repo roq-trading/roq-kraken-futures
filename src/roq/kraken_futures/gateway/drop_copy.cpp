@@ -538,10 +538,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
               .sending_time_utc = {},
           };
           // log::warn("DEBUG order_update={}"sv, order_update);
-          if (shared_.update_order(stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
-          } else {
-            log::warn("*** EXTERNAL ORDER ***"sv);
-          }
+          create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id_);
         }
       }
       auto trade_update = TradeUpdate{
@@ -684,11 +681,7 @@ void DropCopy::process_order(
       .sending_time_utc = {},
   };
   // log::warn("DEBUG order_update={}"sv, order_update);
-  if (shared_.update_order(stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {})) {
-  } else {
-    log::warn("*** EXTERNAL ORDER ***"sv);
-    log::warn("order={}"sv, order);
-  }
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id_);
 }
 
 }  // namespace gateway

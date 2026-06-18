@@ -17,7 +17,7 @@ auto create_rate_limiter(auto &settings) {
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, api{API::create(settings)}, symbols{settings.ws.max_subscriptions_per_stream},
+    : dispatcher{dispatcher}, settings{settings}, api{API::create(settings)}, symbols{settings.ws.max_subscriptions_per_stream},
       rate_limiter{create_rate_limiter(settings)} {
 }
 
