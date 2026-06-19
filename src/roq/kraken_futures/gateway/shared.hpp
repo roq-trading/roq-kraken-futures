@@ -25,38 +25,20 @@ struct Shared final {
 
   Shared(Shared const &) = delete;
 
-  auto discard_symbol(std::string_view const &name) const { return dispatcher.discard_symbol(name); }
-
-  template <typename... Args>
-  auto find_order(Args &&...args) {
-    return dispatcher.find_order(std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  auto operator()(Args &&...args) {
-    return dispatcher(std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  auto get_ref_data(Args &&...args) {
-    return dispatcher.get_ref_data(std::forward<Args>(args)...);
-  }
-
- public:
-  std::vector<MBPUpdate> bids, asks;
-  std::vector<Fill> fills;
-
   server::Dispatcher &dispatcher;
 
- public:
   Settings const &settings;
   API const api;
+
   core::Symbols symbols;
   utils::unordered_set<std::string> all_symbols;
 
   core::limit::RateLimiter rate_limiter;
+
   core::TimerQueue<std::string> time_series_request_queue;
 
+  std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
+  std::vector<Fill> fills;
   std::vector<Bar> bars;
 };
 

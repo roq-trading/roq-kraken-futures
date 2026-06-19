@@ -145,7 +145,7 @@ void Rest::operator()(ConnectionStatus connection_status, std::string_view const
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 void Rest::operator()(Trace<web::rest::Client::Connected> const &) {
@@ -171,7 +171,7 @@ void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
       .account = {},
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -255,7 +255,7 @@ void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
   size_t counter = {};
   for (auto &item : instruments.instruments) {
     log::info<2>("item={}"sv, item);
-    auto discard = shared_.discard_symbol(item.symbol);
+    auto discard = shared_.dispatcher.discard_symbol(item.symbol);
     auto security_type = [&]() -> SecurityType {
       switch (item.type) {
         using enum protocol::json::InstrumentType::type_t;
@@ -334,7 +334,7 @@ void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
         .sending_time_utc = {},
         .discard = discard,
     };
-    create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, reference_data, true);
     if (discard) {
       continue;
     }
@@ -348,7 +348,7 @@ void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, market_status, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, market_status, true);
     if (shared_.all_symbols.emplace(item.symbol).second) {  // only include new
       symbols.emplace_back(item.symbol);
     }
@@ -433,7 +433,7 @@ void Rest::operator()(Trace<protocol::json::Candles> const &events, std::string_
       .update_type = UpdateType::SNAPSHOT,
       .exchange_time_utc = {},  // XXX FIXME
   };
-  create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, time_series_update, true);
 }
 
 void Rest::check_request_queue(std::chrono::nanoseconds now) {

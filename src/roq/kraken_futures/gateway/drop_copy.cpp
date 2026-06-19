@@ -227,7 +227,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
       .account = account_.name,
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -258,7 +258,7 @@ void DropCopy::operator()(ConnectionStatus connection_status, std::string_view c
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 uint32_t DropCopy::download(State state) {
@@ -344,7 +344,7 @@ void DropCopy::operator()(Trace<protocol::json::AccountBalancesAndMargins> const
           .exchange_time_utc = {},
           .sending_time_utc = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, funds_update, true);
     }
   });
 }
@@ -370,7 +370,7 @@ void DropCopy::operator()(Trace<protocol::json::OpenPositions> const &event) {
           .exchange_time_utc = {},
           .sending_time_utc = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, position_update, true);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, position_update, true);
     }
     // note! workaround because zero-positions aren't reported
     for (auto &[symbol, found] : fill_symbols_) {
@@ -388,7 +388,7 @@ void DropCopy::operator()(Trace<protocol::json::OpenPositions> const &event) {
             .exchange_time_utc = {},
             .sending_time_utc = {},
         };
-        create_trace_and_dispatch(handler_, trace_info, position_update, true);
+        create_trace_and_dispatch(shared_.dispatcher, trace_info, position_update, true);
       }
       found = false;  // note!
     }
@@ -436,7 +436,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
     for (auto &item : fills_snapshot.fills) {
       fill_symbols_.try_emplace(item.instrument);  // note!
       auto side = item.buy ? Side::BUY : Side::SELL;
-      auto ref_data = shared_.get_ref_data(shared_.settings.exchange, item.instrument);
+      auto ref_data = shared_.dispatcher.get_ref_data(shared_.settings.exchange, item.instrument);
       auto profit_loss_amount = utils::compute_profit_loss_amount(side, item.qty, item.price, ref_data.multiplier);
       auto fill = Fill{
           .external_trade_id = item.fill_id,
@@ -471,7 +471,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_update, true, SOURCE_NONE);
     }
   });
 }
@@ -499,7 +499,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
             .external_order_id = {},
             .client_order_id = client_order_id,
         };
-        shared_.find_order(lookup, [&](auto &order) { is_create = order.max_response_version == 0; });
+        shared_.dispatcher.find_order(lookup, [&](auto &order) { is_create = order.max_response_version == 0; });
         if (is_create) {
           auto order_update = server::oms::OrderUpdate{
               .account = account_.name,
@@ -563,7 +563,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_update, true, SOURCE_NONE);
     };
     shared_.fills.clear();
     for (auto &item : fills.fills) {
@@ -582,7 +582,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
         remaining_quantity = NaN;
         shared_.fills.clear();
         fill_symbols_.try_emplace(symbol);  // note!
-        auto ref_data = shared_.get_ref_data(shared_.settings.exchange, symbol);
+        auto ref_data = shared_.dispatcher.get_ref_data(shared_.settings.exchange, symbol);
         multiplier = ref_data.multiplier;
       }
       update_time_utc = std::max(update_time_utc, item.time);

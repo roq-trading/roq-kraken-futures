@@ -71,20 +71,7 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
 
   void operator()(metrics::Writer &) const override;
 
-  // streams
-
-  void operator()(Trace<StreamStatus> const &) override;
-  void operator()(Trace<ExternalLatency> const &) override;
-  void operator()(Trace<ReferenceData> const &, bool is_last) override;
-  void operator()(Trace<MarketStatus> const &, bool is_last) override;
-  void operator()(Trace<TopOfBook> const &, bool is_last) override;
-  void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) override;
-  void operator()(Trace<TradeSummary> const &, bool is_last) override;
-  void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
-  void operator()(Trace<TimeSeriesUpdate> const &, bool is_last) override;
-  void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id) override;
-  void operator()(Trace<FundsUpdate> const &, bool is_last) override;
-  void operator()(Trace<PositionUpdate> const &, bool is_last) override;
+  // Rest::Handler
 
   void operator()(Rest::SymbolsUpdate &) override;
 
@@ -115,8 +102,6 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
   utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> const order_entry_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> const drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;
-  // cache
-  std::vector<MBPUpdate> bids_, asks_;
 };
 
 }  // namespace gateway

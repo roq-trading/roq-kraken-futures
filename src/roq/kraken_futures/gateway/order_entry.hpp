@@ -28,10 +28,7 @@ namespace kraken_futures {
 namespace gateway {
 
 struct OrderEntry final : public web::rest::Client::Handler {
-  struct Handler {
-    virtual void operator()(Trace<StreamStatus> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency> const &) = 0;
-  };
+  struct Handler {};
 
   OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Account &, Shared &);
 
