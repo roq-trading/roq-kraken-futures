@@ -3,8 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <vector>
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -34,8 +32,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   OrderEntry(OrderEntry const &) = delete;
 
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
-
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
@@ -59,14 +55,24 @@ struct OrderEntry final : public web::rest::Client::Handler {
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
  protected:
+  // web::rest::Client::Handler
+
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
 
+  // helpers
+
+  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
+
+  // create-order
 
   void create_order(Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id);
   void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
+
+  // modify-order
 
   void modify_order(
       Event<ModifyOrder> const &,
@@ -76,6 +82,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
       std::string_view const &previous_request_id);
   void modify_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
+  // cancel-order
+
   void cancel_order(
       Event<CancelOrder> const &,
       server::oms::Order const &,
@@ -84,11 +92,17 @@ struct OrderEntry final : public web::rest::Client::Handler {
       std::string_view const &previous_request_id);
   void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
+  // cancel-all-orders
+
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
   void cancel_all_orders_ack(Trace<web::rest::Response> const &, std::string_view const &request_id);
 
+  // cancel-all-orders-after
+
   void cancel_all_orders_after(std::chrono::nanoseconds timeout);
   void cancel_all_orders_after_ack(Trace<web::rest::Response> const &);
+
+  // helpers
 
   enum class State {
     UNDEFINED = 0,
@@ -98,8 +112,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   uint32_t download(State);
 
   void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
-
-  // helpers
 
   template <typename Accept, typename Reject>
   void process_send_order(auto &request_status, Accept, Reject);

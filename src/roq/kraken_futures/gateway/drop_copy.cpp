@@ -2,18 +2,13 @@
 
 #include "roq/kraken_futures/gateway/drop_copy.hpp"
 
-#include <algorithm>
-
 #include "roq/mask.hpp"
 
 #include "roq/utils/common.hpp"
-#include "roq/utils/update.hpp"
 
 #include "roq/utils/exceptions/unhandled.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
-
-#include "roq/web/socket/client.hpp"
 
 #include "roq/kraken_futures/protocol/json/map.hpp"
 

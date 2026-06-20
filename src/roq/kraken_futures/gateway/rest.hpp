@@ -3,10 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <vector>
-
-#include "roq/utils/container.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -49,8 +45,6 @@ struct Rest final : public web::rest::Client::Handler {
 
   Rest(Rest const &) = delete;
 
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
-
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
@@ -58,9 +52,15 @@ struct Rest final : public web::rest::Client::Handler {
   void operator()(metrics::Writer &) const;
 
  protected:
+  // web::rest::Client::Handler
+
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
+
+  // helpers
+
+  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
@@ -72,13 +72,19 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(State);
 
+  // instruments
+
   void get_instruments();
   void get_instruments_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::Instruments> const &);
 
+  // candles
+
   void get_candles(std::string_view const &symbol);
   void get_candles_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<protocol::json::Candles> const &, std::string_view const &symbol);
+
+  // helpers
 
   void check_request_queue(std::chrono::nanoseconds now);
 

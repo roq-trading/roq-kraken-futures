@@ -3,8 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <vector>
 
 #include "roq/utils/container.hpp"
 
@@ -45,6 +43,8 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(metrics::Writer &) const;
 
  protected:
+  // web::socket::Client::Handler
+
   void operator()(web::socket::Client::Connected const &) override;
   void operator()(web::socket::Client::Disconnected const &) override;
   void operator()(web::socket::Client::Ready const &) override;
@@ -52,6 +52,8 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(web::socket::Client::Latency const &) override;
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
+
+  // helpers
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
