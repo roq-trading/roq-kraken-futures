@@ -425,8 +425,7 @@ void DropCopy::operator()(Trace<protocol::json::OpenOrders> const &event) {
 
 void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
   profile_.fills_snapshot([&]() {
-    auto &trace_info = event.trace_info;
-    auto &fills_snapshot = event.value;
+    auto &[trace_info, fills_snapshot] = event;
     log::info<2>("fills_snapshot={}"sv, fills_snapshot);
     for (auto &item : fills_snapshot.fills) {
       fill_symbols_.try_emplace(item.instrument);  // note!
@@ -473,8 +472,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
 
 void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
   profile_.fills([&]() {
-    auto &trace_info = event.trace_info;
-    auto &fills = event.value;
+    auto &[trace_info, fills] = event;
     log::info<2>("fills={}"sv, fills);
     // log::warn("DEBUG fills={}"sv, fills);
     std::string_view symbol, external_order_id, client_order_id;
