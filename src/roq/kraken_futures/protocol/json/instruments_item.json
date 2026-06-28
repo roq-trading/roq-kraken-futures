@@ -122,6 +122,11 @@
       "name": "impactMidSize",
       "type": "std/double",
       "comment": "undoc"
+    },
+    {
+      "name": "isExpired",
+      "type": "std/bool",
+      "comment": "undoc"
     }
   ]
 }
