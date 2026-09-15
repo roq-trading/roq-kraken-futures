@@ -303,6 +303,7 @@ void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
         .description = {},
         .security_type = security_type,
         .external_security_id = {},
+        .market_segment = {},
         .cfi_code = {},
         .base_currency = item.base,
         .quote_currency = item.quote,
