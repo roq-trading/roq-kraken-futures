@@ -505,6 +505,7 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
               .order_type = {},
               .time_in_force = {},
               .execution_instructions = {},
+              .execution_destination = {},
               .create_time_utc = {},
               .update_time_utc = update_time_utc,
               .external_account = {},
@@ -648,6 +649,7 @@ void DropCopy::process_order(
       .order_type = map(order.type),
       .time_in_force = TimeInForce::GTC,  // note! assumption
       .execution_instructions = {},
+      .execution_destination = {},
       .create_time_utc = order.time,
       .update_time_utc = order.last_update_time,
       .external_account = {},
