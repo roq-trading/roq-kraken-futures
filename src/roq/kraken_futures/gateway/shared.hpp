@@ -16,6 +16,8 @@
 #include "roq/kraken_futures/gateway/api.hpp"
 #include "roq/kraken_futures/gateway/settings.hpp"
 
+#include "roq/kraken_futures/tools/rate_limit.hpp"
+
 namespace roq {
 namespace kraken_futures {
 namespace gateway {
@@ -29,6 +31,8 @@ struct Shared final {
 
   Settings const &settings;
   API const api;
+
+  tools::RateLimit rate_limit;
 
   core::Symbols symbols;
   utils::unordered_set<std::string> all_symbols;

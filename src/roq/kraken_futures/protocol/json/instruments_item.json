@@ -127,6 +127,31 @@
       "name": "isExpired",
       "type": "std/bool",
       "comment": "undoc"
+    },
+    {
+      "name": "platformsPermitted"
+    },
+    {
+      "name": "countriesBanned"
+    },
+    {
+      "name": "makerProtectionMillis",
+      "type": "std/int32"
+    },
+    {
+      "name": "rebateLevels"
+    },
+    {
+      "name": "maxOpenInterestUsd",
+      "type": "std/double"
+    },
+    {
+      "name": "description",
+      "type": "std/string_view"
+    },
+    {
+      "name": "minRelativeFundingRate",
+      "type": "std/double"
     }
   ]
 }
