@@ -111,7 +111,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   uint32_t download(State);
 
-  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
+  void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
   template <typename Accept, typename Reject>
   void process_send_order(auto &request_status, Accept, Reject);
