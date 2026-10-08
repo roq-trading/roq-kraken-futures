@@ -14,11 +14,13 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/core/download.hpp"
+#include "roq/core/download_2.hpp"
 
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
+
+#include "roq/server/stream.hpp"
 
 #include "roq/kraken_futures/gateway/account.hpp"
 #include "roq/kraken_futures/gateway/shared.hpp"
@@ -29,18 +31,27 @@ namespace roq {
 namespace kraken_futures {
 namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, public protocol::json::ParserPrivate::Handler {
+struct DropCopy final : public Base<DropCopy>, public server::Stream, public web::socket::Client::Handler, public protocol::json::ParserPrivate::Handler {
   struct Handler {};
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  DropCopy(DropCopy const &) = delete;
+  // protected:
+  friend base_type;
 
-  void operator()(Event<Start> const &);
-  void operator()(Event<Stop> const &);
-  void operator()(Event<Timer> const &);
+  // server::Stream
 
-  void operator()(metrics::Writer &) const;
+  uint16_t stream_id() const override { return stream_id_; }
+
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
+
+  void operator()(Event<Start> const &) override;
+  void operator()(Event<Stop> const &) override;
+  void operator()(Event<Timer> const &) override;
+
+  void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
 
  protected:
   // web::socket::Client::Handler
@@ -53,9 +64,7 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(Trace<web::socket::Text> const &) override;
   void operator()(Trace<web::socket::Binary> const &) override;
 
-  // helpers
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
+  // core::Download
 
   enum class State {
     UNDEFINED = 0,
@@ -64,12 +73,7 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
     DONE,
   };
 
-  uint32_t download(State);
-
-  void get_challenge();
-
-  void subscribe();
-  void subscribe(std::string_view const &feed);
+  int32_t download(Trace<State> const &);
 
   // protocol::json::ParserPrivate::Handler
 
@@ -93,6 +97,11 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(Trace<protocol::json::Fills> const &) override;
 
   // helpers
+
+  void get_challenge();
+
+  void subscribe();
+  void subscribe(std::string_view const &feed);
 
   void process_order(
       auto &order,
@@ -134,7 +143,7 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus connection_status_ = {};
-  core::Download<State> download_;
+  core::Download2<State> download_;
   // challenge
   std::string original_challenge_;
   std::string signed_challenge_;

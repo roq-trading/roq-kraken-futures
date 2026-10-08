@@ -123,8 +123,10 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      account_{account}, shared_{shared}, download_{shared.settings.ws.request_timeout, [this](auto state) { return download(state); }} {
+      account_{account}, shared_{shared}, download_{shared.settings.ws.request_timeout, [this](auto &event) { return download(event); }} {
 }
+
+// server::Stream
 
 void DropCopy::operator()(Event<Start> const &) {
   (*connection_).start();
@@ -135,7 +137,8 @@ void DropCopy::operator()(Event<Stop> const &) {
 }
 
 void DropCopy::operator()(Event<Timer> const &event) {
-  (*connection_).refresh(event.value.now);
+  auto &[message_info, timer] = event;
+  (*connection_).refresh(timer.now);
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {
@@ -170,49 +173,53 @@ void DropCopy::get_challenge() {
   (*connection_).send_text(message);
 }
 
-void DropCopy::subscribe() {
-  subscribe("account_balances_and_margins"sv);  // XXX FIXME TODO doesn't appear to exist anymore
-  subscribe("open_positions"sv);
-  subscribe("open_orders"sv);
-  subscribe("fills"sv);
+void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
+  connection_status_ = connection_status;
+  auto stream_status = StreamStatus{
+      .stream_id = stream_id_,
+      .account = account_.name,
+      .supports = SUPPORTS,
+      .transport = Transport::TCP,
+      .protocol = Protocol::WS,
+      .encoding = {Encoding::JSON},
+      .priority = Priority::PRIMARY,
+      .connection_status = connection_status_,
+      .reason = reason,
+      .interface = (*connection_).get_interface(),
+      .authority = (*connection_).get_current_authority(),
+      .path = (*connection_).get_current_path(),
+      .proxy = (*connection_).get_proxy(),
+  };
+  log::info("stream_status={}"sv, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
-void DropCopy::subscribe(std::string_view const &feed) {
-  auto message = fmt::format(
-      R"({{)"
-      R"("event":"subscribe",)"
-      R"("feed":"{}",)"
-      R"("api_key":"{}",)"
-      R"("original_challenge":"{}",)"
-      R"("signed_challenge":"{}")"
-      R"(}})"sv,
-      feed,
-      account_.key,
-      original_challenge_,
-      signed_challenge_);
-  log::info<2>(R"(request="{}")"sv, message);
-  (*connection_).send_text(message);
-}
+// web::socket::Client::Handler
 
 void DropCopy::operator()(Trace<web::socket::Connected> const &) {
   // note! wait for upgrade
 }
 
-void DropCopy::operator()(Trace<web::socket::Disconnected> const &) {
+void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   ready_ = false;
   next_heartbeat_ = {};
-  (*this)(ConnectionStatus::DISCONNECTED);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   download_.reset();
   original_challenge_.clear();
   signed_challenge_.clear();
 }
 
-void DropCopy::operator()(Trace<web::socket::Ready> const &) {
-  download_.begin();
+void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
+  auto &[trace_info, ready] = event;
+  download_.begin(trace_info);
 }
 
-void DropCopy::operator()(Trace<web::socket::Close> const &) {
+void DropCopy::operator()(Trace<web::socket::Close> const &event) {
+  auto &[trace_info, close] = event;
+  log::warn("close={}"sv, close);
 }
 
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
@@ -235,44 +242,25 @@ void DropCopy::operator()(Trace<web::socket::Binary> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
-  connection_status_ = connection_status;
-  TraceInfo trace_info;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-      .proxy = (*connection_).get_proxy(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
-}
+// core::Download
 
-uint32_t DropCopy::download(State state) {
+int32_t DropCopy::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case GET_CHALLENGE:
-      (*this)(ConnectionStatus::DOWNLOADING, "get-challenge"sv);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "get-challenge"sv);
       get_challenge();
       return 1;
     case SUBSCRIBE:
-      (*this)(ConnectionStatus::DOWNLOADING, "subscribe"sv);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "subscribe"sv);
       subscribe();
       return 0;
     case DONE:
-      (*this)(ConnectionStatus::READY);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
       return 0;
@@ -280,6 +268,8 @@ uint32_t DropCopy::download(State state) {
   assert(false);
   return 0;
 }
+
+// protocol::json::ParserPrivate::Handler
 
 void DropCopy::operator()(Trace<protocol::json::Info> const &event) {
   auto &[trace_info, info] = event;
@@ -304,7 +294,7 @@ void DropCopy::operator()(Trace<protocol::json::Challenge> const &event) {
     assert(std::empty(signed_challenge_));
     original_challenge_ = challenge.message;
     signed_challenge_ = account_.signed_challenge(original_challenge_);
-    download_.check(State::GET_CHALLENGE);  // note!
+    download_.check(trace_info, State::GET_CHALLENGE);  // note!
   });
 }
 
@@ -678,6 +668,32 @@ void DropCopy::process_order(
   };
   // log::warn("DEBUG order_update={}"sv, order_update);
   create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id_);
+}
+
+// helpers
+
+void DropCopy::subscribe() {
+  subscribe("account_balances_and_margins"sv);  // XXX FIXME TODO doesn't appear to exist anymore
+  subscribe("open_positions"sv);
+  subscribe("open_orders"sv);
+  subscribe("fills"sv);
+}
+
+void DropCopy::subscribe(std::string_view const &feed) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("feed":"{}",)"
+      R"("api_key":"{}",)"
+      R"("original_challenge":"{}",)"
+      R"("signed_challenge":"{}")"
+      R"(}})"sv,
+      feed,
+      account_.key,
+      original_challenge_,
+      signed_challenge_);
+  log::info<2>(R"(request="{}")"sv, message);
+  (*connection_).send_text(message);
 }
 
 }  // namespace gateway

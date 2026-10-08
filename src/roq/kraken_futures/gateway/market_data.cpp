@@ -96,6 +96,8 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
       shared_{shared} {
 }
 
+// server::Stream
+
 void MarketData::operator()(Event<Start> const &) {
   (*connection_).start();
 }
@@ -105,7 +107,8 @@ void MarketData::operator()(Event<Stop> const &) {
 }
 
 void MarketData::operator()(Event<Timer> const &event) {
-  (*connection_).refresh(event.value.now);
+  auto &[message_info, timer] = event;
+  (*connection_).refresh(timer.now);
 }
 
 void MarketData::operator()(metrics::Writer &writer) const {
@@ -125,28 +128,58 @@ void MarketData::operator()(metrics::Writer &writer) const {
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
+void MarketData::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
+  connection_status_ = connection_status;
+  auto stream_status = StreamStatus{
+      .stream_id = stream_id_,
+      .account = {},
+      .supports = SUPPORTS,
+      .transport = Transport::TCP,
+      .protocol = Protocol::WS,
+      .encoding = {Encoding::JSON},
+      .priority = Priority::PRIMARY,
+      .connection_status = connection_status_,
+      .reason = reason,
+      .interface = (*connection_).get_interface(),
+      .authority = (*connection_).get_current_authority(),
+      .path = (*connection_).get_current_path(),
+      .proxy = (*connection_).get_proxy(),
+  };
+  log::info("stream_status={}"sv, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+}
+
+// server::MarketDataStream
+
 void MarketData::subscribe(size_t start_from) {
   if (ready()) {
     subscribe(shared_.symbols.get_slice(index_, start_from));
   }
 }
 
+// web::socket::Client::Handler
+
 void MarketData::operator()(Trace<web::socket::Connected> const &) {
   // note! wait for upgrade
 }
 
-void MarketData::operator()(Trace<web::socket::Disconnected> const &) {
+void MarketData::operator()(Trace<web::socket::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   next_heartbeat_ = {};
-  (*this)(ConnectionStatus::DISCONNECTED);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
 }
 
-void MarketData::operator()(Trace<web::socket::Ready> const &) {
-  (*this)(ConnectionStatus::READY);
+void MarketData::operator()(Trace<web::socket::Ready> const &event) {
+  auto &[trace_info, ready] = event;
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
   subscribe();
 }
 
-void MarketData::operator()(Trace<web::socket::Close> const &) {
+void MarketData::operator()(Trace<web::socket::Close> const &event) {
+  auto &[trace_info, close] = event;
+  log::warn("close={}"sv, close);
 }
 
 void MarketData::operator()(Trace<web::socket::Latency> const &event) {
@@ -169,96 +202,7 @@ void MarketData::operator()(Trace<web::socket::Binary> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
-  connection_status_ = connection_status;
-  TraceInfo trace_info;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = {},
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-      .proxy = (*connection_).get_proxy(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
-}
-
-void MarketData::subscribe(std::span<Symbol const> const &symbols) {
-  subscribe("ticker"sv, symbols);
-  subscribe("book"sv, symbols);
-  subscribe("trade"sv, symbols);
-  if (shared_.settings.download.time_series_lookback.count()) {
-    // note! there is no WS feed
-    for (auto &symbol : symbols) {
-      shared_.time_series_request_queue.emplace_back(symbol);
-    }
-  }
-}
-
-void MarketData::subscribe(std::string_view const &feed) {
-  log::info(R"(subscribe feed="{}")"sv, feed);
-  auto message = fmt::format(
-      R"({{)"
-      R"("event":"subscribe",)"
-      R"("feed":"{}")"
-      R"(}})"sv,
-      feed);
-  log::info<2>(R"(request="{}")"sv, message);
-  (*connection_).send_text(message);
-}
-
-template <typename T>
-void MarketData::subscribe(std::string_view const &feed, std::span<T> const &product_ids) {
-  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
-  auto message = fmt::format(
-      R"({{)"
-      R"("event":"subscribe",)"
-      R"("feed":"{}",)"
-      R"("product_ids":["{}"])"
-      R"(}})"sv,
-      feed,
-      fmt::join(product_ids, R"(",")"sv));
-  log::info<2>(R"(request="{}")"sv, message);
-  (*connection_).send_text(message);
-}
-
-template <typename T>
-void MarketData::unsubscribe(std::string_view const &feed, std::span<T> const &product_ids) {
-  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
-  auto message = fmt::format(
-      R"({{)"
-      R"("event":"unsubscribe",)"
-      R"("feed":"{}",)"
-      R"("product_ids":["{}"])"
-      R"(}})"sv,
-      feed,
-      fmt::join(product_ids, R"(",")"sv));
-  log::info<2>(R"(request="{}")"sv, message);
-  (*connection_).send_text(message);
-}
-
-void MarketData::parse(std::string_view const &message) {
-  profile_.parse([&]() {
-    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
-    try {
-      TraceInfo trace_info;
-      if (!protocol::json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
-        log_message();
-      }
-    } catch (...) {
-      log_message();
-      utils::exceptions::Unhandled::terminate();
-    }
-  });
-}
+// protocol::json::ParserPublic::Handler
 
 void MarketData::operator()(Trace<protocol::json::Info> const &event) {
   auto &[trace_info, info] = event;
@@ -505,6 +449,77 @@ void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_summary, true);
+  });
+}
+
+// helpers
+
+void MarketData::subscribe(std::span<Symbol const> const &symbols) {
+  subscribe("ticker"sv, symbols);
+  subscribe("book"sv, symbols);
+  subscribe("trade"sv, symbols);
+  if (shared_.settings.download.time_series_lookback.count()) {
+    // note! there is no WS feed
+    for (auto &symbol : symbols) {
+      shared_.time_series_request_queue.emplace_back(symbol);
+    }
+  }
+}
+
+void MarketData::subscribe(std::string_view const &feed) {
+  log::info(R"(subscribe feed="{}")"sv, feed);
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("feed":"{}")"
+      R"(}})"sv,
+      feed);
+  log::info<2>(R"(request="{}")"sv, message);
+  (*connection_).send_text(message);
+}
+
+template <typename T>
+void MarketData::subscribe(std::string_view const &feed, std::span<T> const &product_ids) {
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("feed":"{}",)"
+      R"("product_ids":["{}"])"
+      R"(}})"sv,
+      feed,
+      fmt::join(product_ids, R"(",")"sv));
+  log::info<2>(R"(request="{}")"sv, message);
+  (*connection_).send_text(message);
+}
+
+template <typename T>
+void MarketData::unsubscribe(std::string_view const &feed, std::span<T> const &product_ids) {
+  log::info(R"(subscribe feed="{}", len(product_ids)={})"sv, feed, std::size(product_ids));
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"unsubscribe",)"
+      R"("feed":"{}",)"
+      R"("product_ids":["{}"])"
+      R"(}})"sv,
+      feed,
+      fmt::join(product_ids, R"(",")"sv));
+  log::info<2>(R"(request="{}")"sv, message);
+  (*connection_).send_text(message);
+}
+
+void MarketData::parse(std::string_view const &message) {
+  profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
+    try {
+      TraceInfo trace_info;
+      if (!protocol::json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+        log_message();
+      }
+    } catch (...) {
+      log_message();
+      utils::exceptions::Unhandled::terminate();
+    }
   });
 }
 

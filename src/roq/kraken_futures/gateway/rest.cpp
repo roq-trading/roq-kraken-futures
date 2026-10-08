@@ -90,8 +90,10 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto state) { return download(state); }} {
+      shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
+
+// server::Stream
 
 void Rest::operator()(Event<Start> const &) {
   (*connection_).start();
@@ -122,9 +124,9 @@ void Rest::operator()(metrics::Writer &writer) const {
       .write(latency_.ping, metrics::Type::LATENCY);
 }
 
-void Rest::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
+void Rest::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
   connection_status_ = connection_status;
-  TraceInfo trace_info;
   auto stream_status = StreamStatus{
       .stream_id = stream_id_,
       .account = {},
@@ -144,17 +146,21 @@ void Rest::operator()(ConnectionStatus connection_status, std::string_view const
   create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
-void Rest::operator()(Trace<web::rest::Connected> const &) {
+// web::rest::Client::Handler
+
+void Rest::operator()(Trace<web::rest::Connected> const &event) {
+  auto &[trace_info, connected] = event;
   if (download_.downloading()) {
-    download_.bump();
+    download_.bump(trace_info);
   } else {
-    download_.begin();
+    download_.begin(trace_info);
   }
 }
 
-void Rest::operator()(Trace<web::rest::Disconnected> const &) {
+void Rest::operator()(Trace<web::rest::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
-  (*this)(ConnectionStatus::DISCONNECTED);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   if (!download_.downloading()) {
     download_.reset();
   }
@@ -171,18 +177,21 @@ void Rest::operator()(Trace<web::rest::Latency> const &event) {
   latency_.ping.update(latency.sample);
 }
 
-uint32_t Rest::download(State state) {
+// core::Download
+
+int32_t Rest::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case INSTRUMENTS:
-      (*this)(ConnectionStatus::DOWNLOADING, "instruments"sv);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "instruments"sv);
       get_instruments();
       return 1;
     case DONE:
-      (*this)(ConnectionStatus::READY);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
       return 0;
   }
   assert(false);
@@ -215,6 +224,7 @@ void Rest::get_instruments() {
 void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   auto const STATE = State::INSTRUMENTS;
   profile_.instruments_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       download_.retry(STATE);
@@ -225,9 +235,8 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
       } else {
         protocol::json::Instruments instruments{body, decode_buffer_};
         if (std::empty(instruments.error)) {
-          Trace event_2{event, instruments};
-          (*this)(event_2);
-          download_.check(STATE);
+          create_trace_and_dispatch_2(trace_info, instruments);
+          download_.check(trace_info, STATE);
         } else {
           log::warn("instruments={}"sv, instruments);
           if (instruments.error == "Unavailable"sv) {
@@ -242,8 +251,8 @@ void Rest::get_instruments_ack(Trace<web::rest::Response> const &event, uint32_t
   });
 }
 
-void Rest::operator()(Trace<protocol::json::Instruments> const &events) {
-  auto &[trace_info, instruments] = events;
+void Rest::operator()(Trace<protocol::json::Instruments> const &event) {
+  auto &[trace_info, instruments] = event;
   log::info<4>("instruments={}"sv, instruments);
   assert(std::empty(instruments.error));
   std::vector<Symbol> symbols;
@@ -386,20 +395,20 @@ void Rest::get_candles(std::string_view const &symbol) {
 
 void Rest::get_candles_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.candles_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
       protocol::json::Candles candles{body, decode_buffer_};
-      Trace event_2{event, candles};
-      (*this)(event_2, symbol);
+      create_trace_and_dispatch_2(trace_info, candles, symbol);
     };
     process_response(event, handle_error, handle_success);
   });
 }
 
-void Rest::operator()(Trace<protocol::json::Candles> const &events, std::string_view const &symbol) {
-  auto &[trace_info, candles] = events;
+void Rest::operator()(Trace<protocol::json::Candles> const &event, std::string_view const &symbol) {
+  auto &[trace_info, candles] = event;
   log::info<4>("candles={}"sv, candles);
   auto &bars = shared_.bars;
   bars.clear();
@@ -432,6 +441,8 @@ void Rest::operator()(Trace<protocol::json::Candles> const &events, std::string_
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, time_series_update, true);
 }
+
+// helpers
 
 void Rest::check_request_queue(std::chrono::nanoseconds now) {
   auto can_request = [&](auto now) { return shared_.rate_limiter.can_request(now); };
