@@ -283,13 +283,11 @@ void OrderEntry::create_order(
         .body = {},
         .quality_of_service = get_quality_of_service(shared_.settings),
     };
-    auto callback = [this, user_id = message_info.source, order_id = create_order.order_id]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
+    auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](auto &event, [[maybe_unused]] auto &request_id) {
       auto version = 1;
       create_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)(request_id, request, callback);
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -376,12 +374,8 @@ void OrderEntry::modify_order(
         .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback = [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
-                        [[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      modify_order_ack(event, user_id, order_id, version);
-    };
-    (*connection_)(request_id, request, callback);
+                        auto &event, [[maybe_unused]] auto &request_id) { modify_order_ack(event, user_id, order_id, version); };
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -467,12 +461,8 @@ void OrderEntry::cancel_order(
         .quality_of_service = get_quality_of_service(shared_.settings),
     };
     auto callback = [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
-                        [[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      cancel_order_ack(event, user_id, order_id, version);
-    };
-    (*connection_)(request_id, request, callback);
+                        auto &event, [[maybe_unused]] auto &request_id) { cancel_order_ack(event, user_id, order_id, version); };
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -573,12 +563,8 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
         .body = {},
         .quality_of_service = get_quality_of_service(shared_.settings),
     };
-    auto callback = [this](auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      cancel_all_orders_ack(event, request_id);
-    };
-    (*connection_)(request_id, request, callback);
+    auto callback = [this](auto &event, auto &request_id) { cancel_all_orders_ack(event, request_id); };
+    (*connection_)(request, callback, request_id);
     send_ack();
   });
 }
@@ -637,12 +623,8 @@ void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
       .body = {},
       .quality_of_service = get_quality_of_service(shared_.settings),
   };
-  auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
-    TraceInfo trace_info;
-    Trace event{trace_info, response};
-    cancel_all_orders_after_ack(event);
-  };
-  (*connection_)("cancel-all-orders-after"sv, request, callback);
+  auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { cancel_all_orders_after_ack(event); };
+  (*connection_)(request, callback, "cancel-all-orders-after"sv);
 }
 
 void OrderEntry::cancel_all_orders_after_ack(Trace<web::rest::Response> const &event) {
