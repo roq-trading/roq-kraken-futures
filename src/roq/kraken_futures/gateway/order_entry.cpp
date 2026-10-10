@@ -141,16 +141,16 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
 
 // server::Stream
 
-void OrderEntry::operator()(Event<Start> const &) {
+void OrderEntry::operator()(Trace<Start> const &) {
   (*connection_).start();
 }
 
-void OrderEntry::operator()(Event<Stop> const &) {
+void OrderEntry::operator()(Trace<Stop> const &) {
   (*connection_).stop();
 }
 
-void OrderEntry::operator()(Event<Timer> const &event) {
-  auto &[message_info, timer] = event;
+void OrderEntry::operator()(Trace<Timer> const &event) {
+  auto &[trace_info, timer] = event;
   (*connection_).refresh(timer.now);
   if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < timer.now) {
     next_cancel_all_timer_ = timer.now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
