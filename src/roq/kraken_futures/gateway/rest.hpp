@@ -21,6 +21,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/kraken_futures/gateway/shared.hpp"
+#include "roq/kraken_futures/gateway/symbols_update.hpp"
 
 #include "roq/kraken_futures/protocol/json/candles.hpp"
 #include "roq/kraken_futures/protocol/json/instruments.hpp"
@@ -30,17 +31,8 @@ namespace kraken_futures {
 namespace gateway {
 
 struct Rest final : public Base<Rest>, public server::Stream, public web::rest::Client::Handler {
-  struct TokenUpdate final {
-    std::string_view account;
-    std::string_view token;
-  };
-
-  struct SymbolsUpdate final {
-    std::span<Symbol const> symbols;
-  };
-
   struct Handler {
-    virtual void operator()(SymbolsUpdate &) = 0;
+    virtual void operator()(Trace<SymbolsUpdate> const &) = 0;
   };
 
   Rest(Handler &, io::Context &context, uint16_t stream_id, Shared &);

@@ -113,7 +113,7 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
       bool is_download);
 
  private:
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
   void reset();
 

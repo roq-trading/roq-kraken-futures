@@ -28,7 +28,12 @@ namespace roq {
 namespace kraken_futures {
 namespace gateway {
 
-struct Controller final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
+struct Controller final : public Base<Controller>,
+                          public server::Handler,
+                          public Rest::Handler,
+                          public OrderEntry::Handler,
+                          public MarketData::Handler,
+                          public DropCopy::Handler {
   ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
   ROQ_PUBLIC static uint8_t parse_api(Settings const &);
@@ -38,6 +43,8 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
   Controller(Controller const &) = delete;
 
  protected:
+  friend base_type;
+
   // server::Handler
 
   void operator()(Trace<Start> const &) override;
@@ -74,11 +81,11 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
 
   // Rest::Handler
 
-  void operator()(Rest::SymbolsUpdate &) override;
+  void operator()(Trace<SymbolsUpdate> const &) override;
 
   // helpers
 
-  void ensure_symbol_slices(size_t size);
+  void ensure_symbol_slices(TraceInfo const &, size_t size);
 
   template <typename... Args>
   void dispatch(Args &&...);

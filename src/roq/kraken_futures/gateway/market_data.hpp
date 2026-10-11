@@ -98,7 +98,7 @@ struct MarketData final : public Base<MarketData>,
   void unsubscribe(std::string_view const &feed, std::span<T> const &product_ids);
   void unsubscribe(std::string_view const &feed, std::string_view const &symbol) { unsubscribe(feed, std::span{&symbol, 1}); }
 
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
   void reset();
 
