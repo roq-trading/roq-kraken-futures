@@ -154,7 +154,7 @@ void OrderEntry::operator()(Trace<Timer> const &event) {
   (*connection_).refresh(timer.now);
   if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < timer.now) {
     next_cancel_all_timer_ = timer.now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
-    cancel_all_orders_after(shared_.settings.rest.cancel_all_after);
+    cancel_all_orders_after(trace_info, shared_.settings.rest.cancel_all_after);
   }
 }
 
@@ -272,7 +272,7 @@ void OrderEntry::create_order(
     auto &[message_info, create_order] = event;
     auto query = protocol::json::Encoder::send_order(encode_buffer_, create_order, order, ref_data, request_id);
     auto path = shared_.api.order_management.send_order;
-    auto headers = account_.create_headers(path, query);
+    auto headers = account_.create_headers(message_info, path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -362,7 +362,7 @@ void OrderEntry::modify_order(
     auto query = protocol::json::Encoder::edit_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id);
     // log::warn("DEBUG query={}"sv, query);
     auto path = shared_.api.order_management.edit_order;
-    auto headers = account_.create_headers(path, query);
+    auto headers = account_.create_headers(message_info, path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -449,7 +449,7 @@ void OrderEntry::cancel_order(
     auto &[message_info, cancel_order] = event;
     auto query = protocol::json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id);
     auto path = shared_.api.order_management.cancel_order;
-    auto headers = account_.create_headers(path, query);
+    auto headers = account_.create_headers(message_info, path, query);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -552,7 +552,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
       create_trace_and_dispatch(shared_.dispatcher, trace_info, cancel_all_orders_ack);
     };
     auto path = shared_.api.order_management.cancel_all_orders;
-    auto headers = account_.create_headers(path, {});
+    auto headers = account_.create_headers(message_info, path, {});
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -609,11 +609,11 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
 
 // cancel-all-orders-after
 
-void OrderEntry::cancel_all_orders_after(std::chrono::nanoseconds timeout) {
+void OrderEntry::cancel_all_orders_after(TraceInfo const &trace_info, std::chrono::nanoseconds timeout) {
   auto value = std::chrono::duration_cast<std::chrono::seconds>(timeout);
   auto query = fmt::format("?timeout={}"sv, value.count());
   auto path = shared_.api.order_management.cancel_all_orders_after;
-  auto headers = account_.create_headers(path, query);
+  auto headers = account_.create_headers(trace_info, path, query);
   auto request = web::rest::Request{
       .method = web::http::Method::POST,
       .path = path,

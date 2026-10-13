@@ -106,7 +106,7 @@ struct OrderEntry final : public Base<OrderEntry>, public server::OrderActionStr
 
   // cancel-all-orders-after
 
-  void cancel_all_orders_after(std::chrono::nanoseconds timeout);
+  void cancel_all_orders_after(TraceInfo const &, std::chrono::nanoseconds timeout);
   void cancel_all_orders_after_ack(Trace<web::rest::Response> const &);
 
   // core::Download

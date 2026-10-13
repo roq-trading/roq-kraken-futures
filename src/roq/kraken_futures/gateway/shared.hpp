@@ -9,8 +9,8 @@
 #include "roq/server.hpp"
 
 #include "roq/core/symbols.hpp"
-#include "roq/core/timer_queue.hpp"
 
+#include "roq/core/limit/queue.hpp"
 #include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/kraken_futures/gateway/api.hpp"
@@ -39,7 +39,7 @@ struct Shared final {
 
   core::limit::RateLimiter rate_limiter;
 
-  core::TimerQueue<std::string> time_series_request_queue;
+  core::limit::Queue<std::string> time_series_request_queue;
 
   std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
   std::vector<Fill> fills;

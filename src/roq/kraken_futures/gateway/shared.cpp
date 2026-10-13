@@ -18,7 +18,7 @@ auto create_rate_limiter(auto &settings) {
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
     : dispatcher{dispatcher}, settings{settings}, api{API::create(settings)}, throttle{settings}, symbols{settings.ws.max_subscriptions_per_stream},
-      rate_limiter{create_rate_limiter(settings)} {
+      rate_limiter{create_rate_limiter(settings)}, time_series_request_queue{rate_limiter} {
 }
 
 }  // namespace gateway

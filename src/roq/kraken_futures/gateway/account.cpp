@@ -18,17 +18,18 @@ Account::Account(Config const &config, std::string_view const &name, bool use_no
     : name{name}, key{config.get_access_key(name)}, crypto_{config.get_access_secret(name)}, use_nonce_{use_nonce} {
 }
 
-std::string Account::create_headers(std::string_view const &path, std::string_view const &query) {
-  return crypto_.create_headers(path, query, key, get_nonce());
+std::string Account::create_headers(TraceInfo const &trace_info, std::string_view const &path, std::string_view const &query) {
+  auto nonce = get_nonce(trace_info);
+  return crypto_.create_headers(path, query, key, nonce);
 }
 
 std::string Account::signed_challenge(std::string_view const &original_challenge) {
   return crypto_.signed_challenge(original_challenge);
 }
 
-std::chrono::milliseconds Account::get_nonce() {
+std::chrono::milliseconds Account::get_nonce(TraceInfo const &trace_info) {
   if (use_nonce_) {
-    auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
+    auto now = std::chrono::duration_cast<decltype(nonce_)>(trace_info.origin_create_time_utc);
     nonce_ = std::max(now, nonce_ + 1ms);  // note! can't reuse
   }
   return nonce_;
