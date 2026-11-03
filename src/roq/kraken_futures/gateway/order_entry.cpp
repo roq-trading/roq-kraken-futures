@@ -36,7 +36,6 @@ auto const SUPPORTS = Mask{
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
-    SupportType::ORDER,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 1;
@@ -151,10 +150,13 @@ void OrderEntry::operator()(Trace<Stop> const &) {
 
 void OrderEntry::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
-  if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < timer.now) {
-    next_cancel_all_timer_ = timer.now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
-    cancel_all_orders_after(trace_info, shared_.settings.rest.cancel_all_after);
+  if ((*connection_).refresh(timer.now)) {
+    if (ready()) {
+      if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < timer.now) {
+        next_cancel_all_timer_ = timer.now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
+        cancel_all_orders_after(trace_info, shared_.settings.rest.cancel_all_after);
+      }
+    }
   }
 }
 

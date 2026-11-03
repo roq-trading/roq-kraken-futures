@@ -24,10 +24,10 @@ namespace {
 auto const NAME = "ex"sv;
 
 auto const SUPPORTS = Mask{
+    SupportType::FUNDS,
+    SupportType::POSITION,
     SupportType::ORDER,
     SupportType::TRADE,
-    SupportType::POSITION,
-    SupportType::FUNDS,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 1;
@@ -138,7 +138,10 @@ void DropCopy::operator()(Trace<Stop> const &) {
 
 void DropCopy::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
+  if ((*connection_).refresh(timer.now)) {
+    if (ready()) {
+    }
+  }
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {
@@ -246,17 +249,18 @@ void DropCopy::operator()(Trace<web::socket::Binary> const &) {
 
 int32_t DropCopy::download(Trace<State> const &event) {
   auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case GET_CHALLENGE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "get-challenge"sv);
+      publish_downloading();
       get_challenge();
       return 1;
     case SUBSCRIBE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "subscribe"sv);
+      publish_downloading();
       subscribe();
       return 0;
     case DONE:

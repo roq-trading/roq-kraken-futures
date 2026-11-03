@@ -105,9 +105,10 @@ void Rest::operator()(Trace<Stop> const &) {
 
 void Rest::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
-  if (ready()) {
-    check_request_queue(trace_info);
+  if ((*connection_).refresh(timer.now)) {
+    if (ready()) {
+      check_request_queue(trace_info);
+    }
   }
 }
 
@@ -181,13 +182,14 @@ void Rest::operator()(Trace<web::rest::Latency> const &event) {
 
 int32_t Rest::download(Trace<State> const &event) {
   auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case INSTRUMENTS:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "instruments"sv);
+      publish_downloading();
       get_instruments();
       return 1;
     case DONE:
