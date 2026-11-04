@@ -150,10 +150,11 @@ void OrderEntry::operator()(Trace<Stop> const &) {
 
 void OrderEntry::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  if ((*connection_).refresh(timer.now)) {
+  if ((*connection_).refresh(trace_info)) {
     if (ready()) {
-      if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() && next_cancel_all_timer_ < timer.now) {
-        next_cancel_all_timer_ = timer.now + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
+      if (shared_.settings.rest.cancel_on_disconnect && shared_.settings.rest.cancel_all_after.count() != 0 && ready() &&
+          next_cancel_all_timer_ < trace_info.origin_create_time) {
+        next_cancel_all_timer_ = trace_info.origin_create_time + shared_.settings.rest.cancel_all_after / 4;  // note! update 4x per period
         cancel_all_orders_after(trace_info, shared_.settings.rest.cancel_all_after);
       }
     }
