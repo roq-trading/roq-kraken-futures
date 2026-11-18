@@ -64,9 +64,6 @@ Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings,
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
       rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
-  if (!shared_.settings.rest.cancel_on_disconnect) {
-    log::warn("Orders will *NOT* be cancelled on disconnect"sv);
-  }
 }
 
 // server::Handler

@@ -30,12 +30,6 @@
       "description": "Ping path"
     },
     {
-      "name": "cancel_on_disconnect",
-      "type": "std/bool",
-      "default": true,
-      "description": "Cancel orders on disconnect?"
-    },
-    {
       "name": "cancel_all_after",
       "type": "std/nanoseconds",
       "validator": "roq/flags/validators/TimePeriod",

@@ -152,6 +152,10 @@
     {
       "name": "minRelativeFundingRate",
       "type": "std/double"
+    },
+    {
+      "name": "suspended",
+      "type": "std/bool"
     }
   ]
 }
