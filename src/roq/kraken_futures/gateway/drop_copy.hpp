@@ -117,38 +117,32 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   void reset();
 
-  Handler &handler_;
-  // config
+  [[maybe_unused]] Handler &handler_;
+  //
   uint16_t const stream_id_;
   std::string const name_;
-  // web socket
   std::unique_ptr<web::socket::Client> const connection_;
-  // buffers
+  //
   core::json::BufferStack decode_buffer_;
-  // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, challenge, heartbeat, account_balances_and_margins, open_positions, open_orders_snapshot, open_orders, fills_snapshot, fills;
+    utils::metrics::Profile parse,  //
+        challenge, heartbeat,       //
+        account_balances_and_margins, open_positions, open_orders_snapshot, open_orders, fills_snapshot, fills;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;
   } latency_;
-  // account
   Account &account_;
-  // cache
   Shared &shared_;
-  // state
-  bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus connection_status_ = {};
   core::Download2<State> download_;
-  // challenge
   std::string original_challenge_;
   std::string signed_challenge_;
-  // workaround
-  utils::unordered_map<std::string, bool> fill_symbols_;
+  utils::unordered_map<std::string, bool> fill_symbols_;  // XXX FIXME TODO workaround
 };
 
 }  // namespace gateway

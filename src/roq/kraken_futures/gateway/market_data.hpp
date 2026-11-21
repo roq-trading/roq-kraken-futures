@@ -105,31 +105,28 @@ struct MarketData final : public Base<MarketData>,
   void resubscribe(TraceInfo const &, std::string_view const &symbol);
 
  private:
-  Handler &handler_;
-  // config
+  [[maybe_unused]] Handler &handler_;
+  //
   uint16_t const stream_id_;
   std::string const name_;
   size_t const index_;
-  // web socket
   std::unique_ptr<web::socket::Client> const connection_;
-  // buffers
+  //
   core::json::BufferStack decode_buffer_;
-  // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, heartbeat, ticker, book_snapshot, book, trade_snapshot, trade;
+    utils::metrics::Profile parse,  //
+        heartbeat,                  //
+        ticker, book_snapshot, book, trade_snapshot, trade;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;
   } latency_;
-  // cache
   Shared &shared_;
-  // state
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus connection_status_ = {};
-  // experimental
   utils::unordered_set<std::string> latch_;
 };
 
