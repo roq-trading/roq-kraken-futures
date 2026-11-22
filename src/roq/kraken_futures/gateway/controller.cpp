@@ -25,6 +25,10 @@ R create_accounts(auto &settings, auto &config) {
   return result;
 }
 
+auto create_rest(auto &gateway, auto &context, auto &stream_id, auto &shared) {
+  return std::make_unique<Rest>(gateway, context, ++stream_id, shared);
+}
+
 template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref_t<R>;
@@ -61,8 +65,9 @@ uint8_t Controller::parse_api(Settings const &) {
 }
 
 Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
-      rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+    : dispatcher_{dispatcher}, context_{context}, shared_{dispatcher, settings}, accounts_{create_accounts<decltype(accounts_)>(settings, config)},
+      rest_{create_rest(*this, context_, stream_id_, shared_)},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
 }
 
@@ -178,7 +183,7 @@ void Controller::operator()(Trace<SymbolsUpdate> const &event) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
   ensure_symbol_slices(trace_info, size);
   for (auto &iter : market_data_) {
-    (*iter).subscribe(start_from);
+    dynamic_cast<server::MarketDataStream &>(*iter).subscribe(start_from);
   }
 }
 
@@ -191,7 +196,7 @@ void Controller::ensure_symbol_slices(TraceInfo const &trace_info, size_t size) 
     log::debug("Create MarketData (stream_id={}, index={})"sv, stream_id, index);
     auto obj = std::make_unique<MarketData>(*this, context_, stream_id, shared_, index);
     Start start;
-    create_trace_and_dispatch(*obj, trace_info, start);
+    create_trace_and_dispatch(dynamic_cast<server::Stream &>(*obj), trace_info, start);
     market_data_.emplace_back(std::move(obj));
   }
 }
@@ -203,8 +208,14 @@ void Controller::dispatch(Args &&...args) {
 
 template <typename... Args>
 void Controller::dispatch_helper(auto &self, Args &&...args) {
-  auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
-  helper(self.rest_);
+  auto helper = [&](auto &target) {
+    if constexpr (std::is_const_v<decltype(self)>) {
+      dynamic_cast<server::Stream const &>(target)(std::forward<Args>(args)...);
+    } else {
+      dynamic_cast<server::Stream &>(target)(std::forward<Args>(args)...);
+    }
+  };
+  helper(*self.rest_);
   for (auto &[_, item] : self.order_entry_) {
     helper(*item);
   }
@@ -225,7 +236,7 @@ Res Controller::dispatch_order_action(Trace<T> const &event, Args &&...args) {
   if (iter == std::end(order_entry_)) [[unlikely]] {
     throw RuntimeError{R"(Unknown account="{}")"sv, value.account};
   }
-  return (*(*iter).second)(event, args...);
+  return dynamic_cast<server::OrderActionStream &>(*(*iter).second)(event, args...);
 }
 
 }  // namespace gateway
