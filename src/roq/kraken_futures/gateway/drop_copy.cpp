@@ -103,7 +103,7 @@ auto compute_order_status(protocol::json::Reason reason, bool is_cancel, double 
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : server::Stream{stream_id}, handler_{handler}, name_{create_name(stream_id, account.name)},
+    : server::Stream{stream_id, account.name, SUPPORTS}, handler_{handler}, name_{create_name(stream_id, account.name)},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -179,9 +179,9 @@ void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view
   auto &[trace_info, connection_status] = event;
   if (update(connection_status, reason)) {
     auto stream_status = StreamStatus{
-        .stream_id = stream_id(),
-        .account = account_.name,
-        .supports = SUPPORTS,
+        .stream_id = stream_id,
+        .account = account,
+        .supports = supports,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
         .encoding = {Encoding::JSON},
@@ -228,7 +228,7 @@ void DropCopy::operator()(Trace<web::socket::Close> const &event) {
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -318,7 +318,7 @@ void DropCopy::operator()(Trace<protocol::json::AccountBalancesAndMargins> const
     log::warn("account_balances_and_margins={}"sv, account_balances_and_margins);
     for (auto &item : account_balances_and_margins.margin_accounts) {
       auto funds_update = FundsUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .currency = item.name,
           .margin_mode = {},
@@ -345,7 +345,7 @@ void DropCopy::operator()(Trace<protocol::json::OpenPositions> const &event) {
       auto long_quantity = std::max(0.0, item.balance);
       auto short_quantity = std::max(0.0, -item.balance);
       auto position_update = PositionUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.instrument,
@@ -363,7 +363,7 @@ void DropCopy::operator()(Trace<protocol::json::OpenPositions> const &event) {
     for (auto &[symbol, found] : fill_symbols_) {
       if (!found) {
         auto position_update = PositionUpdate{
-            .stream_id = stream_id(),
+            .stream_id = stream_id,
             .account = account_.name,
             .exchange = shared_.settings.exchange,
             .symbol = symbol,
@@ -436,7 +436,7 @@ void DropCopy::operator()(Trace<protocol::json::FillsSnapshot> const &event) {
           .profit_loss_amount = profit_loss_amount,
       };
       auto trade_update = TradeUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
@@ -525,11 +525,11 @@ void DropCopy::operator()(Trace<protocol::json::Fills> const &event) {
               .sending_time_utc = {},
           };
           // log::warn("DEBUG order_update={}"sv, order_update);
-          create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id());
+          create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id);
         }
       }
       auto trade_update = TradeUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
@@ -669,7 +669,7 @@ void DropCopy::process_order(
       .sending_time_utc = {},
   };
   // log::warn("DEBUG order_update={}"sv, order_update);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id());
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id);
 }
 
 // helpers

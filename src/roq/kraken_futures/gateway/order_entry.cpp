@@ -117,7 +117,7 @@ auto compute_order_status(auto status, auto remaining_quantity) {
 // === IMPLEMENTATION ===
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : server::OrderActionStream{stream_id}, handler_{handler}, name_{create_name(stream_id, account.name)},
+    : server::OrderActionStream{stream_id, account.name, SUPPORTS}, handler_{handler}, name_{create_name(stream_id, account.name)},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -182,9 +182,9 @@ void OrderEntry::operator()(Trace<ConnectionStatus> const &event, std::string_vi
   auto &[trace_info, connection_status] = event;
   if (update(connection_status, reason)) {
     auto stream_status = StreamStatus{
-        .stream_id = stream_id(),
-        .account = account_.name,
-        .supports = SUPPORTS,
+        .stream_id = stream_id,
+        .account = account,
+        .supports = supports,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
         .encoding = {Encoding::JSON},
@@ -266,7 +266,7 @@ void OrderEntry::operator()(Trace<web::rest::Disconnected> const &event) {
 void OrderEntry::operator()(Trace<web::rest::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -323,7 +323,7 @@ void OrderEntry::create_order_ack(Trace<web::rest::Response> const &event, uint8
           .price = NaN,
       };
       // log::warn("DEBUG response={}"sv, response);
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id(), user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id, user_id, order_id);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
@@ -413,7 +413,7 @@ void OrderEntry::modify_order_ack(Trace<web::rest::Response> const &event, uint8
           .price = NaN,
       };
       // log::warn("DEBUG response={}"sv, response);
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id(), user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id, user_id, order_id);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
@@ -502,7 +502,7 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
           .price = NaN,
       };
       // log::warn("DEBUG response={}"sv, response);
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id(), user_id, order_id);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, args..., stream_id, user_id, order_id);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(DEBUG origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
@@ -549,7 +549,7 @@ void OrderEntry::cancel_all_orders(Trace<CancelAllOrders> const &event, std::str
     auto &[trace_info, cancel_all_orders] = event;
     auto send_ack = [&]() {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .order_id = cancel_all_orders.order_id,
           .exchange = cancel_all_orders.exchange,
@@ -591,7 +591,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     auto &[trace_info, response] = event;
     auto send_ack = [&](auto origin, auto status, Error error, std::string_view const &text) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .order_id = {},
           .exchange = {},
