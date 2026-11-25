@@ -128,21 +128,6 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
 
 // server::Stream
 
-void DropCopy::operator()(Trace<Start> const &event) {
-  (*connection_)(event);
-}
-
-void DropCopy::operator()(Trace<Stop> const &event) {
-  (*connection_)(event);
-}
-
-void DropCopy::operator()(Trace<Timer> const &event) {
-  if ((*connection_)(event)) {
-    if (ready()) {
-    }
-  }
-}
-
 void DropCopy::operator()(metrics::Writer &writer) const {
   writer
       // counter
@@ -160,6 +145,21 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       // latency
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
+}
+
+void DropCopy::operator()(Trace<Start> const &event) {
+  (*connection_)(event);
+}
+
+void DropCopy::operator()(Trace<Stop> const &event) {
+  (*connection_)(event);
+}
+
+void DropCopy::operator()(Trace<Timer> const &event) {
+  if ((*connection_)(event)) {
+    if (ready()) {
+    }
+  }
 }
 
 void DropCopy::get_challenge() {

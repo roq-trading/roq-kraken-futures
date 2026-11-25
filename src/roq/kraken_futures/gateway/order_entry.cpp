@@ -140,6 +140,23 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
 
 // server::Stream
 
+void OrderEntry::operator()(metrics::Writer &writer) const {
+  writer
+      // counter
+      .write(counter_.disconnect, metrics::Type::COUNTER)
+      // profile
+      .write(profile_.create_order, metrics::Type::PROFILE)
+      .write(profile_.create_order_ack, metrics::Type::PROFILE)
+      .write(profile_.modify_order, metrics::Type::PROFILE)
+      .write(profile_.modify_order_ack, metrics::Type::PROFILE)
+      .write(profile_.cancel_order, metrics::Type::PROFILE)
+      .write(profile_.cancel_order_ack, metrics::Type::PROFILE)
+      .write(profile_.cancel_all_orders, metrics::Type::PROFILE)
+      .write(profile_.cancel_all_orders_ack, metrics::Type::PROFILE)
+      // latency
+      .write(latency_.ping, metrics::Type::LATENCY);
+}
+
 void OrderEntry::operator()(Trace<Start> const &event) {
   (*connection_)(event);
 }
@@ -159,23 +176,6 @@ void OrderEntry::operator()(Trace<Timer> const &event) {
       }
     }
   }
-}
-
-void OrderEntry::operator()(metrics::Writer &writer) const {
-  writer
-      // counter
-      .write(counter_.disconnect, metrics::Type::COUNTER)
-      // profile
-      .write(profile_.create_order, metrics::Type::PROFILE)
-      .write(profile_.create_order_ack, metrics::Type::PROFILE)
-      .write(profile_.modify_order, metrics::Type::PROFILE)
-      .write(profile_.modify_order_ack, metrics::Type::PROFILE)
-      .write(profile_.cancel_order, metrics::Type::PROFILE)
-      .write(profile_.cancel_order_ack, metrics::Type::PROFILE)
-      .write(profile_.cancel_all_orders, metrics::Type::PROFILE)
-      .write(profile_.cancel_all_orders_ack, metrics::Type::PROFILE)
-      // latency
-      .write(latency_.ping, metrics::Type::LATENCY);
 }
 
 void OrderEntry::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
